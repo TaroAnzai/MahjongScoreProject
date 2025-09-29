@@ -1,13 +1,6 @@
-
-
----
-
-## 📄 `README.md`
-
-```markdown
 # MahjongScoreProject
 
-麻雀大会のスコア集計システム  
+麻雀大会のスコア集計システム
 フロントエンド（React + Vite）とバックエンド（Flask + Smorest + MySQL）を統合した開発用リポジトリです。
 
 ---
@@ -15,7 +8,6 @@
 ## 📂 プロジェクト構成
 
 ```
-
 MahjongScoreProject/
 ├── backend/        # Flask + Smorest API
 │   ├── app/
@@ -29,18 +21,18 @@ MahjongScoreProject/
 ├── docker-compose.yml  # 開発用 (backend + MySQL)
 ├── .gitignore
 └── README.md
-
-````
+```
 
 ---
 
 ## 🚀 開発環境のセットアップ
 
 ### 1. リポジトリのクローン
+
 ```bash
 git clone git@github.com:TaroAnzai/MahjongScoreProject.git
 cd MahjongScoreProject
-````
+```
 
 ### 2. バックエンド (Flask + MySQL)
 
@@ -82,7 +74,3 @@ pytest
 * `.env` ファイルは Git 管理外です（各環境で個別に配置してください）。
 * 本番環境では Docker を使わず、Ubuntu 上で **gunicorn + systemd + nginx** により常駐運用します。
 * GitHub Actions による自動デプロイ（main → 本番サーバー）を導入予定です。
-
-```
-
-
