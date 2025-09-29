@@ -1,0 +1,23 @@
+.input{
+    font-size:1rem;
+}
+.formRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+label {
+  width: 6em; /* ラベルの幅（:位置を揃える） */
+  text-align: right;
+  margin-right: 0.5em;
+  white-space: nowrap;
+}
+
+input,
+textarea {
+  flex: 1;
+  box-sizing: border-box;
+  padding: 6px;
+  font-size: 1rem;
+}

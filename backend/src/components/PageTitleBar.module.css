@@ -1,0 +1,95 @@
+/* PageTitleBar.module.css */
+.title {
+  position: relative;
+  height: 2.5em;
+  border-bottom: 1px solid #ccc;
+  font-size:larger;
+
+  display: flex;                 /* ← Flexboxを使う */
+  align-items: center;          /* ← 縦方向中央揃え */
+  justify-content: center;      /* ← 水平方向は中央 */
+
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(145deg, rgba(34, 139, 34, 0.2), rgba(0, 100, 0, 0.15));
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(144, 238, 144, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.navButton {
+  position: absolute;
+  font-size: 1.5em;
+  width: 2em;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+
+              background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+}
+.navButton:hover {
+    background: rgba(144, 238, 144, 0.15);
+    transform: scale(1.1);
+}
+
+.left {
+  left: 0;
+}
+
+.right {
+  right: 0;
+}
+
+.center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 8em);  /* ← 両端ナビゲーションや共有ボタンの幅を考慮して調整 */;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 2.5em;
+  pointer-events: none;     /* ← 中央エリアにはイベントを通さないように（必要であれば） */
+}
+
+.editable {
+  cursor: pointer;
+  max-width: 100%;            /* 画面幅の60%を上限に */
+  overflow: hidden;           /* はみ出す部分を隠す */
+  text-overflow: ellipsis;    /* 末尾に「...」を表示 */
+  white-space: nowrap;        /* 折り返さない */
+
+             color: white;
+            font-size: 18px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.shareButton {
+  position: absolute;
+  top: 0;
+  font-size: 0.8em;          /* 文字の大きさに合わせる */
+  text-align: center;
+  line-height: 2em;        /* テキストやアイコンを中央に配置 */
+  cursor: pointer;
+  user-select: none;
+  background-color: #ccc;  /* 灰色の背景 */
+  border-radius: 50%;      /* 丸型にする */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  top: 50%;                    /* 親要素の中央に配置 */
+  right: 3em;                  /* 右端に配置 */
+  transform: translateY(-50%); /* アイコン自身の高さの半分だけ上に */
+  width: 1.3em;                   /* アイコンの幅 */
+  height: 1.3em;
+  padding: 2px;                  /* アイコンの高さ */
+}

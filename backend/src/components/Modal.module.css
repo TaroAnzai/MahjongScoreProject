@@ -1,0 +1,46 @@
+/* Modal.module.css */
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: linear-gradient(145deg, rgba(34, 139, 34, 0.2), rgba(0, 100, 0, 0.15));
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(144, 238, 144, 0.3);
+  box-sizing: border-box;
+  padding: 1.5rem;
+  border-radius: 10px;
+  max-width: 400px;
+  width: 90%;
+  color: white;
+  font-family: 'Yu Gothic', sans-serif;
+  text-align: center;
+
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 全体スクロールを防止 */
+}
+
+.modalBody {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem; /* ボタンとの間に余白 */
+}
+.footerButtons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}

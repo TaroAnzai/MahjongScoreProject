@@ -1,0 +1,33 @@
+/* src/styles/score.module.css */
+
+.mahjongScoreWrapper {
+  margin-top: 1rem;
+  overflow-x: auto;
+  position: relative;
+}
+
+.mahjongScoreTable {
+  margin-top: 1rem;
+  min-width: max-content; /* 横スクロールを許可する */
+}
+
+.header,
+.cell {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+  white-space: nowrap; /* 折り返さない */
+  max-width: 6em;       /* 最大幅6em */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stickyHeader {
+  position: sticky;
+  left: 0;
+  background: darkgreen;
+  z-index: 2;
+}
+
+
+

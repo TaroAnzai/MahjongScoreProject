@@ -1,0 +1,105 @@
+/* src/styles/score.module.css */
+
+.scoreWrapper {
+  margin-top: 1rem;
+  overflow-x: auto;
+}
+
+.scoreTable {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.header,
+.cell {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+  white-space: nowrap; 
+  max-width:60px;
+   overflow: hidden;  
+   text-overflow: ellipsis;
+   white-space: nowrap;
+}
+
+.input {
+  font-size: inherit;
+  color: #000;
+  background-color: #fff;
+  border: none;
+  text-align: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 2px;          /* ← 小さく */
+  height: 100%;          /* ← 高さ揃え */
+  margin: 0;             /* ← 念のためリセット */
+  overflow: hidden; 
+  text-overflow: ellipsis;
+}
+
+
+
+.input:disabled {
+  background-color: transparent;
+  color: #fff;
+  cursor: default;
+  border: none;
+}
+
+.input:focus {
+  border: 1px solid #4CAF50;
+  box-shadow: 0 0 3px rgba(76, 175, 80, 0.5);
+}
+
+.input::-webkit-inner-spin-button,
+.input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.addButton {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  width:auto
+}
+.confirmRow {
+  border: 1px solid #ccc;
+}
+.confirmCell {
+  text-align: center; /* ボタンを中央に配置 */
+  padding: 8px;
+
+}
+.totalRow {
+  font-weight: bold;
+}
+.plusButtonRow {
+  font-weight: bold;
+}
+
+.scoreWrapper .scoreTable tbody .sumRow,
+.scoreWrapper .scoreTable tbody .confirmRow{
+  background: none;
+}
+.scoreWrapper .scoreTable tbody .sumRow:hover,
+.scoreWrapper .scoreTable tbody .confirmRow:hover{
+  transform:unset;
+}
+.sumRow td:last-child,
+.confirmRow td:last-child{
+  padding:unset;
+  border: none;
+  border-radius:unset;
+  background:unset;
+}
+.confirmBtnRow{
+  display: flex;
+  justify-content: center;  /* 中央揃え */
+  align-items: center;      /* 垂直中央（高さ揃え） */
+  gap: 1rem;     
+}

@@ -1,0 +1,29 @@
+/* MultiSelectorModal.module.css */
+.listContainer{
+  flex-grow: 1;
+  overflow-y: auto;
+}
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+  width: 100%;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.listItem {
+
+  color:rgba(0, 0, 0, 0.821);
+  font-size:1.5em;
+  color:white;
+  margin-bottom:16px
+
+
+}
+

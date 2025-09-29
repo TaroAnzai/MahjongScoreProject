@@ -1,0 +1,15 @@
+.gridSection {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2列 */
+  gap: 0.75rem;
+}
+
+.gridItem {
+  display: flex;
+  justify-content: center;
+}
+
+/* 2n+1番目にあたる最後の1つだけを全幅にする */
+.gridItem:last-child:nth-child(2n + 1) {
+  grid-column: span 2;
+}

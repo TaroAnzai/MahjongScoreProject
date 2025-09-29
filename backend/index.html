@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/mahjong.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>麻雀集計</title>
+    <!-- OGP設定 -->
+    <meta property="og:title" content="麻雀点数記録表" />
+    <meta property="og:description" content="麻雀点数記録表にアクセスできます。" />
+    <meta property="og:image" content="https://anzai-home.com/mahjong/assets/Screenshot1.png" />
+    <meta property="og:url" content="<?php echo 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']; ?>" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitterカード（必要なら）-->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://anzai-home.com/mahjong/assets/Screenshot1.png" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <div id="modal-root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

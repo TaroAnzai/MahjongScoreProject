@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="32" height="32">
+  <!-- 牌の立体感：ベースの影 -->
+  <rect x="10" y="10" width="44" height="44" rx="6" ry="6" fill="#ccc"></rect>
+
+  <!-- 牌の本体 -->
+  <rect x="8" y="8" width="44" height="44" rx="6" ry="6" fill="#ffffff" stroke="#333" stroke-width="2"></rect>
+
+  <!-- 「麻雀」文字（縦書き、中央揃え） -->
+  <text x="30" y="26" text-anchor="middle" font-family="serif" font-size="16" fill="#006400">麻</text>
+  <text x="30" y="42" text-anchor="middle" font-family="serif" font-size="16" fill="#006400">雀</text>
+</svg>
