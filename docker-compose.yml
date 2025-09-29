@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  api:
+    build: ./backend
+    container_name: mahjongscore-api
+    ports:
+      - "6000:5000"   # ホスト6000 → コンテナ5000
+    volumes:
+      - ./backend:/app
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_URL=mysql+pymysql://root:secret@db/progress
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: mahjongscore-db
+    restart: always
+    ports:
+      - "3307:3306"   # ホスト3307 → コンテナ3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=progress
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
