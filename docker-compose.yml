@@ -5,7 +5,7 @@ services:
     build: ./backend
     container_name: mahjongscore-api
     ports:
-      - "6000:5000"   # ホスト6000 → コンテナ5000
+      - "6080:5000"   # ホスト6080 → コンテナ5000
     volumes:
       - ./backend:/app
     environment:

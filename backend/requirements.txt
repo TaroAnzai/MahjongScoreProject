@@ -1,4 +1,36 @@
-Flask
-Flask-SQLAlchemy
-Flask-Migrate
-Flask-Login
+# --- Flask & Extensions ---
+Flask>=3.0,<4.0
+Flask-Cors>=5.0,<6.0
+Flask-Login>=0.6,<1.0
+Flask-Migrate>=4.0,<5.0
+Flask-SQLAlchemy>=3.0,<4.0
+
+# --- Database ---
+SQLAlchemy>=2.0,<3.0
+PyMySQL>=1.0,<2.0
+python-dateutil>=2.9,<3.0
+
+# --- Alembic (DBマイグレーション) ---
+alembic>=1.14,<2.0
+Mako>=1.3,<2.0
+
+# --- Utilities ---
+python-dotenv>=1.0,<2.0
+cryptography>=45.0,<46.0   # MySQL 8.0 認証で必須
+packaging>=23.0,<26.0
+typing_extensions>=4.0,<5.0
+six>=1.16,<2.0
+
+# --- Gunicorn (本番WSGIサーバー) ---
+gunicorn>=23.0,<24.0
+
+# --- Testing (開発用のみ) ---
+pytest>=8.0,<9.0
+
+# --- その他（旧freezeから必須だったもの） ---
+greenlet>=3.0,<4.0
+blinker>=1.8,<2.0
+Werkzeug>=3.0,<4.0
+itsdangerous>=2.2,<3.0
+Jinja2>=3.1,<4.0
+MarkupSafe>=2.1,<3.0
