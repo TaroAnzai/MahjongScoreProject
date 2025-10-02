@@ -3,7 +3,7 @@ from flask_smorest import Blueprint, abort
 from flask.views import MethodView
 from flask_login import login_required
 
-from app.schemas.tournament_schema import TournamentSchema, TournamentCreateSchema
+from app.schemas.tournament_schema import TournamentSchema, TournamentCreateSchema, TournamentResultSchema, ScoreSummarySchema
 from app.services import tournament_service
 
 tournament_bp = Blueprint("Tournaments", "tournaments", url_prefix="/api/tournaments",
@@ -42,3 +42,17 @@ class TournamentResource(MethodView):
         """Delete tournament"""
         tournament_service.delete_tournament(tournament_id)
         return None
+
+@tournament_bp.route("/<int:tournament_id>/results")
+class ExportTournamentResultsResource(MethodView):
+    @tournament_bp.response(200, TournamentResultSchema)
+    def get(self, tournament_id):
+        """大会単位のスコア集計結果を返す"""
+        return tournament_service.ExportService.export_tournament_results(tournament_id)
+
+@tournament_bp.route("/<int:tournament_id>/summary")
+class ExportScoreSummaryResource(MethodView):
+    @tournament_bp.response(200, ScoreSummarySchema)
+    def get(self, tournament_id):
+        """卓ごとのクロステーブル用スコアを返す"""
+        return tournament_service.ExportService.export_score_summary(tournament_id)

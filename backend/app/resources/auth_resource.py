@@ -5,7 +5,7 @@ from flask.views import MethodView
 from app.schemas.auth_schema import LoginByKeySchema, MessageSchema
 from app.services.auth_service import AuthService
 
-auth_bp = Blueprint("Auth", "auth", url_prefix="/api", description="認証関連 API")
+auth_bp = Blueprint("Auth", "auth", url_prefix="/api/auth", description="認証関連 API")
 
 @auth_bp.route("/login/by-key")
 class LoginByKeyResource(MethodView):

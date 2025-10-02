@@ -1,5 +1,6 @@
 # app/schemas/table_schema.py
 from marshmallow import Schema, fields
+from app.schemas.game_schema import ScoreSchema
 
 class TableBaseSchema(Schema):
     id = fields.Int(dump_only=True)
@@ -30,3 +31,16 @@ class TableWithPlayersSchema(Schema):
 
 class MessageSchema(Schema):
     message = fields.Str(required=True)
+class GameCreateSchema(Schema):
+    scores = fields.List(fields.Nested(ScoreSchema), required=True)
+    memo = fields.Str(load_default=None)
+
+class GameResponseSchema(Schema):
+    game_id = fields.Int(required=True)
+    scores = fields.List(fields.Nested(ScoreSchema))
+
+class GetTableQuerySchema(Schema):
+    key = fields.Int(required=False,
+                     metadata={"description": "get table by Table Key"})
+    tournament_id = fields.Int(required=False,
+                               metadata={"description": "get tables by Tournament ID"})

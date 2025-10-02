@@ -5,7 +5,8 @@ from flask_login import login_required
 from app.schemas.table_schema import (
     TableCreateSchema, TableUpdateSchema,
     TableBaseSchema, TableWithPlayersSchema,
-    PlayerSchema, MessageSchema
+    PlayerSchema, MessageSchema,
+    GameCreateSchema, GameResponseSchema, GetTableQuerySchema
 )
 from app.services.table_service import TableService
 
@@ -23,29 +24,18 @@ class TableListResource(MethodView):
             abort(status, message=table["error"])
         return table
 
+    @table_bp.arguments(GetTableQuerySchema, location="query")
     @table_bp.response(200, TableBaseSchema(many=True))
-    def get(self):
+    def get(self, args):
         """トーナメントIDで卓一覧を取得"""
-        from flask import request
-        tournament_id = request.args.get("tournament_id")
-        if not tournament_id:
-            abort(400, message="tournament_id is required")
-        return TableService.get_tables_by_tournament(tournament_id)
+        tournament_id = args.get("tournament_id")
+        key= args.get("key")
+        if tournament_id:
+            return TableService.get_tables_by_tournament(tournament_id)
+        if key:
+            return TableService.get_table_by_key(key)
+        abort(400, message="tournament_id is required")
 
-@table_bp.route("/<string:table_key>")
-class TableByKeyResource(MethodView):
-    @table_bp.response(200, TableWithPlayersSchema)
-    def get(self, table_key):
-        """テーブルキーで卓を取得"""
-        return TableService.get_table_by_key(table_key)
-
-@table_bp.route("/by-id/<int:table_id>")
-class TableByIdResource(MethodView):
-    @table_bp.response(200, TableWithPlayersSchema)
-    @login_required
-    def get(self, table_id):
-        """テーブルIDで卓を取得"""
-        return TableService.get_table_by_id(table_id)
 
 @table_bp.route("/<int:table_id>/players")
 class TablePlayersResource(MethodView):
@@ -78,6 +68,12 @@ class TablePlayerResource(MethodView):
 
 @table_bp.route("/<int:table_id>")
 class TableResource(MethodView):
+    @table_bp.response(200, TableWithPlayersSchema)
+    @login_required
+    def get(self, table_id):
+        """卓を取得"""
+        return TableService.get_table_by_id(table_id)
+    
     @table_bp.response(200, MessageSchema)
     @login_required
     def delete(self, table_id):
@@ -96,3 +92,17 @@ class TableResource(MethodView):
         if status != 200:
             abort(status, message=result["error"])
         return result
+    
+    @table_bp.route("/<int:table_id>/games")
+    class GameListResource(MethodView):
+        @table_bp.arguments(GameCreateSchema)
+        @table_bp.response(201, GameResponseSchema)
+        @login_required
+        def post(self, data, table_id):
+            """卓に新しいゲームを追加"""
+            return TableService.add_game(table_id, scores=data["scores"], memo=data.get("memo"))
+
+        @table_bp.response(200, GameResponseSchema(many=True))
+        def get(self, table_id):
+            """卓の全ゲームを取得"""
+            return TableService.get_games(table_id)
