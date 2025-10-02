@@ -1,18 +1,50 @@
 # config.py
 
 import os
+from dotenv import load_dotenv
 import secrets
 
+
+# FLASK_ENV の値に応じて .env を読み込む
+env_name = os.getenv("FLASK_ENV", "development")
+
+if env_name == "production":
+    load_dotenv(".env.production")
+elif env_name == "test":
+    load_dotenv(".env.test")
+else:
+    load_dotenv(".env") #開発用
+
+
+
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_hex(16))
-    SQLALCHEMY_DATABASE_URI =  os.getenv('DATABASE_URL')
+    # Database
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Flask-Login
-    SESSION_COOKIE_NAME = 'mahjong_session'
-    SESSION_COOKIE_SAMESITE = 'None'
-    SESSION_COOKIE_SECURE = True  # HTTPS通信のみでCookieを送信
+    # Security
+    SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret")
 
     # CORS
+    CORS_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").split(",")]
     CORS_SUPPORTS_CREDENTIALS = True
-    CORS_ORIGINS = ["https://localhost:5173","http://localhost:5173", "https://anzai-home.com"]
+
+    # Session / Cookie
+    SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "None")
+    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() in ("true", "1")
+
+    # Debug / Testing flags
+    DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
+    TESTING = os.getenv("TESTING", "False").lower() in ("true", "1")
+
+    # OpenAPI / Swagger
+    API_TITLE = os.getenv("API_TITLE", "Task Progress API")
+    API_VERSION = os.getenv("API_VERSION", "1.0.0")
+    OPENAPI_VERSION = os.getenv("OPENAPI_VERSION", "3.0.3")
+    OPENAPI_URL_PREFIX = os.getenv("OPENAPI_URL_PREFIX", "/")
+    OPENAPI_JSON_PATH = os.getenv("OPENAPI_JSON_PATH", "openapi.json")
+    OPENAPI_SWAGGER_UI_PATH = os.getenv("OPENAPI_SWAGGER_UI_PATH", "/swagger-ui")
+    OPENAPI_SWAGGER_UI_URL = os.getenv(
+        "OPENAPI_SWAGGER_UI_URL",
+        "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
+    )

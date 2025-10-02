@@ -10,7 +10,6 @@ services:
       - ./backend:/app
     environment:
       - FLASK_ENV=development
-      - DATABASE_URL=mysql+pymysql://root:secret@db/progress
     depends_on:
       - db
 
