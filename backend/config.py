@@ -7,6 +7,7 @@ import secrets
 
 # FLASK_ENV の値に応じて .env を読み込む
 env_name = os.getenv("FLASK_ENV", "development")
+print("env_name:", env_name)
 
 if env_name == "production":
     load_dotenv(".env.production")
@@ -15,7 +16,8 @@ elif env_name == "test":
 else:
     load_dotenv(".env") #開発用
 
-
+print("CORS_ORIGINS:", os.getenv("CORS_ORIGINS"))
+print("SESSION_COOKIE_NAME:", os.getenv("SESSION_COOKIE_NAME"))
 
 class Config:
     # Database
@@ -32,6 +34,7 @@ class Config:
     # Session / Cookie
     SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "None")
     SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() in ("true", "1")
+    SESSION_COOKIE_NAME = os.getenv("SESSION_COOKIE_NAME", "session")
 
     # Debug / Testing flags
     DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1")
