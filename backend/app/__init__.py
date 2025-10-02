@@ -1,15 +1,10 @@
 # app/__init__.py
 
 from flask import Flask, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager
-from flask_cors import CORS
 
-db = SQLAlchemy()
-migrate = Migrate()
-login_manager = LoginManager()
-login_manager.login_view = 'auth_api.login_by_key'
+from flask_cors import CORS
+from app.extensions import db, login_manager, migrate
+
 
 def create_app(config_override=None):
     app = Flask(__name__, instance_relative_config=True)
