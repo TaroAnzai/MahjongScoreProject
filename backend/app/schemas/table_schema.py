@@ -24,10 +24,15 @@ class PlayerSchema(Schema):
     id = fields.Int()
     name = fields.Str()
     nickname = fields.Str()
+    class Meta:  # ← 追加
+        ordered = True
 
 class TableWithPlayersSchema(Schema):
     table = fields.Nested(TableBaseSchema)
     players = fields.List(fields.Nested(PlayerSchema))
+
+    class Meta:  # ← 追加
+        ordered = True
 
 class MessageSchema(Schema):
     message = fields.Str(required=True)

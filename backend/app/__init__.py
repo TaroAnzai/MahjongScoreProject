@@ -3,7 +3,7 @@
 from flask import Flask, jsonify
 
 from flask_cors import CORS
-from app.extensions import db, login_manager, migrate
+from app.extensions import db, login_manager, migrate, api
 
 
 def create_app(config_override=None):
@@ -19,6 +19,7 @@ def create_app(config_override=None):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    api.init_app(app)
 
     # モデルと認証ユーザーの読み込み
     from app import models

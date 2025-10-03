@@ -39,7 +39,7 @@ class TableListResource(MethodView):
 
 @table_bp.route("/<int:table_id>/players")
 class TablePlayersResource(MethodView):
-    @table_bp.response(200, dict(players=PlayerSchema(many=True)))
+    @table_bp.response(200, PlayerSchema(many=True))
     @login_required
     def get(self, table_id):
         """卓の参加プレイヤーを取得"""
