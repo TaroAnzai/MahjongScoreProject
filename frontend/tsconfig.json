@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,     // ← これが重要
+    "outDir": "dist",          // ← 出力先を分離
+    "noEmit": true,             // ← Vite/Reactなら基本はこれを付ける
+  },
+  "include": ["src"]
+}
