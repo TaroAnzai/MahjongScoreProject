@@ -1,11 +1,9 @@
-version: "3.9"
-
 services:
   api:
     build: ./backend
     container_name: mahjongscore-api
     ports:
-      - "6080:5000"   # ホスト6080 → コンテナ5000
+      - '6080:5000' # ホスト6080 → コンテナ5000
     volumes:
       - ./backend:/app
     environment:
@@ -18,7 +16,7 @@ services:
     container_name: mahjongscore-db
     restart: always
     ports:
-      - "3307:3306"   # ホスト3307 → コンテナ3306
+      - '3307:3306' # ホスト3307 → コンテナ3306
     environment:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=progress

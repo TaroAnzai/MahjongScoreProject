@@ -1,0 +1,55 @@
+{
+  // ===== 保存時に「全部」やる =====
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always", // ESLint の自動修正を常に実行
+  },
+  // ===== ESLint の対象と言語サービス =====
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.codeActionsOnSave.rules": [
+    "simple-import-sort/imports",
+    "simple-import-sort/exports"
+  ],
+  // ===== 自動 import 補完を最大化 =====
+  "typescript.suggest.autoImports": true,
+  "javascript.suggest.autoImports": true,
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  // ===== import パスは最短（エイリアス優先など） =====
+  "typescript.preferences.importModuleSpecifier": "shortest",
+  "javascript.preferences.importModuleSpecifier": "shortest",
+  // Prettier を優先して使う場合（導入済みなら推奨）
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSaveMode": "file",
+  "prettier.requireConfig": true,
+  // 未使用の import/変数をグレーアウト表示
+  "editor.showUnused": true,
+  "typescript.preferences.quoteStyle": "single", // import 時のクォート統一
+  // インデント・表示
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.rulers": [
+    100
+  ], // 100列に縦ガイドライン
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+
+  "prettier.printWidth": 100,
+  "prettier.singleQuote": true,
+  // npm/yarn/pnpm script の補完
+  "npm.enableScriptExplorer": true,
+  // 自動保存（保存忘れ防止、好みで）
+  "files.autoSave": "onWindowChange",
+  // 厳格な型チェックを VSCode 上でも活かす
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "typescript.tsserver.log": "verbose", // デバッグ時に型解析ログ
+  // JSX や TSX で Emmet（HTML ショートカット）を有効化
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "typescript": "typescriptreact"
+  },
+}

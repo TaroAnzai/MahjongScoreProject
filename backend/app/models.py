@@ -1,154 +1,262 @@
-
-from app import db 
+from app import db
 from datetime import datetime, timezone
+import uuid
+from sqlalchemy import event
+from enum import StrEnum
 
 
+# =========================================================
+# グループ（最上位レイヤー）
+# =========================================================
 class Group(db.Model):
-    __tablename__ = 'groups'
+    __tablename__ = "groups"
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text)
-    group_key = db.Column(db.String(64), unique=True, nullable=False)
-    edit_key = db.Column(db.String(64), unique=True, nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_by = db.Column(
+        db.String(64), nullable=False, default=lambda: str(uuid.uuid4())
+    )  # グループ作成者（オーナー）
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+    last_updated_at = db.Column(
+        db.DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+        server_default=db.func.now()
+    )
 
-    tournaments = db.relationship('Tournament', backref='group', lazy=True)
-    players = db.relationship("Player", back_populates="group", cascade="all, delete-orphan")
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'description': self.description
-        }
+    # リレーション
+    tournaments = db.relationship(
+        "Tournament", backref="group", lazy=True, cascade="all, delete-orphan"
+    )
+    players = db.relationship(
+        "Player", back_populates="group", cascade="all, delete-orphan"
+    )
 
 
+# =========================================================
+# 大会
+# =========================================================
 class Tournament(db.Model):
-    __tablename__ = 'tournaments'
+    __tablename__ = "tournaments"
+
     id = db.Column(db.Integer, primary_key=True)
-    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), nullable=False)
     name = db.Column(db.Text, nullable=False)
-    rate = db.Column(db.Float, default=1.0) 
+    rate = db.Column(db.Float, default=1.0)
     description = db.Column(db.Text)
-    tournament_key = db.Column(db.String(64), unique=True, nullable=False)
-    edit_key = db.Column(db.String(64), unique=True, nullable=False)
+    created_by = db.Column(db.String(64), nullable=False)  # 作成者（共有リンク利用者 or 親オーナー）
     started_at = db.Column(db.DateTime)
-    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+    # 関連
+    tables = db.relationship(
+        "Table", backref="tournament", lazy=True, cascade="all, delete-orphan"
+    )
 
 
-    tables = db.relationship('Table', backref='tournament', lazy=True)
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'rate': self.rate,
-            'description': self.description,
-            'group_id': self.group_id,
-            'tournament_key': self.tournament_key,
-            'edit_key': self.edit_key,
-            'started_at': self.started_at.isoformat() if self.started_at else None,
-        }
-
+# =========================================================
+# 卓（テーブル）
+# =========================================================
 class Table(db.Model):
-    __tablename__ = 'tables'
+    __tablename__ = "tables"
+
     id = db.Column(db.Integer, primary_key=True)
-    tournament_id = db.Column(db.Integer, db.ForeignKey('tournaments.id'), nullable=False)
+    tournament_id = db.Column(
+        db.Integer, db.ForeignKey("tournaments.id"), nullable=False
+    )
     name = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    type = db.Column(db.String(20), default='normal')  # 'normal' または 'chip'
-    table_players = db.relationship('TablePlayer', back_populates='table', lazy=True)
-    games = db.relationship('Game', backref='table', lazy=True)
-    table_key = db.Column(db.String(64), unique=True, nullable=False)
-    edit_key = db.Column(db.String(64), unique=True, nullable=False)
+    type = db.Column(db.String(20), default="normal")  # normal / chip
+    created_by = db.Column(db.String(64), nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'tournament_id': self.tournament_id,
-            'table_key': self.table_key,
-            'edit_key': self.edit_key,
-            'type': self.type,
-        }
+    table_players = db.relationship("TablePlayer", back_populates="table", lazy=True)
+    games = db.relationship(
+        "Game", backref="table", lazy=True, cascade="all, delete-orphan"
+    )
 
+
+# =========================================================
+# 卓プレイヤー（着席情報）
+# =========================================================
 class TablePlayer(db.Model):
-    __tablename__ = 'table_players'
+    __tablename__ = "table_players"
+
     id = db.Column(db.Integer, primary_key=True)
-    table_id = db.Column(db.Integer, db.ForeignKey('tables.id'), nullable=False)
-    player_id = db.Column(db.Integer, db.ForeignKey('players.id'), nullable=False)
+    table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
+    player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
     seat_position = db.Column(db.Integer)
-    joined_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    joined_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
 
-    table = db.relationship('Table', back_populates='table_players')
-    player = db.relationship('Player', back_populates='table_participations')
+    table = db.relationship("Table", back_populates="table_players")
+    player = db.relationship("Player", back_populates="table_participations")
 
+
+# =========================================================
+# プレイヤー
+# =========================================================
 class Player(db.Model):
-    __tablename__ = 'players'
+    __tablename__ = "players"
+
     id = db.Column(db.Integer, primary_key=True)
-    group_id = db.Column(db.Integer, db.ForeignKey('groups.id'), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), nullable=False)
     name = db.Column(db.Text, nullable=False)
     nickname = db.Column(db.Text)
     display_order = db.Column(db.Integer)
 
-    table_participations = db.relationship('TablePlayer', back_populates='player', lazy=True)
-    scores = db.relationship('Score', backref='player', lazy=True)
-    tournament_participations = db.relationship('TournamentPlayer', back_populates='player')
-
     group = db.relationship("Group", back_populates="players")
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'nickname': self.nickname,
-            'group_id': self.group_id,
-        }
-
-
-class Game(db.Model):
-    __tablename__ = 'games'
-    id = db.Column(db.Integer, primary_key=True)
-    table_id = db.Column(db.Integer, db.ForeignKey('tables.id'), nullable=False)
-    game_index = db.Column(db.Integer, nullable=False)
-    played_at = db.Column(db.DateTime)
-    memo = db.Column(db.Text)
-
-    scores = db.relationship(
-        'Score',
-        backref='game',
-        lazy=True,
-        cascade='all, delete-orphan'
+    table_participations = db.relationship(
+        "TablePlayer", back_populates="player", lazy=True
+    )
+    scores = db.relationship("Score", backref="player", lazy=True)
+    tournament_participations = db.relationship(
+        "TournamentPlayer", back_populates="player"
     )
 
 
+# =========================================================
+# ゲーム（半荘）
+# =========================================================
+class Game(db.Model):
+    __tablename__ = "games"
 
-class Score(db.Model):
-    __tablename__ = 'scores'
     id = db.Column(db.Integer, primary_key=True)
-    game_id = db.Column(db.Integer, db.ForeignKey('games.id'), nullable=False)
-    player_id = db.Column(db.Integer, db.ForeignKey('players.id'), nullable=False)
+    table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
+    game_index = db.Column(db.Integer, nullable=False)
+    memo = db.Column(db.Text)
+    played_at = db.Column(db.DateTime)
+    created_by = db.Column(db.String(64), nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+    scores = db.relationship(
+        "Score", backref="game", lazy=True, cascade="all, delete-orphan"
+    )
+
+
+# =========================================================
+# スコア（各プレイヤーの点数）
+# =========================================================
+class Score(db.Model):
+    __tablename__ = "scores"
+
+    id = db.Column(db.Integer, primary_key=True)
+    game_id = db.Column(db.Integer, db.ForeignKey("games.id"), nullable=False)
+    player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
     score = db.Column(db.Integer, nullable=False)
     rank = db.Column(db.Integer)
     uma = db.Column(db.Float)
     total_score = db.Column(db.Float)
 
+
+# =========================================================
+# 大会参加者
+# =========================================================
 class TournamentPlayer(db.Model):
-    __tablename__ = 'tournament_players'
+    __tablename__ = "tournament_players"
+
     id = db.Column(db.Integer, primary_key=True)
-    tournament_id = db.Column(db.Integer, db.ForeignKey('tournaments.id'), nullable=False)
-    player_id = db.Column(db.Integer, db.ForeignKey('players.id'), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    tournament_id = db.Column(db.Integer, db.ForeignKey("tournaments.id"), nullable=False)
+    player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
 
-    # 関係
-    tournament = db.relationship('Tournament', backref=db.backref('tournament_players', lazy='dynamic'))
-    player = db.relationship('Player', back_populates='tournament_participations')
+    tournament = db.relationship(
+        "Tournament", backref=db.backref("tournament_players", lazy="dynamic")
+    )
+    player = db.relationship("Player", back_populates="tournament_participations")
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'tournament_id': self.tournament_id,
-            'player_id': self.player_id,
-            'player_name': self.player.name,
-            'created_at': self.created_at.isoformat(),
-        }
+# =========================================================
+# Enum定義
+# =========================================================
+class AccessLevel(StrEnum):
+    VIEW = "VIEW"
+    EDIT = "EDIT"
+    OWNER = "OWNER"
+# =========================================================
+# 共有リンク（短縮キー方式）
+# =========================================================
+class ShareLink(db.Model):
+    __tablename__ = "share_links"
+
+    id = db.Column(db.Integer, primary_key=True)
+    short_key = db.Column(
+        db.String(16), unique=True, nullable=False)  # 外部共有用の短いキー
+    resource_type = db.Column(db.String(32), nullable=False)  # group / tournament / table / game
+    resource_id = db.Column(db.Integer, nullable=False)
+    access_level = db.Column(
+        db.Enum(AccessLevel),
+        default=AccessLevel.VIEW,
+        nullable=False,
+    )
+    created_by = db.Column(db.String(64), nullable=False)
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
+
+# =========================================================
+# Groupの最終更新日時を自動更新するイベントリスナー
+# =========================================================
+
+def touch_group(connection, group_id: int) -> bool:
+    """Groupのlast_updated_atを現在時刻に更新"""
+    if not group_id:
+        return False
+    connection.execute(
+        db.text("UPDATE groups SET last_updated_at = :now WHERE id = :gid"),
+        {"now": datetime.now(timezone.utc), "gid": group_id},
+    )
+    return True
+
+# --- Groupの変更 ---
+@event.listens_for(Group, "before_update")
+def update_self_last_updated(mapper, connection, target):
+    touch_group(connection, target.id)
+
+# --- Tournamentの変更 ---
+@event.listens_for(Tournament, "after_insert")
+@event.listens_for(Tournament, "after_update")
+@event.listens_for(Tournament, "after_delete")
+def update_group_on_tournament_change(mapper, connection, target):
+    touch_group(connection, target.group_id)
+
+
+# --- Tableの変更 ---
+@event.listens_for(Table, "after_insert")
+@event.listens_for(Table, "after_update")
+@event.listens_for(Table, "after_delete")
+def update_group_on_table_change(mapper, connection, target):
+    result = connection.execute(
+        db.text("SELECT group_id FROM tournaments WHERE id = :tid"),
+        {"tid": target.tournament_id},
+    ).fetchone()
+    if result:
+        touch_group(connection, result.group_id)
+
+
+# --- Gameの変更 ---
+@event.listens_for(Game, "after_insert")
+@event.listens_for(Game, "after_update")
+@event.listens_for(Game, "after_delete")
+def update_group_on_game_change(mapper, connection, target):
+    result = connection.execute(
+        db.text(
+            "SELECT tr.group_id FROM tournaments tr "
+            "JOIN tables t ON tr.id = t.tournament_id "
+            "JOIN games gm ON gm.table_id = t.id "
+            "WHERE gm.id = :gid"
+        ),
+        {"gid": target.id},
+    ).fetchone()
+    if result:
+        touch_group(connection, result.group_id)

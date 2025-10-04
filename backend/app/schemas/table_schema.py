@@ -34,8 +34,6 @@ class TableWithPlayersSchema(Schema):
     class Meta:  # ← 追加
         ordered = True
 
-class MessageSchema(Schema):
-    message = fields.Str(required=True)
 class GameCreateSchema(Schema):
     scores = fields.List(fields.Nested(ScoreSchema), required=True)
     memo = fields.Str(load_default=None)

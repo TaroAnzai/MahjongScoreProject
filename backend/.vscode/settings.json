@@ -1,0 +1,26 @@
+{
+    "terminal.integrated.profiles.linux": {
+        
+        "bash": {
+            "path": "bash",
+            "icon": "terminal-bash",
+            "args": ["--login"] // この行を追加します！
+        },
+        "zsh": {
+            "path": "zsh"
+        },
+        "fish": {
+            "path": "fish"
+        },
+        "tmux": {
+            "path": "tmux",
+            "icon": "terminal-tmux"
+        },
+        "pwsh": {
+            "path": "pwsh",
+            "icon": "terminal-powershell"
+        }
+    },
+    // 必要であれば、デフォルトのシェルを明示的に設定することもできます
+    "terminal.integrated.defaultProfile.linux": "bash" 
+}

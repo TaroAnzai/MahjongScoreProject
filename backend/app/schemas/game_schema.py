@@ -12,7 +12,3 @@ class GameUpdateSchema(Schema):
     played_at = fields.DateTime(load_default=None)
     scores = fields.List(fields.Nested(ScoreSchema))
 
-
-
-class MessageSchema(Schema):
-    message = fields.Str(required=True)
