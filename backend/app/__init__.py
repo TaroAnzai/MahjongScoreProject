@@ -6,12 +6,20 @@ from flask_cors import CORS
 from app.extensions import db, login_manager, migrate, api
 
 
-def create_app(config_override=None):
+def create_app(config_name=None, config_override=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object('config.Config')
-    # ✅ テストなど外部から渡された設定で上書き
+
+    # ✅ テストなどでconfig_nameが指定された場合に対応
+    if config_name == "testing":
+        app.config.update(
+            TESTING=True,
+            SQLALCHEMY_DATABASE_URI="sqlite:///:memory:",
+            SQLALCHEMY_TRACK_MODIFICATIONS=False,
+        )
     if config_override:
         app.config.update(config_override)
+
     CORS(app,
         supports_credentials=app.config.get("CORS_SUPPORTS_CREDENTIALS", True),
         origins=app.config.get("CORS_ORIGINS", []))

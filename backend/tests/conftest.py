@@ -3,6 +3,7 @@ import tempfile
 import pytest
 from app import create_app, db
 from app.models import Group, Tournament, Table, Game, Player, ShareLink, AccessLevel
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 
 @pytest.fixture(scope="session")
@@ -59,15 +60,16 @@ def db_session(app_context):
     """
     connection = db.engine.connect()
     transaction = connection.begin()
-    options = dict(bind=connection, binds={})
-    session = db.create_scoped_session(options=options)
-    db.session = session
 
-    yield session
+    # ✅ Flask-SQLAlchemy 3系対応
+    Session = scoped_session(sessionmaker(bind=connection))
+    db.session = Session
+
+    yield Session
 
     transaction.rollback()
     connection.close()
-    session.remove()
+    Session.remove()
 
 
 # =========================================================

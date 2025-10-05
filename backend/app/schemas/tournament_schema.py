@@ -2,41 +2,37 @@
 from marshmallow import Schema, fields
 
 
+# ---------------------------------------------------
+# 共通スキーマ
+# ---------------------------------------------------
 class TournamentSchema(Schema):
     id = fields.Int(dump_only=True)
+    group_id = fields.Int(required=True)
     name = fields.Str(required=True)
     description = fields.Str(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
+    updated_at = fields.DateTime(dump_only=True)
 
 
 class TournamentCreateSchema(Schema):
+    """大会作成用"""
+    group_id = fields.Int(required=True, description="大会を所属させるグループID")
     name = fields.Str(required=True)
     description = fields.Str(allow_none=True)
 
 
-class PlayerScoreSchema(Schema):
-    id = fields.Int(required=True)
-    name = fields.Str(required=True)
-    total_score = fields.Int(required=True)
-    games_played = fields.Int(required=True)
+class TournamentQuerySchema(Schema):
+    """クエリパラメータ（short_key）"""
+    short_key = fields.Str(required=True, description="グループ共有リンクキー")
 
-class GroupSchema(Schema):
-    id = fields.Int(required=True)
-    name = fields.Str(required=True)
-    players = fields.List(fields.Nested(PlayerScoreSchema))
 
 class TournamentResultSchema(Schema):
-    tournament = fields.Dict(keys=fields.Str(), values=fields.Raw())
-    groups = fields.List(fields.Nested(GroupSchema))
+    """大会スコア結果"""
+    tournament = fields.Dict()
+    groups = fields.List(fields.Dict())
 
-class ScoreSummaryPlayerSchema(Schema):
-    id = fields.Int(required=True)
-    name = fields.Str(required=True)
-
-class ScoreSummaryTableSchema(Schema):
-    name = fields.Str(required=True)
-    scores = fields.Dict(keys=fields.Int(), values=fields.Int())
 
 class ScoreSummarySchema(Schema):
-    players = fields.List(fields.Nested(ScoreSummaryPlayerSchema))
-    tables = fields.List(fields.Nested(ScoreSummaryTableSchema))
+    """クロステーブル用スコア"""
+    players = fields.List(fields.Dict())
+    tables = fields.List(fields.Dict())

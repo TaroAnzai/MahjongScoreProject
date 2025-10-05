@@ -4,6 +4,14 @@ import uuid
 from sqlalchemy import event
 from enum import StrEnum
 
+# =========================================================
+# Enum定義
+# =========================================================
+class AccessLevel(StrEnum):
+    VIEW = "VIEW"
+    EDIT = "EDIT"
+    OWNER = "OWNER"
+
 
 # =========================================================
 # グループ（最上位レイヤー）
@@ -24,7 +32,7 @@ class Group(db.Model):
         db.DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
         nullable=False,
-        server_default=db.func.now()
+        server_default=db.func.now(),
     )
 
     # リレーション
@@ -33,6 +41,15 @@ class Group(db.Model):
     )
     players = db.relationship(
         "Player", back_populates="group", cascade="all, delete-orphan"
+    )
+
+    # ✅ ShareLinkリレーション（Group固有）
+    share_links = db.relationship(
+        "ShareLink",
+        primaryjoin="and_(ShareLink.resource_type=='group', "
+                    "foreign(ShareLink.resource_id)==Group.id)",
+        viewonly=True,
+        lazy="joined"
     )
 
 
@@ -47,7 +64,7 @@ class Tournament(db.Model):
     name = db.Column(db.Text, nullable=False)
     rate = db.Column(db.Float, default=1.0)
     description = db.Column(db.Text)
-    created_by = db.Column(db.String(64), nullable=False)  # 作成者（共有リンク利用者 or 親オーナー）
+    created_by = db.Column(db.String(64), nullable=False)  # 作成者
     started_at = db.Column(db.DateTime)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
@@ -56,6 +73,15 @@ class Tournament(db.Model):
     # 関連
     tables = db.relationship(
         "Table", backref="tournament", lazy=True, cascade="all, delete-orphan"
+    )
+
+    # ✅ ShareLinkリレーション（大会）
+    share_links = db.relationship(
+        "ShareLink",
+        primaryjoin="and_(ShareLink.resource_type=='tournament', "
+                    "foreign(ShareLink.resource_id)==Tournament.id)",
+        viewonly=True,
+        lazy="joined"
     )
 
 
@@ -79,6 +105,15 @@ class Table(db.Model):
     table_players = db.relationship("TablePlayer", back_populates="table", lazy=True)
     games = db.relationship(
         "Game", backref="table", lazy=True, cascade="all, delete-orphan"
+    )
+
+    # ✅ ShareLinkリレーション（卓）
+    share_links = db.relationship(
+        "ShareLink",
+        primaryjoin="and_(ShareLink.resource_type=='table', "
+                    "foreign(ShareLink.resource_id)==Table.id)",
+        viewonly=True,
+        lazy="joined"
     )
 
 
@@ -142,6 +177,15 @@ class Game(db.Model):
         "Score", backref="game", lazy=True, cascade="all, delete-orphan"
     )
 
+    # ✅ ShareLinkリレーション（ゲーム）
+    share_links = db.relationship(
+        "ShareLink",
+        primaryjoin="and_(ShareLink.resource_type=='game', "
+                    "foreign(ShareLink.resource_id)==Game.id)",
+        viewonly=True,
+        lazy="joined"
+    )
+
 
 # =========================================================
 # スコア（各プレイヤーの点数）
@@ -176,13 +220,7 @@ class TournamentPlayer(db.Model):
     )
     player = db.relationship("Player", back_populates="tournament_participations")
 
-# =========================================================
-# Enum定義
-# =========================================================
-class AccessLevel(StrEnum):
-    VIEW = "VIEW"
-    EDIT = "EDIT"
-    OWNER = "OWNER"
+
 # =========================================================
 # 共有リンク（短縮キー方式）
 # =========================================================
@@ -190,24 +228,19 @@ class ShareLink(db.Model):
     __tablename__ = "share_links"
 
     id = db.Column(db.Integer, primary_key=True)
-    short_key = db.Column(
-        db.String(16), unique=True, nullable=False)  # 外部共有用の短いキー
+    short_key = db.Column(db.String(16), unique=True, nullable=False)
     resource_type = db.Column(db.String(32), nullable=False)  # group / tournament / table / game
     resource_id = db.Column(db.Integer, nullable=False)
-    access_level = db.Column(
-        db.Enum(AccessLevel),
-        default=AccessLevel.VIEW,
-        nullable=False,
-    )
+    access_level = db.Column(db.Enum(AccessLevel), default=AccessLevel.VIEW, nullable=False)
     created_by = db.Column(db.String(64), nullable=False)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
 
+
 # =========================================================
 # Groupの最終更新日時を自動更新するイベントリスナー
 # =========================================================
-
 def touch_group(connection, group_id: int) -> bool:
     """Groupのlast_updated_atを現在時刻に更新"""
     if not group_id:
@@ -218,10 +251,12 @@ def touch_group(connection, group_id: int) -> bool:
     )
     return True
 
+
 # --- Groupの変更 ---
 @event.listens_for(Group, "before_update")
 def update_self_last_updated(mapper, connection, target):
     touch_group(connection, target.id)
+
 
 # --- Tournamentの変更 ---
 @event.listens_for(Tournament, "after_insert")
