@@ -3,8 +3,9 @@ from flask_smorest import Blueprint
 from flask.views import MethodView
 from flask_login import login_required
 from app.schemas.game_schema import (
-     GameUpdateSchema, MessageSchema
+     GameUpdateSchema
 )
+from app.schemas.player_schema import MessageSchema
 from app.services.game_service import GameService
 
 game_bp = Blueprint("Game", "games", url_prefix="/api/games", description="ゲーム管理 API")

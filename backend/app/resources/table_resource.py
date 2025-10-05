@@ -5,9 +5,10 @@ from flask_login import login_required
 from app.schemas.table_schema import (
     TableCreateSchema, TableUpdateSchema,
     TableBaseSchema, TableWithPlayersSchema,
-    PlayerSchema, MessageSchema,
+    PlayerSchema,
     GameCreateSchema, GameResponseSchema, GetTableQuerySchema
 )
+from app.schemas.player_schema import MessageSchema
 from app.services.table_service import TableService
 
 table_bp = Blueprint("Table", "tables", url_prefix="/api/tables", description="卓管理 API")
@@ -73,7 +74,7 @@ class TableResource(MethodView):
     def get(self, table_id):
         """卓を取得"""
         return TableService.get_table_by_id(table_id)
-    
+
     @table_bp.response(200, MessageSchema)
     @login_required
     def delete(self, table_id):
@@ -92,17 +93,17 @@ class TableResource(MethodView):
         if status != 200:
             abort(status, message=result["error"])
         return result
-    
-    @table_bp.route("/<int:table_id>/games")
-    class GameListResource(MethodView):
-        @table_bp.arguments(GameCreateSchema)
-        @table_bp.response(201, GameResponseSchema)
-        @login_required
-        def post(self, data, table_id):
-            """卓に新しいゲームを追加"""
-            return TableService.add_game(table_id, scores=data["scores"], memo=data.get("memo"))
 
-        @table_bp.response(200, GameResponseSchema(many=True))
-        def get(self, table_id):
-            """卓の全ゲームを取得"""
-            return TableService.get_games(table_id)
+@table_bp.route("/<int:table_id>/games")
+class GameListResource(MethodView):
+    @table_bp.arguments(GameCreateSchema)
+    @table_bp.response(201, GameResponseSchema)
+    @login_required
+    def post(self, data, table_id):
+        """卓に新しいゲームを追加"""
+        return TableService.add_game(table_id, scores=data["scores"], memo=data.get("memo"))
+
+    @table_bp.response(200, GameResponseSchema(many=True))
+    def get(self, table_id):
+        """卓の全ゲームを取得"""
+        return TableService.get_games(table_id)
