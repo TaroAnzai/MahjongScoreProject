@@ -1,49 +1,30 @@
-# app/schemas/table_schema.py
 from marshmallow import Schema, fields
-from app.schemas.game_schema import ScoreSchema
 
-class TableBaseSchema(Schema):
-    id = fields.Int(dump_only=True)
-    name = fields.Str(required=True)
-    tournament_id = fields.Int(required=True)
-    type = fields.Str(dump_only=True)
-    table_key = fields.Str(dump_only=True)
-    edit_key = fields.Str(dump_only=True)
+from app.schemas.common_schemas import ShareLinkSchema
+
 
 class TableCreateSchema(Schema):
-    name = fields.Str(required=True)
     tournament_id = fields.Int(required=True)
-    player_ids = fields.List(fields.Int(), load_default=[])
+    name = fields.Str(required=True)
+    type = fields.Str(load_default="normal")
+
 
 class TableUpdateSchema(Schema):
     name = fields.Str()
     type = fields.Str()
-    description = fields.Str()
 
-class PlayerSchema(Schema):
-    id = fields.Int()
-    name = fields.Str()
-    nickname = fields.Str()
-    class Meta:  # ← 追加
-        ordered = True
 
-class TableWithPlayersSchema(Schema):
-    table = fields.Nested(TableBaseSchema)
-    players = fields.List(fields.Nested(PlayerSchema))
+class TableQuerySchema(Schema):
+    short_key = fields.Str(required=True, metadata={"location": "query"})
 
-    class Meta:  # ← 追加
-        ordered = True
 
-class GameCreateSchema(Schema):
-    scores = fields.List(fields.Nested(ScoreSchema), required=True)
-    memo = fields.Str(load_default=None)
-
-class GameResponseSchema(Schema):
-    game_id = fields.Int(required=True)
-    scores = fields.List(fields.Nested(ScoreSchema))
-
-class GetTableQuerySchema(Schema):
-    key = fields.Int(required=False,
-                     metadata={"description": "get table by Table Key"})
-    tournament_id = fields.Int(required=False,
-                               metadata={"description": "get tables by Tournament ID"})
+class TableSchema(Schema):
+    id = fields.Int(dump_only=True)
+    tournament_id = fields.Int(required=True)
+    name = fields.Str(required=True)
+    type = fields.Str()
+    created_by = fields.Str(dump_only=True)
+    created_at = fields.DateTime(dump_only=True)
+    share_links = fields.List(
+        fields.Nested(ShareLinkSchema), dump_only=True, dump_default=[]
+    )
