@@ -41,7 +41,7 @@ class Config:
     TESTING = os.getenv("TESTING", "False").lower() in ("true", "1")
 
     # OpenAPI / Swagger
-    API_TITLE = os.getenv("API_TITLE", "Task Progress API")
+    API_TITLE = os.getenv("API_TITLE", "Mahjong Score API")
     API_VERSION = os.getenv("API_VERSION", "1.0.0")
     OPENAPI_VERSION = os.getenv("OPENAPI_VERSION", "3.0.3")
     OPENAPI_URL_PREFIX = os.getenv("OPENAPI_URL_PREFIX", "/")

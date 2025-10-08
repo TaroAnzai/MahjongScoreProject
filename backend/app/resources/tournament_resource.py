@@ -31,6 +31,7 @@ class TournamentListResource(MethodView):
     @tournament_bp.response(200, TournamentSchema(many=True))
     @with_common_error_responses(tournament_bp)
     def get(self, query_args):
+        """GET Tournaments by Group Short Key"""
         short_key = query_args["short_key"]
         try:
             return TournamentService.list_by_group_short_key(short_key)
@@ -42,6 +43,7 @@ class TournamentListResource(MethodView):
     @tournament_bp.response(201, TournamentSchema)
     @with_common_error_responses(tournament_bp)
     def post(self, query_args, new_data):
+        """CREATE Tournament"""
         short_key = query_args["short_key"]
         try:
             return TournamentService.create_tournament(new_data, short_key)
@@ -55,6 +57,7 @@ class TournamentResource(MethodView):
     @tournament_bp.response(200, TournamentSchema)
     @with_common_error_responses(tournament_bp)
     def get(self, query_args, tournament_id):
+        """GET Tournament by ID"""
         short_key = query_args["short_key"]
         try:
             return TournamentService.get_tournament(tournament_id, short_key)
@@ -66,6 +69,7 @@ class TournamentResource(MethodView):
     @tournament_bp.response(200, TournamentSchema)
     @with_common_error_responses(tournament_bp)
     def put(self, query_args, update_data, tournament_id):
+        """UPDATE Tournament by short key"""
         short_key = query_args["short_key"]
         try:
             return TournamentService.update_tournament(tournament_id, update_data, short_key)
@@ -76,9 +80,12 @@ class TournamentResource(MethodView):
     @tournament_bp.response(200, MessageSchema)
     @with_common_error_responses(tournament_bp)
     def delete(self, query_args, tournament_id):
+        """DELETE Tournament by short key"""
         short_key = query_args["short_key"]
         try:
             TournamentService.delete_tournament(tournament_id, short_key)
             return {"message": "Tournament deleted"}
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
+
+

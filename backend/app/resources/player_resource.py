@@ -43,6 +43,7 @@ class PlayerListResource(MethodView):
     @with_common_error_responses(player_bp)
     def post(self, query_args, new_data):
         short_key = query_args["short_key"]
+        print("DATA", short_key, new_data)
         try:
             return PlayerService.create_player(new_data, short_key)
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:

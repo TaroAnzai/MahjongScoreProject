@@ -26,6 +26,4 @@ class PlayerSchema(Schema):
     name = fields.Str(required=True)
     nickname = fields.Str(allow_none=True)
     display_order = fields.Int(allow_none=True)
-    share_links = fields.List(
-        fields.Nested(ShareLinkSchema), dump_only=True, dump_default=[]
-    )
+
