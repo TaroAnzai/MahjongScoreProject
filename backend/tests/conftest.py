@@ -54,22 +54,10 @@ def app_context(test_app):
 
 @pytest.fixture()
 def db_session(app_context):
-    """
-    テスト用のDBセッションを提供。
-    各テスト後にロールバックしてクリーン状態に戻す。
-    """
-    connection = db.engine.connect()
-    transaction = connection.begin()
-
-    # ✅ Flask-SQLAlchemy 3系対応
-    Session = scoped_session(sessionmaker(bind=connection))
-    db.session = Session
-
-    yield Session
-
-    transaction.rollback()
-    connection.close()
-    Session.remove()
+    """Flaskアプリのdb.sessionを使う統一フィクスチャ"""
+    yield db.session
+    db.session.rollback()
+    db.session.close()
 
 
 # =========================================================

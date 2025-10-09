@@ -1,6 +1,13 @@
 # app/schemas/common_schemas.py
 from marshmallow import Schema, fields, INCLUDE
 
+
+class ShareLinkSchema(Schema):
+    """共有リンク情報を表す共通スキーマ"""
+
+    short_key = fields.Str(required=True)
+    access_level = fields.Str(required=True)
+
 class MessageSchema(Schema):
     message = fields.Str()
 
