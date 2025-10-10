@@ -7,6 +7,7 @@ from app.resources.table_resource import table_bp
 from app.resources.game_resource import game_bp
 from app.resources.tournament_participant_resource import tournament_participant_bp
 from app.resources.table_player_resource import table_player_bp
+from app.resources.export_resource import export_bp
 
 def register_blueprints(app):
     api.register_blueprint(tournament_bp)
@@ -16,3 +17,4 @@ def register_blueprints(app):
     api.register_blueprint(game_bp)
     api.register_blueprint(tournament_participant_bp)
     api.register_blueprint(table_player_bp)
+    api.register_blueprint(export_bp)
