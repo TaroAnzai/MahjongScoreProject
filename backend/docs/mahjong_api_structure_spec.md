@@ -80,9 +80,84 @@ backend/
 
 ---
 
-## 🔀 API ルート一覧
+## 🧭 API ルート仕様一覧
 
-（Group / Tournament / Table / Game などの API 定義は既存の通り）
+| リソース  | HTTP   | URL                                           | 機能概要           | 実装ファイル                              |
+| --------- | ------ | --------------------------------------------- | ------------------ | ----------------------------------------- |
+| **Group** | POST   | `/api/groups`                                 | 新規グループ作成   | group_resource.py / group_service.py      |
+|           | GET    | `/api/groups`                                 | グループ一覧取得   | 〃                                        |
+|           | GET    | `/api/groups/<group_key>`                     | グループ詳細取得   | 〃                                        |
+|           | PUT    | `/api/groups/<group_key>`                     | グループ更新       | 〃                                        |
+|           | DELETE | `/api/groups/<group_key>`                     | グループ削除       | 〃                                        |
+|           | GET    | `/api/groups/<group_key>/players`             | 所属プレイヤー一覧 | 〃                                        |
+|           | POST   | `/api/groups/<group_key>/players`             | プレイヤー追加     | 〃                                        |
+|           | DELETE | `/api/groups/<group_key>/players/<player_id>` | プレイヤー削除     | 〃                                        |
+|           | POST   | `/api/groups/<group_key>/tournaments`         | 大会作成           | group_resource.py + tournament_service.py |
+|           | GET    | `/api/groups/<group_key>/tournaments`         | グループ内大会一覧 | 〃                                        |
+
+---
+
+| リソース   | HTTP   | URL                        | 機能概要           | 実装ファイル                           |
+| ---------- | ------ | -------------------------- | ------------------ | -------------------------------------- |
+| **Player** | POST   | `/api/players`             | プレイヤー登録     | player_resource.py / player_service.py |
+|            | GET    | `/api/players/<player_id>` | プレイヤー詳細取得 | 〃                                     |
+|            | PUT    | `/api/players/<player_id>` | プレイヤー更新     | 〃                                     |
+|            | DELETE | `/api/players/<player_id>` | プレイヤー削除     | 〃                                     |
+
+---
+
+| リソース       | HTTP   | URL                                        | 機能概要     | 実装ファイル                                   |
+| -------------- | ------ | ------------------------------------------ | ------------ | ---------------------------------------------- |
+| **Tournament** | POST   | `/api/groups/<group_key>/tournaments`      | 大会作成     | tournament_resource.py / tournament_service.py |
+|                | GET    | `/api/tournaments/<tournament_key>`        | 大会取得     | 〃                                             |
+|                | PUT    | `/api/tournaments/<tournament_key>`        | 大会更新     | 〃                                             |
+|                | DELETE | `/api/tournaments/<tournament_key>`        | 大会削除     | 〃                                             |
+|                | GET    | `/api/tournaments/<tournament_key>/export` | 大会成績出力 | export_resource.py / export_service.py         |
+
+---
+
+| リソース                  | HTTP   | URL                                                          | 機能概要       | 実装ファイル                                                           |
+| ------------------------- | ------ | ------------------------------------------------------------ | -------------- | ---------------------------------------------------------------------- |
+| **TournamentParticipant** | GET    | `/api/tournaments/<tournament_key>/participants`             | 大会参加者一覧 | tournament_participant_resource.py / tournament_participant_service.py |
+|                           | POST   | `/api/tournaments/<tournament_key>/participants`             | 参加者登録     | 〃                                                                     |
+|                           | DELETE | `/api/tournaments/<tournament_key>/participants/<player_id>` | 参加者削除     | 〃                                                                     |
+
+---
+
+| リソース  | HTTP   | URL                                           | 機能概要           | 実装ファイル                         |
+| --------- | ------ | --------------------------------------------- | ------------------ | ------------------------------------ |
+| **Table** | POST   | `/api/tournaments/<tournament_key>/tables`    | 卓作成             | table_resource.py / table_service.py |
+|           | GET    | `/api/tables/<table_key>`                     | 卓取得             | 〃                                   |
+|           | PUT    | `/api/tables/<table_key>`                     | 卓更新             | 〃                                   |
+|           | DELETE | `/api/tables/<table_key>`                     | 卓削除             | 〃                                   |
+|           | GET    | `/api/tables/<table_key>/players`             | 卓内プレイヤー一覧 | 〃                                   |
+|           | POST   | `/api/tables/<table_key>/players`             | 卓プレイヤー追加   | 〃                                   |
+|           | DELETE | `/api/tables/<table_key>/players/<player_id>` | 卓プレイヤー削除   | 〃                                   |
+|           | GET    | `/api/tables/<table_key>/games`               | 卓内対局一覧       | 〃                                   |
+
+---
+
+| リソース        | HTTP   | URL                                           | 機能概要           | 実装ファイル                                       |
+| --------------- | ------ | --------------------------------------------- | ------------------ | -------------------------------------------------- |
+| **TablePlayer** | GET    | `/api/tables/<table_key>/players`             | 卓内プレイヤー取得 | table_player_resource.py / table_player_service.py |
+|                 | POST   | `/api/tables/<table_key>/players`             | 卓内プレイヤー登録 | 〃                                                 |
+|                 | DELETE | `/api/tables/<table_key>/players/<player_id>` | 卓プレイヤー削除   | 〃                                                 |
+
+---
+
+| リソース | HTTP   | URL                             | 機能概要       | 実装ファイル                       |
+| -------- | ------ | ------------------------------- | -------------- | ---------------------------------- |
+| **Game** | POST   | `/api/tables/<table_key>/games` | 新しい対局登録 | game_resource.py / game_service.py |
+|          | GET    | `/api/games/<game_key>`         | 対局詳細取得   | 〃                                 |
+|          | PUT    | `/api/games/<game_key>`         | 対局更新       | 〃                                 |
+|          | DELETE | `/api/games/<game_key>`         | 対局削除       | 〃                                 |
+
+---
+
+| リソース             | HTTP | URL                                        | 機能概要                    | 実装ファイル                           |
+| -------------------- | ---- | ------------------------------------------ | --------------------------- | -------------------------------------- |
+| **Export / Summary** | GET  | `/api/tournaments/<tournament_key>/export` | 大会の成績出力（CSV/Excel） | export_resource.py / export_service.py |
+|                      | GET  | `/api/groups/<group_key>/summary`          | グループ集計出力            | 〃                                     |
 
 ---
 
