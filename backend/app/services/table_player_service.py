@@ -60,7 +60,7 @@ def create_table_player(table_key: str, data: dict):
     player_id = data.get("player_id")
     if not player_id:
         raise ServiceValidationError("player_id は必須です。")
-
+    print("in create_table_player:", player_id)
     participant = TournamentPlayer.query.get(player_id)
     if not participant:
         raise ServiceNotFoundError("大会参加者が見つかりません。")
@@ -88,21 +88,17 @@ def create_table_player(table_key: str, data: dict):
 # =========================================================
 # 卓参加者削除
 # =========================================================
-def delete_table_player(short_key: str):
+def delete_table_player(table_key: str, player_id: int):
     """卓参加者共有キーから削除"""
-    link = get_share_link_by_key(short_key)
-    if not link or link.resource_type != "table_player":
+    link = get_share_link_by_key(table_key)
+    if not link or link.resource_type != "table":
         raise ServicePermissionError("不正な共有リンクです。")
 
-    table_player = TablePlayer.query.get(link.resource_id)
+    table_player = TablePlayer.query.filter_by(id=player_id, table_id=link.resource_id).first()
     if not table_player:
         raise ServiceNotFoundError("卓参加者が見つかりません。")
 
-    table = Table.query.get(table_player.table_id)
-    if not table:
-        raise ServiceNotFoundError("卓が見つかりません。")
-
-    _ensure_access(link, AccessLevel.OWNER, "卓参加者を削除する権限がありません。")
+    _ensure_access(link, AccessLevel.EDIT, "卓参加者を削除する権限がありません。")
 
     db.session.delete(table_player)
     db.session.commit()

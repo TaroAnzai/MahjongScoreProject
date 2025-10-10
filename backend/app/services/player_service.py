@@ -71,25 +71,25 @@ def create_player(data: dict, group_key: str) -> Player:
 # =========================================================
 # プレイヤー取得・更新・削除
 # =========================================================
-def get_player_by_key(short_key: str) -> Player:
+def get_player_by_key(group_key: str, player_id: int) -> Player:
     """プレイヤー共有キーから取得"""
-    link = get_share_link_by_key(short_key)
-    if not link or link.resource_type != "player":
+    link = get_share_link_by_key(group_key)
+    if not link or link.resource_type != "group":
         raise ServicePermissionError("共有リンクが不正です。")
 
-    player = Player.query.get(link.resource_id)
+    _ensure_access(link, AccessLevel.VIEW, "プレイヤーを閲覧する権限がありません。")
+    player = Player.query.filter_by(id=player_id, group_id=link.resource_id).first()
     if not player:
         raise ServiceNotFoundError("プレイヤーが見つかりません。")
     return player
 
 
-def update_player(short_key: str, data: dict) -> Player:
+def update_player(group_key: str, player_id: int, data: dict) -> Player:
     """プレイヤー共有キーから更新"""
-    link = get_share_link_by_key(short_key)
-    if not link or link.resource_type != "player":
+    link = get_share_link_by_key(group_key)
+    if not link or link.resource_type != "group":
         raise ServicePermissionError("共有リンクが不正です。")
-
-    player = Player.query.get(link.resource_id)
+    player = Player.query.filter_by(id=player_id, group_id=link.resource_id).first()
     if not player:
         raise ServiceNotFoundError("プレイヤーが見つかりません。")
 
@@ -106,17 +106,17 @@ def update_player(short_key: str, data: dict) -> Player:
     return player
 
 
-def delete_player(short_key: str) -> None:
+def delete_player(group_key: str, player_id: int) -> None:
     """プレイヤー共有キーから削除"""
-    link = get_share_link_by_key(short_key)
-    if not link or link.resource_type != "player":
+    link = get_share_link_by_key(group_key)
+    if not link or link.resource_type != "group":
         raise ServicePermissionError("共有リンクが不正です。")
 
-    player = Player.query.get(link.resource_id)
+    player = Player.query.filter_by(id=player_id, group_id=link.resource_id).first()
     if not player:
         raise ServiceNotFoundError("プレイヤーが見つかりません。")
 
-    _ensure_access(link, AccessLevel.OWNER, "プレイヤーを削除する権限がありません。")
+    _ensure_access(link, AccessLevel.EDIT, "プレイヤーを削除する権限がありません。")
 
     db.session.delete(player)
     db.session.commit()

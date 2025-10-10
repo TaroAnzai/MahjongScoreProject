@@ -99,3 +99,11 @@ def sample_sharelink(db_session, sample_group):
     db_session.add(link)
     db_session.commit()
     return link
+
+@pytest.fixture(autouse=True)
+def clean_db(db_session):
+    """各テスト実行前にDBをクリーンアップ"""
+    db_session.rollback()
+    for tbl in reversed(db.metadata.sorted_tables):
+        db_session.execute(tbl.delete())
+    db_session.commit()

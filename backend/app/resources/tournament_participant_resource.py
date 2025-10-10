@@ -57,16 +57,16 @@ class TournamentParticipantListResource(MethodView):
 # =========================================================
 # 大会参加者削除
 # =========================================================
-@tournament_participant_bp.route("/participants/<string:participant_key>")
+@tournament_participant_bp.route("/<string:tournament_key>/participants/<int:participant_id>")
 class TournamentParticipantResource(MethodView):
     """DELETE: 大会参加者削除"""
 
     @tournament_participant_bp.response(200, MessageSchema)
     @with_common_error_responses(tournament_participant_bp)
-    def delete(self, participant_key):
+    def delete(self, tournament_key, participant_id):
         """参加者共有キーから削除"""
         try:
-            delete_participant(participant_key)
+            delete_participant(tournament_key, participant_id)
             return {"message": "Tournament participant deleted"}
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)

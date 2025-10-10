@@ -79,21 +79,17 @@ def create_participant(tournament_key: str, data: dict):
 # =========================================================
 # 参加者削除
 # =========================================================
-def delete_participant(participant_key: str):
+def delete_participant(tournament_key: str, participant_id: int):
     """大会参加者共有キーから削除"""
-    link = get_share_link_by_key(participant_key)
-    if not link or link.resource_type != "tournament_player":
+    link = get_share_link_by_key(tournament_key)
+    if not link or link.resource_type != "tournament":
         raise ServicePermissionError("不正な共有リンクです。")
 
-    participant = TournamentPlayer.query.get(link.resource_id)
+    participant = TournamentPlayer.query.filter_by(id=participant_id, tournament_id=link.resource_id).first()
     if not participant:
         raise ServiceNotFoundError("大会参加者が見つかりません。")
 
-    tournament = Tournament.query.get(participant.tournament_id)
-    if not tournament:
-        raise ServiceNotFoundError("大会が見つかりません。")
-
-    _ensure_access(link, AccessLevel.OWNER, "大会参加者を削除する権限がありません。")
+    _ensure_access(link, AccessLevel.EDIT, "大会参加者を削除する権限がありません。")
 
     db.session.delete(participant)
     db.session.commit()

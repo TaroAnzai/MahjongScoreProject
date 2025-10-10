@@ -106,7 +106,7 @@ def update_game(short_key: str, data: dict) -> Game:
 def delete_game(short_key: str) -> None:
     """対局共有キーから削除"""
     link, game = _require_game(short_key)
-    _ensure_access(link, AccessLevel.OWNER, "対局を削除する権限がありません。")
+    _ensure_access(link, AccessLevel.EDIT, "対局を削除する権限がありません。")
 
     db.session.delete(game)
     db.session.commit()

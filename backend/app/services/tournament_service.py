@@ -107,7 +107,7 @@ def update_tournament(short_key: str, data: dict) -> Tournament:
 def delete_tournament(short_key: str) -> None:
     """大会共有キーから大会削除"""
     link, tournament = _require_tournament(short_key)
-    _ensure_access(link, AccessLevel.OWNER, "大会を削除する権限がありません。")
+    _ensure_access(link, AccessLevel.EDIT, "大会を削除する権限がありません。")
 
     db.session.delete(tournament)
     db.session.commit()

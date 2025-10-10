@@ -9,7 +9,6 @@ from app.schemas.group_schema import (
     GroupSchema,
 )
 from app.schemas.tournament_schema import TournamentSchema, TournamentCreateSchema
-from app.schemas.player_schema import PlayerSchema, PlayerCreateSchema
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
@@ -22,7 +21,7 @@ from app.services.group_service import (
     delete_group,
 )
 from app.services.tournament_service import create_tournament
-from app.services.player_service import create_player, list_players_by_group_key
+
 
 # ✅ Blueprint設定（命名を仕様準拠に統一）
 group_bp = Blueprint(
@@ -103,28 +102,4 @@ class TournamentCreateResource(MethodView):
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-# =========================================================
-# プレイヤー一覧・作成
-# =========================================================
-@group_bp.route("/<string:group_key>/players")
-class PlayerListResource(MethodView):
-    """GET: プレイヤー一覧 / POST: プレイヤー作成"""
 
-    @group_bp.response(200, PlayerSchema(many=True))
-    @with_common_error_responses(group_bp)
-    def get(self, group_key):
-        """グループ共有キーからプレイヤー一覧を取得"""
-        try:
-            return list_players_by_group_key(group_key)
-        except (ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
-
-    @group_bp.arguments(PlayerCreateSchema)
-    @group_bp.response(201, PlayerSchema)
-    @with_common_error_responses(group_bp)
-    def post(self, new_data, group_key):
-        """グループ共有キーからプレイヤー作成"""
-        try:
-            return create_player(new_data, group_key)
-        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)

@@ -1,30 +1,32 @@
-# tests/test_tournament_participant_api.py
 import pytest
-from app.models import TournamentPlayer
+from app.models import TournamentPlayer, AccessLevel
 
-def _create_group(client, name="Table Group", description="for tournament test"):
-    res = client.post("/api/groups", json={"name": name, "description": description})
+
+# ---------- ヘルパー関数群 ----------
+
+def _create_group(client, name="Tournament Group"):
+    res = client.post("/api/groups", json={"name": name})
     assert res.status_code == 201
     data = res.get_json()
-    links = {link["access_level"]: link["short_key"] for link in data["share_links"]}
+    links = {l["access_level"]: l["short_key"] for l in data["group_links"]}
     return data, links
 
 
-def _create_tournament(client, group_id, short_key, name="Table Tournament"):
+def _create_tournament(client, group_key, name="Main Tournament"):
     res = client.post(
-        f"/api/tournaments?short_key={short_key}",
-        json={"group_id": group_id, "name": name},
+        f"/api/groups/{group_key}/tournaments",
+        json={"name": name},
     )
     assert res.status_code == 201
     data = res.get_json()
-    links = {link["access_level"]: link["short_key"] for link in data["share_links"]}
+    links = {l["access_level"]: l["short_key"] for l in data["tournament_links"]}
     return data, links
 
 
-def _create_player(client, short_key, group_id, name="Alice"):
+def _create_player(client, group_key, name="Alice"):
     res = client.post(
-        f"/api/players?short_key={short_key}",
-        json={"group_id": group_id, "name": name},
+        f"/api/groups/{group_key}/players",
+        json={"name": name},
     )
     assert res.status_code == 201
     return res.get_json()
@@ -32,110 +34,102 @@ def _create_player(client, short_key, group_id, name="Alice"):
 
 @pytest.fixture
 def setup_group_with_tournament(client):
-    """グループ・大会・プレイヤー・共有リンクをセットアップ"""
-    group, group_keys = _create_group(client)
-    group_link_edit = group_keys["EDIT"]
+    """グループ・大会・プレイヤーを作成"""
+    group, group_links = _create_group(client)
+    g_edit_key = group_links[AccessLevel.EDIT.value]
 
     # Tournament作成
-    tournament, tournament_keys = _create_tournament(client, group_id=group["id"], short_key=group_link_edit)
-    tournament_link_edit = tournament_keys["EDIT"]
+    tournament, tournament_links = _create_tournament(client, g_edit_key)
+    t_edit_key = tournament_links[AccessLevel.EDIT.value]
 
-    # プレイヤーを3人API経由で登録
+    # プレイヤー3名登録
     players = [
-        _create_player(client, group_link_edit, group["id"], "Alice"),
-        _create_player(client, group_link_edit, group["id"], "Bob"),
-        _create_player(client, group_link_edit, group["id"], "Charlie"),
+        _create_player(client, g_edit_key, "Alice"),
+        _create_player(client, g_edit_key, "Bob"),
+        _create_player(client, g_edit_key, "Charlie"),
     ]
 
     return {
         "group": group,
         "tournament": tournament,
         "players": players,
-        "link": group_link_edit,
+        "group_key": g_edit_key,
+        "tournament_key": t_edit_key,
     }
 
 
-def test_create_tournament_participant(client, setup_group_with_tournament, db_session):
-    """POST /api/tournaments/<id>/participants — プレイヤー登録"""
-    data = setup_group_with_tournament
-    tournament = data["tournament"]
-    players = data["players"]
-    link = data["link"]
+# ---------- テストケース ----------
 
-    url = f"/api/tournaments/{tournament['id']}/participants?short_key={link}"
-    res = client.post(url, json={"player_id": players[0]["id"]})
+def test_create_tournament_participant(client, setup_group_with_tournament, db_session):
+    """POST /api/tournaments/<tournament_key>/participants — プレイヤー登録"""
+    d = setup_group_with_tournament
+    url = f"/api/tournaments/{d['tournament_key']}/participants"
+
+    res = client.post(url, json={"player_id": d["players"][0]["id"]})
     assert res.status_code == 201
 
-    # ✅ db_sessionで登録確認
     created = db_session.query(TournamentPlayer).filter_by(
-        tournament_id=tournament["id"],
-        player_id=players[0]["id"]
+        tournament_id=d["tournament"]["id"],
+        player_id=d["players"][0]["id"]
     ).first()
     assert created is not None
 
 
 def test_list_tournament_participants(client, setup_group_with_tournament, db_session):
-    """GET /api/tournaments/<id>/participants — 参加者一覧取得"""
-    data = setup_group_with_tournament
-    tournament = data["tournament"]
-    players = data["players"]
-    link = data["link"]
-
-    # 1人登録
-    participant = TournamentPlayer(tournament_id=tournament["id"], player_id=players[0]["id"])
+    """GET /api/tournaments/<tournament_key>/participants — 参加者一覧取得"""
+    d = setup_group_with_tournament
+    participant = TournamentPlayer(
+        tournament_id=d["tournament"]["id"],
+        player_id=d["players"][0]["id"]
+    )
     db_session.add(participant)
     db_session.commit()
 
-    url = f"/api/tournaments/{tournament['id']}/participants?short_key={link}"
+    url = f"/api/tournaments/{d['tournament_key']}/participants"
     res = client.get(url)
     assert res.status_code == 200
 
     result = res.get_json()
     assert isinstance(result, list)
-    assert any(p["player_id"] == players[0]["id"] for p in result)
+    assert any(p["player_id"] == d["players"][0]["id"] for p in result)
 
 
 def test_delete_tournament_participant(client, setup_group_with_tournament, db_session):
-    """DELETE /api/tournaments/<id>/participants/<participant_id> — 削除"""
-    data = setup_group_with_tournament
-    tournament = data["tournament"]
-    players = data["players"]
-    link = data["link"]
+    """DELETE /api/tournaments/<tournament_key>/participants/<participant_id> — 削除"""
+    d = setup_group_with_tournament
+    url = f"/api/tournaments/{d['tournament_key']}/participants"
 
-    # 参加登録（db_session経由）
-    participant = TournamentPlayer(tournament_id=tournament["id"], player_id=players[0]["id"])
-    db_session.add(participant)
-    db_session.commit()
-
-    url = f"/api/tournaments/{tournament['id']}/participants/{participant.id}?short_key={link}"
+    res = client.post(url, json={"player_id": d["players"][0]["id"]})
+    assert res.status_code == 201
+    participant = res.get_json()
+    url = f"/api/tournaments/{d['tournament_key']}/participants/{participant['id']}"
     res = client.delete(url)
     assert res.status_code == 200
     assert res.get_json()["message"] == "Tournament participant deleted"
 
-    deleted = db_session.get(TournamentPlayer, participant.id)
+    deleted = db_session.get(TournamentPlayer, participant["id"])
     assert deleted is None
 
 
-def test_create_with_invalid_link(client, setup_group_with_tournament):
-    """無効な short_key の場合 404"""
-    tournament = setup_group_with_tournament["tournament"]
-    player = setup_group_with_tournament["players"][0]
-    url = f"/api/tournaments/{tournament['id']}/participants?short_key=invalid-key"
+def test_create_with_invalid_key(client, setup_group_with_tournament):
+    """無効な tournament_key の場合 404"""
+    d = setup_group_with_tournament
+    player = d["players"][0]
+    url = f"/api/tournaments/invalid-key/participants"
     res = client.post(url, json={"player_id": player["id"]})
     assert res.status_code == 404
 
 
 def test_create_duplicate_participant(client, setup_group_with_tournament, db_session):
     """重複登録は400"""
-    data = setup_group_with_tournament
-    tournament = data["tournament"]
-    player = data["players"][0]
-    link = data["link"]
-
-    participant = TournamentPlayer(tournament_id=tournament["id"], player_id=player["id"])
+    d = setup_group_with_tournament
+    p = d["players"][0]
+    participant = TournamentPlayer(
+        tournament_id=d["tournament"]["id"], player_id=p["id"]
+    )
     db_session.add(participant)
     db_session.commit()
 
-    url = f"/api/tournaments/{tournament['id']}/participants?short_key={link}"
-    res = client.post(url, json={"player_id": player["id"]})
+    url = f"/api/tournaments/{d['tournament_key']}/participants"
+    res = client.post(url, json={"player_id": p["id"]})
     assert res.status_code == 400

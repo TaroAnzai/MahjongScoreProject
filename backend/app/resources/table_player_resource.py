@@ -54,16 +54,16 @@ class TablePlayerListResource(MethodView):
 # =========================================================
 # 卓参加者削除
 # =========================================================
-@table_player_bp.route("/players/<string:table_player_key>")
+@table_player_bp.route("/<string:table_key>/players/<int:player_id>")
 class TablePlayerResource(MethodView):
     """DELETE: 卓参加者削除"""
 
     @table_player_bp.response(200, MessageSchema)
     @with_common_error_responses(table_player_bp)
-    def delete(self, table_player_key):
+    def delete(self, table_key, player_id):
         """卓参加者共有キーから削除"""
         try:
-            delete_table_player(table_player_key)
+            delete_table_player(table_key, player_id)
             return {"message": "Table player deleted"}
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)

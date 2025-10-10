@@ -112,7 +112,7 @@ def update_table(short_key: str, data: dict) -> Table:
 def delete_table(short_key: str) -> None:
     """卓共有キーから卓を削除"""
     link, table = _require_table(short_key)
-    _ensure_access(link, AccessLevel.OWNER, "卓を削除する権限がありません。")
+    _ensure_access(link, AccessLevel.EDIT, "卓を削除する権限がありません。")
 
     db.session.delete(table)
     db.session.commit()

@@ -1,29 +1,29 @@
 import pytest
-
 from app.models import AccessLevel, Table
 
 
 def _create_group(client):
-    response = client.post("/api/groups", json={"name": "Table Group"})
-    data = response.get_json()
-    links = {link["access_level"]: link["short_key"] for link in data["share_links"]}
+    res = client.post("/api/groups", json={"name": "Table Group"})
+    data = res.get_json()
+    links = {l["access_level"]: l["short_key"] for l in data["group_links"]}
     return data, links
 
 
-def _create_tournament(client, group_id, short_key):
-    response = client.post(
-        f"/api/tournaments?short_key={short_key}",
-        json={"group_id": group_id, "name": "Table Tournament"},
+def _create_tournament(client, group_key, name="Table Tournament"):
+    res = client.post(
+        f"/api/groups/{group_key}/tournaments",
+        json={"name": name},
     )
-    data = response.get_json()
-    links = {link["access_level"]: link["short_key"] for link in data["share_links"]}
+    data = res.get_json()
+    links = {l["access_level"]: l["short_key"] for l in data["tournament_links"]}
     return data, links
 
 
-def _create_table(client, short_key, tournament_id, name="Primary Table"):
+def _create_table(client, tournament_key, name="Primary Table"):
+    """新仕様：大会キーをURLに含めて作成"""
     return client.post(
-        f"/api/tables?short_key={short_key}",
-        json={"tournament_id": tournament_id, "name": name},
+        f"/api/tournaments/{tournament_key}/tables",
+        json={"name": name},
     )
 
 
@@ -32,66 +32,58 @@ class TestTableEndpoints:
     def test_create_table_requires_tournament_edit(self, client, db_session):
         group_data, group_links = _create_group(client)
         tournament_data, tournament_links = _create_tournament(
-            client, group_data["id"], group_links[AccessLevel.EDIT.value]
+            client, group_links[AccessLevel.EDIT.value]
         )
 
-        res = _create_table(
-            client, tournament_links[AccessLevel.EDIT.value], tournament_data["id"]
-        )
+        res = _create_table(client, tournament_links[AccessLevel.EDIT.value])
         assert res.status_code == 201
         table = res.get_json()
-        levels = {link["access_level"] for link in table["share_links"]}
+
+        # ✅ table_links に変更
+        levels = {l["access_level"] for l in table["table_links"]}
         assert levels == {AccessLevel.EDIT.value, AccessLevel.VIEW.value}
 
     def test_create_table_with_view_link_forbidden(self, client, db_session):
         group_data, group_links = _create_group(client)
         tournament_data, tournament_links = _create_tournament(
-            client, group_data["id"], group_links[AccessLevel.EDIT.value]
+            client, group_links[AccessLevel.EDIT.value]
         )
 
-        res = _create_table(
-            client, tournament_links[AccessLevel.VIEW.value], tournament_data["id"]
-        )
+        res = _create_table(client, tournament_links[AccessLevel.VIEW.value])
         assert res.status_code == 403
 
     def test_get_table_requires_view(self, client, db_session):
         group_data, group_links = _create_group(client)
         tournament_data, tournament_links = _create_tournament(
-            client, group_data["id"], group_links[AccessLevel.EDIT.value]
+            client, group_links[AccessLevel.EDIT.value]
         )
-        table_response = _create_table(
-            client, tournament_links[AccessLevel.EDIT.value], tournament_data["id"]
-        )
-        table = table_response.get_json()
-        table_links = {link["access_level"]: link["short_key"] for link in table["share_links"]}
+        table_res = _create_table(client, tournament_links[AccessLevel.EDIT.value])
+        table = table_res.get_json()
+        table_links = {l["access_level"]: l["short_key"] for l in table["table_links"]}
 
-        ok = client.get(f"/api/tables/{table['id']}?short_key={table_links[AccessLevel.VIEW.value]}")
+        ok = client.get(f"/api/tables/{table_links[AccessLevel.VIEW.value]}")
         assert ok.status_code == 200
 
-        forbidden = client.get(
-            f"/api/tables/{table['id']}?short_key={tournament_links[AccessLevel.VIEW.value]}"
-        )
+        forbidden = client.get(f"/api/tables/{tournament_links[AccessLevel.VIEW.value]}")
         assert forbidden.status_code == 403
 
     def test_update_table_requires_edit(self, client, db_session):
         group_data, group_links = _create_group(client)
         tournament_data, tournament_links = _create_tournament(
-            client, group_data["id"], group_links[AccessLevel.EDIT.value]
+            client, group_links[AccessLevel.EDIT.value]
         )
-        table_response = _create_table(
-            client, tournament_links[AccessLevel.EDIT.value], tournament_data["id"]
-        )
-        table = table_response.get_json()
-        table_links = {link["access_level"]: link["short_key"] for link in table["share_links"]}
+        table_res = _create_table(client, tournament_links[AccessLevel.EDIT.value])
+        table = table_res.get_json()
+        table_links = {l["access_level"]: l["short_key"] for l in table["table_links"]}
 
         forbidden = client.put(
-            f"/api/tables/{table['id']}?short_key={table_links[AccessLevel.VIEW.value]}",
+            f"/api/tables/{table_links[AccessLevel.VIEW.value]}",
             json={"name": "Forbidden"},
         )
         assert forbidden.status_code == 403
 
         allowed = client.put(
-            f"/api/tables/{table['id']}?short_key={table_links[AccessLevel.EDIT.value]}",
+            f"/api/tables/{table_links[AccessLevel.EDIT.value]}",
             json={"name": "Updated Table"},
         )
         assert allowed.status_code == 200
@@ -101,21 +93,16 @@ class TestTableEndpoints:
     def test_delete_table_requires_tournament_edit(self, client, db_session):
         group_data, group_links = _create_group(client)
         tournament_data, tournament_links = _create_tournament(
-            client, group_data["id"], group_links[AccessLevel.EDIT.value]
+            client, group_links[AccessLevel.EDIT.value]
         )
-        table_response = _create_table(
-            client, tournament_links[AccessLevel.EDIT.value], tournament_data["id"]
-        )
-        table_id = table_response.get_json()["id"]
+        table_res = _create_table(client, tournament_links[AccessLevel.EDIT.value])
+        table = table_res.get_json()
+        table_links = {l["access_level"]: l["short_key"] for l in table["table_links"]}
 
-        forbidden = client.delete(
-            f"/api/tables/{table_id}?short_key={tournament_links[AccessLevel.VIEW.value]}"
-        )
+        forbidden = client.delete(f"/api/tables/{table_links[AccessLevel.VIEW.value]}")
         assert forbidden.status_code == 403
 
-        allowed = client.delete(
-            f"/api/tables/{table_id}?short_key={tournament_links[AccessLevel.EDIT.value]}"
-        )
+        allowed = client.delete(f"/api/tables/{table_links[AccessLevel.EDIT.value]}")
         assert allowed.status_code == 200
         assert allowed.get_json()["message"] == "Table deleted"
-        assert db_session.get(Table, table_id) is None
+        assert db_session.get(Table, table["id"]) is None
