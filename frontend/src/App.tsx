@@ -27,9 +27,9 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<WelcomePage />} />
-      <Route path="/group/:groupKey" element={<GroupPage />} />
+      {/* <Route path="/group/:groupKey" element={<GroupPage />} />
       <Route path="/table/:tableKey" element={<TablePage />} />
-      <Route path="/tournament/:tournamentKey" element={<TournamentPage />} />
+      <Route path="/tournament/:tournamentKey" element={<TournamentPage />} /> */}
       {/* 404対策 */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

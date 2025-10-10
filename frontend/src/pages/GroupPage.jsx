@@ -3,16 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 // API
-import { getGroupByKey, updateGroup } from '../api/group_api';
-import { getPlayersByGroup, createPlayer, deletePlayer } from '../api/player_api';
-import { getTournamentsByGroup, createTournament } from '../api/tournament_api';
 
 // コンポーネント
 import PageTitleBar from '../components/PageTitleBar';
 import ButtonGridSection from '../components/ButtonGridSection';
 import SelectorModal from '../components/SelectorModal';
-
-
 
 function GroupPage() {
   const { groupKey } = useParams();
@@ -66,66 +61,66 @@ function GroupPage() {
       alert(res?.message || '削除に失敗しました');
     }
   };
-const handleCreateTournament = async () => {
-  const name = prompt('大会名を入力してください');
-  if (!name) return;
+  const handleCreateTournament = async () => {
+    const name = prompt('大会名を入力してください');
+    if (!name) return;
 
-  const tournament = await createTournament({ name, group_id: group.id });
-  if (!tournament) {
-    alert('作成に失敗しました');
-    return;
-  }
-  navigate(`/tournament/${tournament.tournament_key}?edit=${tournament.edit_key}`);
-};
-
-const handleSelectTournament = async () => {
-  const tournaments = await getTournamentsByGroup(group.id);
-  console.log("tournaments",tournaments);
-  if (!tournaments || tournaments.length === 0) {
-    alert('大会が存在しません');
-    return;
-  }
-  // 日付フォーマット変換
-  const formattedTournaments = tournaments.map(t => ({
-    ...t,
-    started_at_date: t.started_at ? new Date(t.started_at).toLocaleDateString('ja-JP') :null
+    const tournament = await createTournament({ name, group_id: group.id });
+    if (!tournament) {
+      alert('作成に失敗しました');
+      return;
     }
-  ));
+    navigate(`/tournament/${tournament.tournament_key}?edit=${tournament.edit_key}`);
+  };
 
-  // モーダルで選択肢を表示
-  setTournamentOptions(formattedTournaments);
-  setShowTournamentModal(true);
-};
+  const handleSelectTournament = async () => {
+    const tournaments = await getTournamentsByGroup(group.id);
+    console.log('tournaments', tournaments);
+    if (!tournaments || tournaments.length === 0) {
+      alert('大会が存在しません');
+      return;
+    }
+    // 日付フォーマット変換
+    const formattedTournaments = tournaments.map((t) => ({
+      ...t,
+      started_at_date: t.started_at ? new Date(t.started_at).toLocaleDateString('ja-JP') : null,
+    }));
 
-const handleTitleChange = async (newTitle) => {
-  const res = await updateGroup(group.id, { name: newTitle });
-  if (res?.success !== false) {
-    setGroup({ ...group, name: newTitle });
-  } else {
-    alert('更新に失敗しました');
-  }
-};
+    // モーダルで選択肢を表示
+    setTournamentOptions(formattedTournaments);
+    setShowTournamentModal(true);
+  };
 
-const handleAddGroup = () => {
-  if (!groupKey) return;
-  const editKey = new URLSearchParams(window.location.search).get('edit');
-  if (!editKey) return;
-  const confirmed = window.confirm(
-    `登録グループに${group.name} を追加してよいですか？\n
+  const handleTitleChange = async (newTitle) => {
+    const res = await updateGroup(group.id, { name: newTitle });
+    if (res?.success !== false) {
+      setGroup({ ...group, name: newTitle });
+    } else {
+      alert('更新に失敗しました');
+    }
+  };
+
+  const handleAddGroup = () => {
+    if (!groupKey) return;
+    const editKey = new URLSearchParams(window.location.search).get('edit');
+    if (!editKey) return;
+    const confirmed = window.confirm(
+      `登録グループに${group.name} を追加してよいですか？\n
     ブラウザに登録されます。
     機種変更やブラウザ変更した場合は、引き継がれません。引継ぎしたい場合はURLを保存しておいてください。`
-  );
-  localStorage.setItem(`group_edit_${groupKey}`, editKey);
-  navigate('/');
-};
-const handleRemoveGroup = () => {
-  if (!groupKey) return;
-  const confirmed = window.confirm(`登録グループから${group.name} を削除してよいですか？\n(グループデータ自体は削除されません。)`);
-  if (!confirmed) return;
-  localStorage.removeItem(`group_edit_${groupKey}`);
-  navigate(`/`);
-};
-
+    );
+    localStorage.setItem(`group_edit_${groupKey}`, editKey);
+    navigate('/');
+  };
+  const handleRemoveGroup = () => {
+    if (!groupKey) return;
+    const confirmed = window.confirm(
+      `登録グループから${group.name} を削除してよいですか？\n(グループデータ自体は削除されません。)`
+    );
+    if (!confirmed) return;
+    localStorage.removeItem(`group_edit_${groupKey}`);
+    navigate(`/`);
+  };
 
   if (!group) return <div className="mahjong-container">読み込み中...</div>;
 
@@ -157,7 +152,6 @@ const handleRemoveGroup = () => {
         <button className="mahjong-button" onClick={handleRemoveGroup}>
           グループを削除
         </button>
-        
       </ButtonGridSection>
 
       <div className="mahjong-section">

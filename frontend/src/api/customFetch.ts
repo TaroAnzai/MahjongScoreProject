@@ -1,47 +1,57 @@
-// src/api/customFetch.ts
+/**
+ * customFetch.ts
+ * Orvalのmutator用fetchラッパー
+ */
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // ← .envから読み込む
+
+interface CustomFetchConfig {
+  url: string;
+  method: string;
+  data?: any;
+  params?: Record<string, string | number>;
+  headers?: Record<string, string>;
+  signal?: AbortSignal;
+}
+
+/**
+ * Orvalが自動生成したfetch呼び出しを共通化
+ */
 export const customFetch = async <T>(
-  config: {
-    url: string;
-    method: string;
-    body?: any;
-    data?: any;
-    params?: Record<string, string | number | boolean | undefined>;
-    headers?: Record<string, string>;
-    signal?: AbortSignal;
-  },
+  config: CustomFetchConfig,
   options?: RequestInit
 ): Promise<T> => {
-  const { url, method, body, data, params, headers, signal } = config;
+  // ✅ ベースURLを組み込む
+  const fullUrl = `${API_BASE_URL}${config.url}`;
 
-  // クエリ文字列を構築
-  const queryString = params
-    ? '?' +
-      Object.entries(params)
-        .filter(([, v]) => v !== undefined)
-        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
-        .join('&')
-    : '';
+  // クエリパラメータ処理
+  let urlWithParams = fullUrl;
+  if (config.params) {
+    const query = new URLSearchParams(
+      Object.entries(config.params).map(([k, v]) => [k, String(v)])
+    );
+    urlWithParams += `?${query}`;
+  }
 
-  const response = await fetch(url + queryString, {
-    method,
+  const response = await fetch(urlWithParams, {
+    method: config.method,
     headers: {
       'Content-Type': 'application/json',
-      ...(headers || {}),
-      ...(options?.headers || {}),
+      ...(config.headers || {}),
     },
-    body: body
-      ? JSON.stringify(body)
-      : data
-      ? JSON.stringify(data)
-      : undefined,
-    signal,
-    credentials: 'include',
+    body: config.data && config.method !== 'GET' ? JSON.stringify(config.data) : undefined,
+    signal: config.signal,
     ...options,
   });
 
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+    console.error(`[customFetch] ${response.status} ${response.statusText}`);
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
+  // JSON以外のレスポンスにも対応
+  const contentType = response.headers.get('content-type');
+  if (contentType?.includes('application/json')) {
+    return (await response.json()) as T;
+  }
+  return (await response.text()) as T;
 };

@@ -2,18 +2,22 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "bundler", 
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowJs": true,     // ← これが重要
-    "outDir": "dist",          // ← 出力先を分離
-    "noEmit": true,             // ← Vite/Reactなら基本はこれを付ける
+    "allowJs": true, // ← これが重要
+    "outDir": "dist", // ← 出力先を分離
+    "noEmit": true, // ← Vite/Reactなら基本はこれを付ける
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "types": ["vite/client"],
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force"
   },
   "include": ["src"]
 }

@@ -1,7 +1,5 @@
 // src/utils/getScoresByTournament.jsx
-import { getTablesByTournament } from '../api/table_api';
-import { getTableGames } from '../api/game_api';
-import { getPlayerTotalScores } from '../api/tournament_api';
+
 /**
  * トーナメントに紐づく各テーブルのスコアを集計し、
  * getPlayerTotalScores で取得した合計点/換算点を合成して返す
