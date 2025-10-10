@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from app import db
 from app.models import AccessLevel, Group, Tournament
 from app.service_errors import (
@@ -14,97 +15,99 @@ _ACCESS_PRIORITY = {
 }
 
 
-def _require_link(short_key: str, expected_resource: str):
+# =========================================================
+# 内部共通関数
+# =========================================================
+def _require_tournament(short_key: str):
+    """共有キーから大会を特定"""
     link = get_share_link_by_key(short_key)
     if not link:
         raise ServiceNotFoundError("共有リンクが無効です。")
-    if link.resource_type != expected_resource:
+    if link.resource_type != "tournament":
         raise ServicePermissionError("共有リンクの対象が一致しません。")
-    return link
+
+    tournament = Tournament.query.get(link.resource_id)
+    if not tournament:
+        raise ServiceNotFoundError("大会が見つかりません。")
+
+    return link, tournament
 
 
-def _require_resource(model, resource_id: int, not_found_message: str):
-    resource = model.query.get(resource_id)
-    if not resource:
-        raise ServiceNotFoundError(not_found_message)
-    return resource
+def _require_group(short_key: str):
+    """共有キーからグループを特定"""
+    link = get_share_link_by_key(short_key)
+    if not link:
+        raise ServiceNotFoundError("共有リンクが無効です。")
+    if link.resource_type != "group":
+        raise ServicePermissionError("共有リンクの対象が一致しません。")
+
+    group = Group.query.get(link.resource_id)
+    if not group:
+        raise ServiceNotFoundError("グループが見つかりません。")
+    return link, group
 
 
-def _ensure_access(link_access: AccessLevel, required: AccessLevel, message: str):
-    if _ACCESS_PRIORITY[link_access] < _ACCESS_PRIORITY[required]:
+def _ensure_access(link, required: AccessLevel, message: str):
+    """アクセスレベルチェック"""
+    if _ACCESS_PRIORITY[link.access_level] < _ACCESS_PRIORITY[required]:
         raise ServicePermissionError(message)
 
 
-class TournamentService:
-    @staticmethod
-    def list_by_group_short_key(short_key: str):
-        link = _require_link(short_key, "group")
-        group = _require_resource(Group, link.resource_id, "グループが見つかりません。")
-        _ensure_access(link.access_level, AccessLevel.VIEW, "大会を閲覧する権限がありません。")
-        return Tournament.query.filter_by(group_id=group.id).all()
+# =========================================================
+# サービス関数群
+# =========================================================
+def create_tournament(data: dict, group_key: str) -> Tournament:
+    """グループ共有キーから大会を作成"""
+    link, group = _require_group(group_key)
+    _ensure_access(link, AccessLevel.EDIT, "大会を作成する権限がありません。")
 
-    @staticmethod
-    def create_tournament(data: dict, short_key: str) -> Tournament:
-        group_id = data.get("group_id")
-        name = data.get("name")
-        if not group_id or not name:
-            raise ServiceValidationError("group_id と name は必須です。")
+    name = data.get("name")
+    if not name:
+        raise ServiceValidationError("大会名は必須です。")
 
-        link = _require_link(short_key, "group")
-        group = _require_resource(Group, group_id, "グループが見つかりません。")
-        if link.resource_id != group.id:
-            raise ServicePermissionError("共有リンクの対象グループが一致しません。")
-        _ensure_access(link.access_level, AccessLevel.EDIT, "大会を作成する権限がありません。")
+    tournament = Tournament(
+        group_id=group.id,
+        name=name,
+        description=data.get("description"),
+        rate=data.get("rate"),
+        created_by=group.created_by,
+        created_at=datetime.now(timezone.utc),
+    )
 
-        tournament = Tournament(
-            group_id=group.id,
-            name=name,
-            description=data.get("description"),
-            rate=data.get("rate"),
-            created_by=group.created_by,
-        )
-        db.session.add(tournament)
-        db.session.flush()
-        create_default_share_links("tournament", tournament.id, tournament.created_by)
-        db.session.refresh(tournament)
-        return tournament
+    db.session.add(tournament)
+    db.session.flush()
+    create_default_share_links("tournament", tournament.id, tournament.created_by)
+    db.session.refresh(tournament)
+    return tournament
 
-    @staticmethod
-    def get_tournament(tournament_id: int, short_key: str) -> Tournament:
-        link = _require_link(short_key, "tournament")
-        _ensure_access(link.access_level, AccessLevel.VIEW, "大会を閲覧する権限がありません。")
-        if link.resource_id != tournament_id:
-            raise ServicePermissionError("共有リンクがこの大会を指していません。")
-        tournament = _require_resource(Tournament, tournament_id, "大会が見つかりません。")
-        return tournament
 
-    @staticmethod
-    def update_tournament(tournament_id: int, data: dict, short_key: str) -> Tournament:
-        link = _require_link(short_key, "tournament")
-        _ensure_access(link.access_level, AccessLevel.EDIT, "大会を更新する権限がありません。")
-        if link.resource_id != tournament_id:
-            raise ServicePermissionError("共有リンクがこの大会を指していません。")
+def get_tournament_by_key(short_key: str) -> Tournament:
+    """大会共有キーから大会取得"""
+    _, tournament = _require_tournament(short_key)
+    return tournament
 
-        tournament = _require_resource(Tournament, tournament_id, "大会が見つかりません。")
 
-        if "name" in data:
-            tournament.name = data["name"]
-        if "description" in data:
-            tournament.description = data["description"]
-        if "rate" in data:
-            tournament.rate = data["rate"]
+def update_tournament(short_key: str, data: dict) -> Tournament:
+    """大会共有キーから大会更新"""
+    link, tournament = _require_tournament(short_key)
+    _ensure_access(link, AccessLevel.EDIT, "大会を更新する権限がありません。")
 
-        db.session.commit()
-        db.session.refresh(tournament)
-        return tournament
+    if "name" in data:
+        tournament.name = data["name"]
+    if "description" in data:
+        tournament.description = data["description"]
+    if "rate" in data:
+        tournament.rate = data["rate"]
 
-    @staticmethod
-    def delete_tournament(tournament_id: int, short_key: str) -> None:
-        tournament = _require_resource(Tournament, tournament_id, "大会が見つかりません。")
-        link = _require_link(short_key, "group")
-        if link.resource_id != tournament.group_id:
-            raise ServicePermissionError("共有リンクの対象グループが一致しません。")
-        _ensure_access(link.access_level, AccessLevel.EDIT, "大会を削除する権限がありません。")
+    db.session.commit()
+    db.session.refresh(tournament)
+    return tournament
 
-        db.session.delete(tournament)
-        db.session.commit()
+
+def delete_tournament(short_key: str) -> None:
+    """大会共有キーから大会削除"""
+    link, tournament = _require_tournament(short_key)
+    _ensure_access(link, AccessLevel.OWNER, "大会を削除する権限がありません。")
+
+    db.session.delete(tournament)
+    db.session.commit()

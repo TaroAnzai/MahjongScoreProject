@@ -1,30 +1,32 @@
 from marshmallow import Schema, fields
-
 from app.schemas.common_schemas import ShareLinkSchema
 
 
 class TableCreateSchema(Schema):
-    tournament_id = fields.Int(required=True)
-    name = fields.Str(required=True)
-    type = fields.Str(load_default="normal")
+    """卓作成リクエスト"""
+    name = fields.Str(required=True, description="卓名")
+    type = fields.Str(load_default="normal", description="卓タイプ(normal/chip)")
 
 
 class TableUpdateSchema(Schema):
-    name = fields.Str()
-    type = fields.Str()
-
-
-class TableQuerySchema(Schema):
-    short_key = fields.Str(required=True, metadata={"location": "query"})
+    """卓更新リクエスト"""
+    name = fields.Str(description="卓名")
+    type = fields.Str(description="卓タイプ")
 
 
 class TableSchema(Schema):
+    """卓レスポンス"""
     id = fields.Int(dump_only=True)
     tournament_id = fields.Int(required=True)
     name = fields.Str(required=True)
     type = fields.Str()
     created_by = fields.Str(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
-    share_links = fields.List(
-        fields.Nested(ShareLinkSchema), dump_only=True, dump_default=[]
+
+    # ✅ share_links → table_links に変更
+    table_links = fields.List(
+        fields.Nested(ShareLinkSchema),
+        dump_only=True,
+        dump_default=[],
+        description="卓に紐づく共有リンク一覧",
     )

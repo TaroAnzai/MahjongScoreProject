@@ -16,12 +16,17 @@ _ACCESS_PRIORITY = {
 }
 
 
+# =========================================================
+# 内部ユーティリティ
+# =========================================================
 def _require_group(short_key: str):
+    """共有リンクからGroupを特定"""
     link = get_share_link_by_key(short_key)
     if not link:
         raise ServiceNotFoundError("共有リンクが無効です。")
     if link.resource_type != "group":
         raise ServicePermissionError("共有リンクの対象が一致しません。")
+
     group = Group.query.get(link.resource_id)
     if not group:
         raise ServiceNotFoundError("グループが見つかりません。")
@@ -29,12 +34,16 @@ def _require_group(short_key: str):
 
 
 def _ensure_access(link, group, required: AccessLevel, message: str):
+    """アクセスレベルチェック"""
     if link.resource_id != group.id:
         raise ServicePermissionError("共有リンクの対象が一致しません。")
     if _ACCESS_PRIORITY[link.access_level] < _ACCESS_PRIORITY[required]:
         raise ServicePermissionError(message)
 
 
+# =========================================================
+# グループ作成
+# =========================================================
 def create_group(data: dict) -> Group:
     name = data.get("name")
     if not name:
@@ -48,31 +57,29 @@ def create_group(data: dict) -> Group:
     )
     db.session.add(group)
     db.session.flush()
+
+    # デフォルト共有リンク作成
     create_default_share_links("group", group.id, group.created_by)
     db.session.refresh(group)
     return group
 
 
-def get_group_by_short_key(short_key: str) -> Group:
-    link = get_share_link_by_key(short_key)
-    if not link:
-        raise ServiceNotFoundError("共有リンクが無効です。")
-    if link.resource_type != "group":
-        raise ServicePermissionError("共有リンクの対象が一致しません。")
-
-    group = Group.query.get(link.resource_id)
-    if not group:
-        raise ServiceNotFoundError("グループが見つかりません。")
+# =========================================================
+# グループ取得
+# =========================================================
+def get_group_by_key(short_key: str) -> Group:
+    """共有リンクキーからグループを取得"""
+    _, group = _require_group(short_key)
     return group
 
 
-def update_group(group_id: int, data: dict, short_key: str) -> Group:
-    group = Group.query.get(group_id)
-    if not group:
-        raise ServiceNotFoundError("グループが見つかりません。")
-
-    link, linked_group = _require_group(short_key)
-    _ensure_access(link, linked_group, AccessLevel.OWNER, "グループの更新にはOWNER権限が必要です。")
+# =========================================================
+# グループ更新
+# =========================================================
+def update_group(short_key: str, data: dict) -> Group:
+    """共有リンクキーからGroupを特定して更新"""
+    link, group = _require_group(short_key)
+    _ensure_access(link, group, AccessLevel.OWNER, "グループの更新にはOWNER権限が必要です。")
 
     if "name" in data:
         group.name = data["name"]
@@ -85,13 +92,13 @@ def update_group(group_id: int, data: dict, short_key: str) -> Group:
     return group
 
 
-def delete_group(group_id: int, short_key: str) -> None:
-    group = Group.query.get(group_id)
-    if not group:
-        raise ServiceNotFoundError("グループが見つかりません。")
-
-    link, linked_group = _require_group(short_key)
-    _ensure_access(link, linked_group, AccessLevel.OWNER, "グループの削除にはOWNER権限が必要です。")
+# =========================================================
+# グループ削除
+# =========================================================
+def delete_group(short_key: str) -> None:
+    """共有リンクキーからGroupを特定して削除"""
+    link, group = _require_group(short_key)
+    _ensure_access(link, group, AccessLevel.OWNER, "グループの削除にはOWNER権限が必要です。")
 
     db.session.delete(group)
     db.session.commit()

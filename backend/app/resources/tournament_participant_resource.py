@@ -6,7 +6,6 @@ from app.decorators import with_common_error_responses
 from app.schemas.common_schemas import MessageSchema
 from app.schemas.tournament_participant_schema import (
     TournamentParticipantCreateSchema,
-    TournamentParticipantQuerySchema,
     TournamentParticipantSchema,
 )
 from app.service_errors import (
@@ -14,53 +13,60 @@ from app.service_errors import (
     ServicePermissionError,
     ServiceValidationError,
 )
-from app.services.tournament_participant_service import TournamentParticipantService
-
+from app.services.tournament_participant_service import (
+    list_participants_by_key,
+    create_participant,
+    delete_participant,
+)
 
 tournament_participant_bp = Blueprint(
-    "TournamentParticipants",
+    "tournament_participants",
     __name__,
-    url_prefix="/api/tournaments/<int:tournament_id>/participants",
-    description="Tournament participant operations",
+    url_prefix="/api/tournaments",
+    description="大会参加者管理API",
 )
 
 
-@tournament_participant_bp.route("")
+# =========================================================
+# 大会参加者作成・一覧
+# =========================================================
+@tournament_participant_bp.route("/<string:tournament_key>/participants")
 class TournamentParticipantListResource(MethodView):
-    @tournament_participant_bp.arguments(TournamentParticipantQuerySchema, location="query")
+    """GET: 大会参加者一覧 / POST: プレイヤー登録"""
+
     @tournament_participant_bp.response(200, TournamentParticipantSchema(many=True))
     @with_common_error_responses(tournament_participant_bp)
-    def get(self, query_args, tournament_id):
-        """大会の参加者一覧を取得"""
-        short_key = query_args["short_key"]
+    def get(self, tournament_key):
+        """大会共有キーから参加者一覧を取得"""
         try:
-            return TournamentParticipantService.list_by_tournament(short_key, tournament_id)
+            return list_participants_by_key(tournament_key)
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-    @tournament_participant_bp.arguments(TournamentParticipantQuerySchema, location="query")
     @tournament_participant_bp.arguments(TournamentParticipantCreateSchema)
     @tournament_participant_bp.response(201, TournamentParticipantSchema)
     @with_common_error_responses(tournament_participant_bp)
-    def post(self, query_args, new_data, tournament_id):
-        """大会にプレイヤーを登録"""
-        short_key = query_args["short_key"]
+    def post(self, new_data, tournament_key):
+        """大会共有キーからプレイヤーを登録"""
         try:
-            return TournamentParticipantService.create(short_key, tournament_id, new_data)
+            return create_participant(tournament_key, new_data)
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
 
-@tournament_participant_bp.route("/<int:participant_id>")
+# =========================================================
+# 大会参加者削除
+# =========================================================
+@tournament_participant_bp.route("/participants/<string:participant_key>")
 class TournamentParticipantResource(MethodView):
-    @tournament_participant_bp.arguments(TournamentParticipantQuerySchema, location="query")
+    """DELETE: 大会参加者削除"""
+
     @tournament_participant_bp.response(200, MessageSchema)
     @with_common_error_responses(tournament_participant_bp)
-    def delete(self, query_args, tournament_id, participant_id):
-        """大会参加者を削除"""
-        short_key = query_args["short_key"]
+    def delete(self, participant_key):
+        """参加者共有キーから削除"""
         try:
-            TournamentParticipantService.delete(short_key, tournament_id, participant_id)
+            delete_participant(participant_key)
             return {"message": "Tournament participant deleted"}
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)

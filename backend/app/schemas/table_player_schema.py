@@ -3,15 +3,10 @@
 from marshmallow import Schema, fields
 
 
-class TablePlayerQuerySchema(Schema):
-    """卓参加者共通クエリ（short_key 必須）"""
-    short_key = fields.Str(required=True, metadata={"location": "query"})
-
-
 class TablePlayerCreateSchema(Schema):
-    """卓への参加登録用"""
+    """卓への参加登録"""
     player_id = fields.Int(required=True, description="大会参加者ID")
-    seat_position = fields.Int(required=False, allow_none=True, description="卓での座席位置")
+    seat_position = fields.Int(allow_none=True, description="卓での座席位置")
 
 
 class TablePlayerSchema(Schema):

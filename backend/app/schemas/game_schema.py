@@ -1,26 +1,23 @@
 from marshmallow import Schema, fields
-
 from app.schemas.common_schemas import ShareLinkSchema
 
 
 class GameCreateSchema(Schema):
-    table_id = fields.Int(required=True)
-    game_index = fields.Int(required=True)
-    memo = fields.Str(allow_none=True)
-    played_at = fields.DateTime(allow_none=True)
+    """対局作成リクエスト"""
+    game_index = fields.Int(required=True, description="対局インデックス（半荘番号など）")
+    memo = fields.Str(allow_none=True, description="メモ")
+    played_at = fields.DateTime(allow_none=True, description="対局日時")
 
 
 class GameUpdateSchema(Schema):
-    game_index = fields.Int()
-    memo = fields.Str(allow_none=True)
-    played_at = fields.DateTime(allow_none=True)
-
-
-class GameQuerySchema(Schema):
-    short_key = fields.Str(required=True, metadata={"location": "query"})
+    """対局更新リクエスト"""
+    game_index = fields.Int(description="対局インデックス")
+    memo = fields.Str(allow_none=True, description="メモ")
+    played_at = fields.DateTime(allow_none=True, description="対局日時")
 
 
 class GameSchema(Schema):
+    """対局レスポンス"""
     id = fields.Int(dump_only=True)
     table_id = fields.Int(required=True)
     game_index = fields.Int(required=True)
@@ -28,6 +25,11 @@ class GameSchema(Schema):
     played_at = fields.DateTime(allow_none=True)
     created_by = fields.Str(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
-    share_links = fields.List(
-        fields.Nested(ShareLinkSchema), dump_only=True, dump_default=[]
+
+    # ✅ share_links → game_links に変更
+    game_links = fields.List(
+        fields.Nested(ShareLinkSchema),
+        dump_only=True,
+        dump_default=[],
+        description="対局に紐づく共有リンク一覧",
     )

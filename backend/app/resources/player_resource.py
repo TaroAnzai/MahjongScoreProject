@@ -1,85 +1,62 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
-
 from app.decorators import with_common_error_responses
 from app.schemas.common_schemas import MessageSchema
 from app.schemas.player_schema import (
-    PlayerCreateSchema,
-    PlayerQuerySchema,
-    PlayerSchema,
     PlayerUpdateSchema,
+    PlayerSchema,
 )
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
     ServiceValidationError,
 )
-from app.services.player_service import PlayerService
-
+from app.services.player_service import (
+    get_player_by_key,
+    update_player,
+    delete_player,
+)
 
 player_bp = Blueprint(
-    "Players",
+    "players",
     __name__,
     url_prefix="/api/players",
-    description="Player operations",
+    description="プレイヤー管理API",
 )
 
 
-@player_bp.route("")
-class PlayerListResource(MethodView):
-    @player_bp.arguments(PlayerQuerySchema, location="query")
-    @player_bp.response(200, PlayerSchema(many=True))
-    @with_common_error_responses(player_bp)
-    def get(self, query_args):
-        short_key = query_args["short_key"]
-        try:
-            return PlayerService.list_by_group_short_key(short_key)
-        except (ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+# =========================================================
+# プレイヤー単体操作
+# =========================================================
+@player_bp.route("/<string:player_key>")
+class PlayerByKeyResource(MethodView):
+    """GET / PUT / DELETE: プレイヤー単体操作"""
 
-    @player_bp.arguments(PlayerQuerySchema, location="query")
-    @player_bp.arguments(PlayerCreateSchema)
-    @player_bp.response(201, PlayerSchema)
-    @with_common_error_responses(player_bp)
-    def post(self, query_args, new_data):
-        short_key = query_args["short_key"]
-        print("DATA", short_key, new_data)
-        try:
-            return PlayerService.create_player(new_data, short_key)
-        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
-
-
-@player_bp.route("/<int:player_id>")
-class PlayerResource(MethodView):
-    @player_bp.arguments(PlayerQuerySchema, location="query")
     @player_bp.response(200, PlayerSchema)
     @with_common_error_responses(player_bp)
-    def get(self, query_args, player_id):
-        short_key = query_args["short_key"]
+    def get(self, player_key):
+        """プレイヤー詳細取得"""
         try:
-            return PlayerService.get_player(player_id, short_key)
+            return get_player_by_key(player_key)
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-    @player_bp.arguments(PlayerQuerySchema, location="query")
     @player_bp.arguments(PlayerUpdateSchema)
     @player_bp.response(200, PlayerSchema)
     @with_common_error_responses(player_bp)
-    def put(self, query_args, update_data, player_id):
-        short_key = query_args["short_key"]
+    def put(self, update_data, player_key):
+        """プレイヤー更新"""
         try:
-            return PlayerService.update_player(player_id, update_data, short_key)
+            return update_player(player_key, update_data)
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-    @player_bp.arguments(PlayerQuerySchema, location="query")
     @player_bp.response(200, MessageSchema)
     @with_common_error_responses(player_bp)
-    def delete(self, query_args, player_id):
-        short_key = query_args["short_key"]
+    def delete(self, player_key):
+        """プレイヤー削除"""
         try:
-            PlayerService.delete_player(player_id, short_key)
+            delete_player(player_key)
             return {"message": "Player deleted"}
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)

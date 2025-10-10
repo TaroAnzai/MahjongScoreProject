@@ -43,8 +43,8 @@ class Group(db.Model):
         "Player", back_populates="group", cascade="all, delete-orphan"
     )
 
-    # ✅ ShareLinkリレーション（Group固有）
-    share_links = db.relationship(
+    # ✅ ShareLinkリレーション（Group固有 → group_links に変更）
+    group_links = db.relationship(
         "ShareLink",
         primaryjoin="and_(ShareLink.resource_type=='group', "
                     "foreign(ShareLink.resource_id)==Group.id)",
@@ -75,8 +75,8 @@ class Tournament(db.Model):
         "Table", backref="tournament", lazy=True, cascade="all, delete-orphan"
     )
 
-    # ✅ ShareLinkリレーション（大会）
-    share_links = db.relationship(
+    # ✅ ShareLinkリレーション（大会 → tournament_links に変更）
+    tournament_links = db.relationship(
         "ShareLink",
         primaryjoin="and_(ShareLink.resource_type=='tournament', "
                     "foreign(ShareLink.resource_id)==Tournament.id)",
@@ -107,8 +107,8 @@ class Table(db.Model):
         "Game", backref="table", lazy=True, cascade="all, delete-orphan"
     )
 
-    # ✅ ShareLinkリレーション（卓）
-    share_links = db.relationship(
+    # ✅ ShareLinkリレーション（卓 → table_links に変更）
+    table_links = db.relationship(
         "ShareLink",
         primaryjoin="and_(ShareLink.resource_type=='table', "
                     "foreign(ShareLink.resource_id)==Table.id)",
@@ -177,8 +177,8 @@ class Game(db.Model):
         "Score", backref="game", lazy=True, cascade="all, delete-orphan"
     )
 
-    # ✅ ShareLinkリレーション（ゲーム）
-    share_links = db.relationship(
+    # ✅ ShareLinkリレーション（ゲーム → game_links に変更）
+    game_links = db.relationship(
         "ShareLink",
         primaryjoin="and_(ShareLink.resource_type=='game', "
                     "foreign(ShareLink.resource_id)==Game.id)",

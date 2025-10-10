@@ -4,81 +4,81 @@ from flask_smorest import Blueprint, abort
 from app.decorators import with_common_error_responses
 from app.schemas.common_schemas import MessageSchema
 from app.schemas.table_schema import (
-    TableCreateSchema,
-    TableQuerySchema,
-    TableSchema,
     TableUpdateSchema,
+    TableSchema,
 )
+from app.schemas.game_schema import GameSchema, GameCreateSchema
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
     ServiceValidationError,
 )
-from app.services.table_service import TableService
+from app.services.table_service import (
+    get_table_by_key,
+    update_table,
+    delete_table,
+)
+from app.services.game_service import create_game
 
-
+# ✅ Blueprint設定
 table_bp = Blueprint(
-    "Tables",
+    "tables",
     __name__,
     url_prefix="/api/tables",
-    description="Table operations",
+    description="卓管理API",
 )
 
 
-@table_bp.route("")
-class TableListResource(MethodView):
-    @table_bp.arguments(TableQuerySchema, location="query")
-    @table_bp.response(200, TableSchema(many=True))
-    @with_common_error_responses(table_bp)
-    def get(self, query_args):
-        short_key = query_args["short_key"]
-        try:
-            return TableService.list_by_tournament_short_key(short_key)
-        except (ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+# =========================================================
+# 卓単体操作
+# =========================================================
+@table_bp.route("/<string:table_key>")
+class TableByKeyResource(MethodView):
+    """GET / PUT / DELETE: 卓単体操作"""
 
-    @table_bp.arguments(TableQuerySchema, location="query")
-    @table_bp.arguments(TableCreateSchema)
-    @table_bp.response(201, TableSchema)
-    @with_common_error_responses(table_bp)
-    def post(self, query_args, new_data):
-        short_key = query_args["short_key"]
-        try:
-            return TableService.create_table(new_data, short_key)
-        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
-
-
-@table_bp.route("/<int:table_id>")
-class TableResource(MethodView):
-    @table_bp.arguments(TableQuerySchema, location="query")
     @table_bp.response(200, TableSchema)
     @with_common_error_responses(table_bp)
-    def get(self, query_args, table_id):
-        short_key = query_args["short_key"]
+    def get(self, table_key):
+        """卓詳細取得"""
         try:
-            return TableService.get_table(table_id, short_key)
+            return get_table_by_key(table_key)
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-    @table_bp.arguments(TableQuerySchema, location="query")
     @table_bp.arguments(TableUpdateSchema)
     @table_bp.response(200, TableSchema)
     @with_common_error_responses(table_bp)
-    def put(self, query_args, update_data, table_id):
-        short_key = query_args["short_key"]
+    def put(self, update_data, table_key):
+        """卓更新"""
         try:
-            return TableService.update_table(table_id, update_data, short_key)
+            return update_table(table_key, update_data)
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-    @table_bp.arguments(TableQuerySchema, location="query")
     @table_bp.response(200, MessageSchema)
     @with_common_error_responses(table_bp)
-    def delete(self, query_args, table_id):
-        short_key = query_args["short_key"]
+    def delete(self, table_key):
+        """卓削除"""
         try:
-            TableService.delete_table(table_id, short_key)
+            delete_table(table_key)
             return {"message": "Table deleted"}
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
+
+# =========================================================
+# 対局作成
+# =========================================================
+@table_bp.route("/<string:table_key>/games")
+class GameCreateResource(MethodView):
+    """POST: 指定卓内に対局を作成"""
+
+    @table_bp.arguments(GameCreateSchema)
+    @table_bp.response(201, GameSchema)
+    @with_common_error_responses(table_bp)
+    def post(self, new_data, table_key):
+        """卓共有キーから対局を作成"""
+        try:
+            return create_game(new_data, table_key)
+        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
+            abort(e.status_code, message=e.message)
+

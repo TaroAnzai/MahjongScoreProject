@@ -6,7 +6,7 @@ from app.models import AccessLevel, Game
 def _create_group(client):
     response = client.post("/api/groups", json={"name": "Game Group"})
     data = response.get_json()
-    links = {link["access_level"]: link["short_key"] for link in data["share_links"]}
+    links = {link["access_level"]: link["short_key"] for link in data["group_links"]}
     return data, links
 
 
@@ -16,7 +16,7 @@ def _create_tournament(client, group_id, short_key):
         json={"group_id": group_id, "name": "Game Tournament"},
     )
     data = response.get_json()
-    links = {link["access_level"]: link["short_key"] for link in data["share_links"]}
+    links = {link["access_level"]: link["short_key"] for link in data["group_links"]}
     return data, links
 
 

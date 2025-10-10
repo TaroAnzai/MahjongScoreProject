@@ -3,82 +3,61 @@ from flask_smorest import Blueprint, abort
 
 from app.decorators import with_common_error_responses
 from app.schemas.common_schemas import MessageSchema
-from app.schemas.game_schema import (
-    GameCreateSchema,
-    GameQuerySchema,
-    GameSchema,
-    GameUpdateSchema,
-)
+from app.schemas.game_schema import GameCreateSchema, GameUpdateSchema, GameSchema
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
     ServiceValidationError,
 )
-from app.services.game_service import GameService
+from app.services.game_service import (
+    create_game,
+    get_game_by_key,
+    update_game,
+    delete_game,
+)
 
-
+# ✅ Blueprint設定
 game_bp = Blueprint(
-    "Games",
+    "games",
     __name__,
     url_prefix="/api/games",
-    description="Game operations",
+    description="対局管理API",
 )
 
 
-@game_bp.route("")
-class GameListResource(MethodView):
-    @game_bp.arguments(GameQuerySchema, location="query")
-    @game_bp.response(200, GameSchema(many=True))
-    @with_common_error_responses(game_bp)
-    def get(self, query_args):
-        short_key = query_args["short_key"]
-        try:
-            return GameService.list_by_table_short_key(short_key)
-        except (ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
 
-    @game_bp.arguments(GameQuerySchema, location="query")
-    @game_bp.arguments(GameCreateSchema)
-    @game_bp.response(201, GameSchema)
-    @with_common_error_responses(game_bp)
-    def post(self, query_args, new_data):
-        short_key = query_args["short_key"]
-        try:
-            return GameService.create_game(new_data, short_key)
-        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+# =========================================================
+# 対局単体操作
+# =========================================================
+@game_bp.route("/<string:game_key>")
+class GameByKeyResource(MethodView):
+    """GET / PUT / DELETE: 対局単体操作"""
 
-
-@game_bp.route("/<int:game_id>")
-class GameResource(MethodView):
-    @game_bp.arguments(GameQuerySchema, location="query")
     @game_bp.response(200, GameSchema)
     @with_common_error_responses(game_bp)
-    def get(self, query_args, game_id):
-        short_key = query_args["short_key"]
+    def get(self, game_key):
+        """対局詳細取得"""
         try:
-            return GameService.get_game(game_id, short_key)
+            return get_game_by_key(game_key)
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-    @game_bp.arguments(GameQuerySchema, location="query")
     @game_bp.arguments(GameUpdateSchema)
     @game_bp.response(200, GameSchema)
     @with_common_error_responses(game_bp)
-    def put(self, query_args, update_data, game_id):
-        short_key = query_args["short_key"]
+    def put(self, update_data, game_key):
+        """対局更新"""
         try:
-            return GameService.update_game(game_id, update_data, short_key)
+            return update_game(game_key, update_data)
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-    @game_bp.arguments(GameQuerySchema, location="query")
     @game_bp.response(200, MessageSchema)
     @with_common_error_responses(game_bp)
-    def delete(self, query_args, game_id):
-        short_key = query_args["short_key"]
+    def delete(self, game_key):
+        """対局削除"""
         try:
-            GameService.delete_game(game_id, short_key)
+            delete_game(game_key)
             return {"message": "Game deleted"}
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)

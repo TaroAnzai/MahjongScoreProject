@@ -5,87 +5,83 @@ from app.decorators import with_common_error_responses
 from app.schemas.common_schemas import MessageSchema
 from app.schemas.tournament_schema import (
     TournamentCreateSchema,
-    TournamentQuerySchema,
-    TournamentSchema,
     TournamentUpdateSchema,
+    TournamentSchema,
 )
+from app.schemas.table_schema import TableSchema, TableCreateSchema
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
     ServiceValidationError,
 )
-from app.services.tournament_service import TournamentService
+from app.services.tournament_service import (
+    get_tournament_by_key,
+    update_tournament,
+    delete_tournament,
+)
+from app.services.table_service import create_table
 
-
+# ✅ Blueprint設定を仕様書V2に準拠
 tournament_bp = Blueprint(
-    "Tournaments",
+    "tournaments",
     __name__,
     url_prefix="/api/tournaments",
-    description="Tournament operations",
+    description="大会管理API",
 )
 
 
-@tournament_bp.route("")
-class TournamentListResource(MethodView):
-    @tournament_bp.arguments(TournamentQuerySchema, location="query")
-    @tournament_bp.response(200, TournamentSchema(many=True))
-    @with_common_error_responses(tournament_bp)
-    def get(self, query_args):
-        """GET Tournaments by Group Short Key"""
-        short_key = query_args["short_key"]
-        try:
-            return TournamentService.list_by_group_short_key(short_key)
-        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
-
-    @tournament_bp.arguments(TournamentQuerySchema, location="query")
-    @tournament_bp.arguments(TournamentCreateSchema)
-    @tournament_bp.response(201, TournamentSchema)
-    @with_common_error_responses(tournament_bp)
-    def post(self, query_args, new_data):
-        """CREATE Tournament"""
-        short_key = query_args["short_key"]
-        try:
-            return TournamentService.create_tournament(new_data, short_key)
-        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
 
 
-@tournament_bp.route("/<int:tournament_id>")
-class TournamentResource(MethodView):
-    @tournament_bp.arguments(TournamentQuerySchema, location="query")
+
+# =========================================================
+# 大会単体操作
+# =========================================================
+@tournament_bp.route("/<string:tournament_key>")
+class TournamentByKeyResource(MethodView):
+    """GET / PUT / DELETE: 大会単体操作"""
+
     @tournament_bp.response(200, TournamentSchema)
     @with_common_error_responses(tournament_bp)
-    def get(self, query_args, tournament_id):
-        """GET Tournament by ID"""
-        short_key = query_args["short_key"]
+    def get(self, tournament_key):
+        """大会詳細取得"""
         try:
-            return TournamentService.get_tournament(tournament_id, short_key)
+            return get_tournament_by_key(tournament_key)
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-    @tournament_bp.arguments(TournamentQuerySchema, location="query")
     @tournament_bp.arguments(TournamentUpdateSchema)
     @tournament_bp.response(200, TournamentSchema)
     @with_common_error_responses(tournament_bp)
-    def put(self, query_args, update_data, tournament_id):
-        """UPDATE Tournament by short key"""
-        short_key = query_args["short_key"]
+    def put(self, update_data, tournament_key):
+        """大会更新"""
         try:
-            return TournamentService.update_tournament(tournament_id, update_data, short_key)
+            return update_tournament(tournament_key, update_data)
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-    @tournament_bp.arguments(TournamentQuerySchema, location="query")
     @tournament_bp.response(200, MessageSchema)
     @with_common_error_responses(tournament_bp)
-    def delete(self, query_args, tournament_id):
-        """DELETE Tournament by short key"""
-        short_key = query_args["short_key"]
+    def delete(self, tournament_key):
+        """大会削除"""
         try:
-            TournamentService.delete_tournament(tournament_id, short_key)
+            delete_tournament(tournament_key)
             return {"message": "Tournament deleted"}
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
+# =========================================================
+# 卓作成
+# =========================================================
+@tournament_bp.route("/<string:tournament_key>/tables")
+class TableCreateResource(MethodView):
+    """POST: 指定大会内に卓を作成"""
 
+    @tournament_bp.arguments(TableCreateSchema)
+    @tournament_bp.response(201, TableSchema)
+    @with_common_error_responses(tournament_bp)
+    def post(self, new_data, tournament_key):
+        """大会共有キーから卓を作成"""
+        try:
+            return create_table(new_data, tournament_key)
+        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
+            abort(e.status_code, message=e.message)

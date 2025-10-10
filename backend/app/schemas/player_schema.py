@@ -1,29 +1,24 @@
 from marshmallow import Schema, fields
 
-from app.schemas.common_schemas import ShareLinkSchema
-
 
 class PlayerCreateSchema(Schema):
-    group_id = fields.Int(required=True)
-    name = fields.Str(required=True)
-    nickname = fields.Str(allow_none=True)
-    display_order = fields.Int(allow_none=True)
+    """プレイヤー作成"""
+    name = fields.Str(required=True, description="プレイヤー名")
+    nickname = fields.Str(allow_none=True, description="ニックネーム")
+    display_order = fields.Int(allow_none=True, description="表示順")
 
 
 class PlayerUpdateSchema(Schema):
+    """プレイヤー更新"""
     name = fields.Str()
     nickname = fields.Str(allow_none=True)
     display_order = fields.Int()
 
 
-class PlayerQuerySchema(Schema):
-    short_key = fields.Str(required=True, metadata={"location": "query"})
-
-
 class PlayerSchema(Schema):
+    """プレイヤーレスポンス"""
     id = fields.Int(dump_only=True)
     group_id = fields.Int(required=True)
     name = fields.Str(required=True)
     nickname = fields.Str(allow_none=True)
     display_order = fields.Int(allow_none=True)
-
