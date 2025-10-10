@@ -22,9 +22,9 @@ def _require_table(short_key: str):
     """共有キーから卓を特定"""
     link = get_share_link_by_key(short_key)
     if not link:
-        raise ServiceNotFoundError("共有リンクが無効です。")
+        raise ServiceNotFoundError("table_keyが無効です。")
     if link.resource_type != "table":
-        raise ServicePermissionError("共有リンクの対象が一致しません。")
+        raise ServicePermissionError("table_keyの対象が一致しません。")
 
     table = Table.query.get(link.resource_id)
     if not table:
@@ -36,9 +36,9 @@ def _require_game(short_key: str):
     """共有キーから対局を特定"""
     link = get_share_link_by_key(short_key)
     if not link:
-        raise ServiceNotFoundError("共有リンクが無効です。")
+        raise ServiceNotFoundError("game_keyが無効です。")
     if link.resource_type != "game":
-        raise ServicePermissionError("共有リンクの対象が一致しません。")
+        raise ServicePermissionError("game_keyの対象が一致しません。")
 
     game = Game.query.get(link.resource_id)
     if not game:
@@ -79,7 +79,13 @@ def create_game(data: dict, table_key: str) -> Game:
     db.session.refresh(game)
     return game
 
+def get_games_by_table(table_key: str):
+    """卓共有キーから対局一覧を取得"""
+    link, table = _require_table(table_key)
+    _ensure_access(link, AccessLevel.VIEW, "対局を閲覧する権限がありません。")
 
+    games = Game.query.filter_by(table_id=table.id).order_by(Game.game_index.asc()).all()
+    return games
 def get_game_by_key(short_key: str) -> Game:
     """対局共有キーから取得"""
     _, game = _require_game(short_key)

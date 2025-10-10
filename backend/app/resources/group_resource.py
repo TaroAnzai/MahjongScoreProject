@@ -20,7 +20,7 @@ from app.services.group_service import (
     update_group,
     delete_group,
 )
-from app.services.tournament_service import create_tournament
+from app.services.tournament_service import create_tournament, get_tournaments_by_group
 
 
 # ✅ Blueprint設定（命名を仕様準拠に統一）
@@ -90,7 +90,7 @@ class GroupByKeyResource(MethodView):
 # =========================================================
 @group_bp.route("/<string:group_key>/tournaments")
 class TournamentCreateResource(MethodView):
-    """POST: 指定グループ内に大会作成"""
+    """GET: グループ内大会一覧 / POST: 指定グループに大会作成"""
 
     @group_bp.arguments(TournamentCreateSchema)
     @group_bp.response(201, TournamentSchema)
@@ -102,4 +102,11 @@ class TournamentCreateResource(MethodView):
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-
+    @group_bp.response(200, TournamentSchema(many=True))
+    @with_common_error_responses(group_bp)
+    def get(self, group_key):
+        """グループキーから大会一覧を取得"""
+        try:
+            return get_tournaments_by_group(group_key)
+        except (ServiceNotFoundError,) as e:
+            abort(e.status_code, message=e.message)

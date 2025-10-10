@@ -37,9 +37,9 @@ def _require_group(short_key: str):
     """共有キーからグループを特定"""
     link = get_share_link_by_key(short_key)
     if not link:
-        raise ServiceNotFoundError("共有リンクが無効です。")
+        raise ServiceNotFoundError("group_keyが無効です。")
     if link.resource_type != "group":
-        raise ServicePermissionError("共有リンクの対象が一致しません。")
+        raise ServicePermissionError("group_keyの対象が一致しません。")
 
     group = Group.query.get(link.resource_id)
     if not group:
@@ -80,7 +80,20 @@ def create_tournament(data: dict, group_key: str) -> Tournament:
     db.session.refresh(tournament)
     return tournament
 
+def get_tournaments_by_group(group_key: str):
+    """グループ内の大会一覧を取得"""
+    link, group = _require_group(group_key)
+    if not group:
+        raise ServiceNotFoundError("指定されたグループが見つかりません。")
+    _ensure_access(link, AccessLevel.VIEW, "大会を閲覧する権限がありません。")
+    tournaments = (
+        db.session.query(Tournament)
+        .filter(Tournament.group_id == group.id)
+        .order_by(Tournament.created_at.desc())
+        .all()
+    )
 
+    return tournaments
 def get_tournament_by_key(short_key: str) -> Tournament:
     """大会共有キーから大会取得"""
     _, tournament = _require_tournament(short_key)

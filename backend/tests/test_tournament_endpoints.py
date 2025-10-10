@@ -96,3 +96,31 @@ class TestTournamentEndpoints:
         assert allowed.status_code == 200
         assert allowed.get_json()["message"] == "Tournament deleted"
         assert db_session.get(Tournament, tournament["id"]) is None
+
+    def test_get_tournaments_by_group(self, client):
+        """GET: /api/groups/<group_key>/tournaments - グループ内大会一覧取得"""
+        group_data, links = _create_group(client)
+
+        # まずグループ内に大会を2件作成
+        res1 = _create_tournament(client, links[AccessLevel.EDIT.value], name="Autumn Cup")
+        res2 = _create_tournament(client, links[AccessLevel.EDIT.value], name="Winter Cup")
+        assert res1.status_code == 201
+        assert res2.status_code == 201
+
+        # GET: 大会一覧取得
+        res_list = client.get(f"/api/groups/{links[AccessLevel.VIEW.value]}/tournaments")
+        assert res_list.status_code == 200
+
+        data = res_list.get_json()
+        assert isinstance(data, list)
+        assert len(data) == 2
+
+        # 名称で確認
+        names = [t["name"] for t in data]
+        assert "Autumn Cup" in names
+        assert "Winter Cup" in names
+
+        # 存在しない group_key で 404
+        res_404 = client.get("/api/groups/xxxxxx/tournaments")
+        assert res_404.status_code == 404
+        assert "group_key" in res_404.get_json()["message"]

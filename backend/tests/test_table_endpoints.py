@@ -106,3 +106,38 @@ class TestTableEndpoints:
         assert allowed.status_code == 200
         assert allowed.get_json()["message"] == "Table deleted"
         assert db_session.get(Table, table["id"]) is None
+    def test_get_games_by_table(self, client, db_session):
+        """GET: /api/tables/<table_key>/games - 卓内対局一覧取得"""
+        # --- 前提：グループ・大会・卓を作成 ---
+        group_data, group_links = _create_group(client)
+        tournament_data, tournament_links = _create_tournament(
+            client, group_links[AccessLevel.EDIT.value]
+        )
+        table_res = _create_table(client, tournament_links[AccessLevel.EDIT.value])
+        table = table_res.get_json()
+        table_links = {l["access_level"]: l["short_key"] for l in table["table_links"]}
+
+        # --- 対局を2件登録 ---
+        for i in range(1, 3):
+            res = client.post(
+                f"/api/tables/{table_links[AccessLevel.EDIT.value]}/games",
+                json={"game_index": i, "memo": f"Round {i}"},
+            )
+            assert res.status_code == 201
+
+        # --- GET: 一覧取得 ---
+        res_list = client.get(f"/api/tables/{table_links[AccessLevel.VIEW.value]}/games")
+        assert res_list.status_code == 200
+
+        data = res_list.get_json()
+        assert isinstance(data, list)
+        assert len(data) == 2
+
+        # 対局インデックスが昇順で並んでいることを確認
+        indexes = [g["game_index"] for g in data]
+        assert indexes == sorted(indexes)
+
+        # --- 存在しない table_key で 404 ---
+        res_404 = client.get("/api/tables/xxxxxx/games")
+        assert res_404.status_code == 404
+        assert "table_key" in res_404.get_json()["message"]

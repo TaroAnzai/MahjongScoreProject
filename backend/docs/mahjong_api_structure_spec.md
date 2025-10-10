@@ -82,27 +82,24 @@ backend/
 
 ## 🧭 API ルート仕様一覧
 
-| リソース  | HTTP   | URL                                           | 機能概要           | 実装ファイル                              |
-| --------- | ------ | --------------------------------------------- | ------------------ | ----------------------------------------- |
-| **Group** | POST   | `/api/groups`                                 | 新規グループ作成   | group_resource.py / group_service.py      |
-|           | GET    | `/api/groups`                                 | グループ一覧取得   | 〃                                        |
-|           | GET    | `/api/groups/<group_key>`                     | グループ詳細取得   | 〃                                        |
-|           | PUT    | `/api/groups/<group_key>`                     | グループ更新       | 〃                                        |
-|           | DELETE | `/api/groups/<group_key>`                     | グループ削除       | 〃                                        |
-|           | GET    | `/api/groups/<group_key>/players`             | 所属プレイヤー一覧 | 〃                                        |
-|           | POST   | `/api/groups/<group_key>/players`             | プレイヤー追加     | 〃                                        |
-|           | DELETE | `/api/groups/<group_key>/players/<player_id>` | プレイヤー削除     | 〃                                        |
-|           | POST   | `/api/groups/<group_key>/tournaments`         | 大会作成           | group_resource.py + tournament_service.py |
-|           | GET    | `/api/groups/<group_key>/tournaments`         | グループ内大会一覧 | 〃                                        |
+| リソース  | HTTP   | URL                                   | 機能概要           | 実装ファイル                              |
+| --------- | ------ | ------------------------------------- | ------------------ | ----------------------------------------- |
+| **Group** | POST   | `/api/groups`                         | 新規グループ作成   | group_resource.py / group_service.py      |
+|           | GET    | `/api/groups/<group_key>`             | グループ詳細取得   | 〃                                        |
+|           | PUT    | `/api/groups/<group_key>`             | グループ更新       | 〃                                        |
+|           | DELETE | `/api/groups/<group_key>`             | グループ削除       | 〃                                        |
+|           | POST   | `/api/groups/<group_key>/tournaments` | 大会作成           | group_resource.py + tournament_service.py |
+|           | GET    | `/api/groups/<group_key>/tournaments` | グループ内大会一覧 | 〃                                        |
 
 ---
 
-| リソース   | HTTP   | URL                        | 機能概要           | 実装ファイル                           |
-| ---------- | ------ | -------------------------- | ------------------ | -------------------------------------- |
-| **Player** | POST   | `/api/players`             | プレイヤー登録     | player_resource.py / player_service.py |
-|            | GET    | `/api/players/<player_id>` | プレイヤー詳細取得 | 〃                                     |
-|            | PUT    | `/api/players/<player_id>` | プレイヤー更新     | 〃                                     |
-|            | DELETE | `/api/players/<player_id>` | プレイヤー削除     | 〃                                     |
+| リソース   | HTTP   | URL                                           | 機能概要           | 実装ファイル                           |
+| ---------- | ------ | --------------------------------------------- | ------------------ | -------------------------------------- |
+| **Player** | GET    | `/api/groups/<group_key>/players`             | 所属プレイヤー一覧 | player_resource.py / player_service.py |
+|            | POST   | `/api/groups/<group_key>/players`             | プレイヤー追加     | 〃                                     |
+|            | DELETE | `/api/groups/<group_key>/players/<player_id>` | プレイヤー削除     | 〃                                     |
+|            | GET    | `/api/groups/<group_key>/players/<player_id>` | プレイヤー詳細取得 | 〃                                     |
+|            | PUT    | `/api/groups/<group_key>/players/<player_id>` | プレイヤー更新     | 〃                                     |
 
 ---
 

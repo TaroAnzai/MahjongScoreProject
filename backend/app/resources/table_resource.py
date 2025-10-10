@@ -18,7 +18,7 @@ from app.services.table_service import (
     update_table,
     delete_table,
 )
-from app.services.game_service import create_game
+from app.services.game_service import create_game, get_games_by_table
 
 # ✅ Blueprint設定
 table_bp = Blueprint(
@@ -70,7 +70,7 @@ class TableByKeyResource(MethodView):
 # =========================================================
 @table_bp.route("/<string:table_key>/games")
 class GameCreateResource(MethodView):
-    """POST: 指定卓内に対局を作成"""
+    """GET / POST: 指定卓内の対局一覧・作成"""
 
     @table_bp.arguments(GameCreateSchema)
     @table_bp.response(201, GameSchema)
@@ -82,3 +82,11 @@ class GameCreateResource(MethodView):
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
+    @table_bp.response(200, GameSchema(many=True))
+    @with_common_error_responses(table_bp)
+    def get(self, table_key):
+        """卓キーから対局一覧を取得"""
+        try:
+            return get_games_by_table(table_key)
+        except (ServicePermissionError, ServiceNotFoundError) as e:
+            abort(e.status_code, message=e.message)
