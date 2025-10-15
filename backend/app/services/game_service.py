@@ -77,6 +77,7 @@ def create_game(data: dict, table_key: str) -> Game:
     db.session.flush()
     create_default_share_links("game", game.id, game.created_by)
     db.session.refresh(game)
+    game.current_user_access = link.access_level
     return game
 
 def get_games_by_table(table_key: str):
@@ -85,10 +86,12 @@ def get_games_by_table(table_key: str):
     _ensure_access(link, AccessLevel.VIEW, "対局を閲覧する権限がありません。")
 
     games = Game.query.filter_by(table_id=table.id).order_by(Game.game_index.asc()).all()
+    games = [setattr(t, "current_user_access", link.access_level) or t for t in games]
     return games
 def get_game_by_key(short_key: str) -> Game:
     """対局共有キーから取得"""
-    _, game = _require_game(short_key)
+    link, game = _require_game(short_key)
+    game.current_user_access = link.access_level
     return game
 
 
@@ -106,6 +109,7 @@ def update_game(short_key: str, data: dict) -> Game:
 
     db.session.commit()
     db.session.refresh(game)
+    game.current_user_access = link.access_level
     return game
 
 

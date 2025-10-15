@@ -133,6 +133,11 @@ class TestTableEndpoints:
         assert isinstance(data, list)
         assert len(data) == 2
 
+        Game1 = data[0]
+        assert "view_link" in Game1
+        assert "edit_link" not in Game1
+        assert "owner_link" not in Game1
+
         # 対局インデックスが昇順で並んでいることを確認
         indexes = [g["game_index"] for g in data]
         assert indexes == sorted(indexes)

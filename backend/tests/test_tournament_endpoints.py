@@ -17,7 +17,12 @@ def _create_tournament(client, group_key, name="Main Tournament"):
         json={"name": name},
     )
 
-
+def _create_table(client, tournament_key, name="Primary Table"):
+    """新仕様：大会キーをURLに含めて作成"""
+    return client.post(
+        f"/api/tournaments/{tournament_key}/tables",
+        json={"name": name},
+    )
 @pytest.mark.api
 class TestTournamentEndpoints:
     def test_create_tournament_requires_group_edit(self, client, db_session):
@@ -159,3 +164,40 @@ class TestTournamentEndpoints:
         res_404 = client.get("/api/groups/xxxxxx/tournaments")
         assert res_404.status_code == 404
         assert "group_key" in res_404.get_json()["message"]
+
+    def test_get_tables_by_tournament(self, client, db_session):
+        """GET: /api/tournaments/<tournament_key>/tables - 大会内卓一覧取得"""
+        # --- 前提：グループ・大会を作成 ---
+        group_data, group_links = _create_group(client)
+        tournament_data = _create_tournament(
+            client, group_links[AccessLevel.EDIT.value]
+        )
+        tournament_links = {
+            link["access_level"]: link["short_key"] for link in tournament_data.get_json()["tournament_links"]
+        }
+        # --- 卓を2件登録 ---
+        for i in range(1, 3):
+            res = client.post(
+                f"/api/tournaments/{tournament_links[AccessLevel.EDIT.value]}/tables",
+                json={"name": f"table {i}"},
+            )
+            assert res.status_code == 201
+
+        # --- GET: 一覧取得 ---
+        res_list = client.get(f"/api/tournaments/{tournament_links[AccessLevel.VIEW.value]}/tables")
+        assert res_list.status_code == 200
+
+        data = res_list.get_json()
+        assert isinstance(data, list)
+        assert len(data) == 2
+
+        Game1 = data[0]
+        assert "view_link" in Game1
+        assert "edit_link" not in Game1
+        assert "owner_link" not in Game1
+
+
+        # --- 存在しない tournament_key で 404 ---
+        res_404 = client.get("/api/tournaments/xxxxxx/tables")
+        assert res_404.status_code == 404
+        assert "共有リンクが無効です。" in res_404.get_json()["message"]

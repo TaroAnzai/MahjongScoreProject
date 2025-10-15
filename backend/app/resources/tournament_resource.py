@@ -19,7 +19,7 @@ from app.services.tournament_service import (
     update_tournament,
     delete_tournament,
 )
-from app.services.table_service import create_table
+from app.services.table_service import create_table, get_table_by_tournament
 
 # ✅ Blueprint設定を仕様書V2に準拠
 tournament_bp = Blueprint(
@@ -84,4 +84,17 @@ class TableCreateResource(MethodView):
         try:
             return create_table(new_data, tournament_key)
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
+            abort(e.status_code, message=e.message)
+
+# =========================================================
+# 卓一覧取得
+# =========================================================
+    @tournament_bp.response(200, TableSchema(many=True))
+    @with_common_error_responses(tournament_bp)
+    def get(self, tournament_key):
+        """大会内の卓一覧取得"""
+        try:
+            tables = get_table_by_tournament(tournament_key)
+            return tables
+        except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)

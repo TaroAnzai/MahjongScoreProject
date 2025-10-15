@@ -78,8 +78,17 @@ def create_table(data: dict, tournament_key: str) -> Table:
     db.session.refresh(table)
     table.current_user_access = link.access_level
     return table
+# =========================================================
+# 対局一覧取得
+# =========================================================
+def get_table_by_tournament(tournament_key: str):
+    """卓共有キーから対局一覧を取得"""
+    link, tournament = _require_tournament(tournament_key)
+    _ensure_access(link, AccessLevel.VIEW, "対局を閲覧する権限がありません。")
 
-
+    tables = Table.query.filter_by(tournament_id=tournament.id).all()
+    tables = [setattr(t, "current_user_access", link.access_level) or t for t in tables]
+    return tables
 # =========================================================
 # 卓取得
 # =========================================================
