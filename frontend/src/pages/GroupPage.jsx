@@ -1,6 +1,6 @@
 // src/pages/GroupPage.jsx
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, data } from 'react-router-dom';
 
 // API
 
@@ -8,58 +8,57 @@ import { useParams, useNavigate } from 'react-router-dom';
 import PageTitleBar from '../components/PageTitleBar';
 import ButtonGridSection from '../components/ButtonGridSection';
 import SelectorModal from '../components/SelectorModal';
+import {
+  useDeleteApiGroupsGroupKeyPlayersPlayerId,
+  useGetApiGroupsGroupKey,
+  useGetApiGroupsGroupKeyPlayers,
+  usePostApiGroupsGroupKeyPlayers,
+} from '@/api/generated/mahjongApi';
 
 function GroupPage() {
   const { groupKey } = useParams();
-  const [group, setGroup] = useState(null);
-  const [players, setPlayers] = useState([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const navigate = useNavigate();
   const [showTournamentModal, setShowTournamentModal] = useState(false);
   const [tournamentOptions, setTournamentOptions] = useState([]);
 
-  useEffect(() => {
-    if (!groupKey) return;
-
-    async function fetchGroupData(key) {
-      const groupData = await getGroupByKey(key);
-      if (!groupData) {
-        alert('グループが見つかりません');
-        return;
-      }
-      setGroup(groupData);
-      await loadPlayers(groupData.id);
-    }
-
-    fetchGroupData(groupKey);
-  }, [groupKey]);
-
-  const loadPlayers = async (groupId) => {
-    const playerList = await getPlayersByGroup(groupId);
-    setPlayers(playerList);
-  };
-
-  const handleAddPlayer = async () => {
+  const { data: group, isLoadingGroup, isError } = useGetApiGroupsGroupKey(groupKey);
+  const {
+    data: players,
+    isLoading: isLoadingPlayers,
+    refetch: loadPlayers,
+  } = useGetApiGroupsGroupKeyPlayers(groupKey);
+  const { mutate: createPlayer } = usePostApiGroupsGroupKeyPlayers({
+    mutation: {
+      onSuccess: async () => {
+        console.log('Player created, reloading players...');
+        loadPlayers();
+      },
+      onError: (error) => {
+        alert('メンバーの追加に失敗しました: ' + error.message);
+      },
+    },
+  });
+  const { mutate: deletePlayer } = useDeleteApiGroupsGroupKeyPlayersPlayerId({
+    mutation: {
+      onSuccess: () => {
+        console.log('Player deleted, reloading players...');
+        loadPlayers();
+      },
+      onError: (error) => {
+        alert('メンバーの削除に失敗しました: ' + error.message);
+      },
+    },
+  });
+  const handleAddPlayer = () => {
     const name = prompt('メンバー名を入力してください');
     if (!name) return;
-
-    const newPlayer = await createPlayer({ name, group_id: group.id });
-    if (!newPlayer) {
-      alert('作成に失敗しました');
-      return;
-    }
-
-    await loadPlayers(group.id);
+    createPlayer({ groupKey: groupKey, data: { name: name } });
   };
 
   const handleDeletePlayer = async (player) => {
-    const res = await deletePlayer(player.id);
-    if (res?.success) {
-      await loadPlayers(group.id);
-      setShowDeleteModal(false);
-    } else {
-      alert(res?.message || '削除に失敗しました');
-    }
+    if (!player) return;
+    deletePlayer({ groupKey: groupKey, playerId: player.id });
   };
   const handleCreateTournament = async () => {
     const name = prompt('大会名を入力してください');
@@ -156,13 +155,17 @@ function GroupPage() {
 
       <div className="mahjong-section">
         <h3 className="mahjong-subtitle">メンバー一覧</h3>
-        <ul className="mahjong-list">
-          {players.map((player) => (
-            <li key={player.id} className="mahjong-list-item">
-              {player.name}
-            </li>
-          ))}
-        </ul>
+        {isLoadingPlayers ? (
+          <div>Loading...</div>
+        ) : (
+          <ul className="mahjong-list">
+            {players.map((player) => (
+              <li key={player.id} className="mahjong-list-item">
+                {player.name}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {showDeleteModal && (

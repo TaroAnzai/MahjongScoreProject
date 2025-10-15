@@ -11,6 +11,12 @@ import {
 import { useQueries } from '@tanstack/react-query';
 import type { Group } from '@/api/generated/mahjongApi.schemas';
 
+const getKeyType = (data: Group): 'OWNER' | 'EDIT' | 'VIEW' | '' => {
+  if (data.owner_link) return 'OWNER';
+  if (data.edit_link) return 'EDIT';
+  if (data.view_link) return 'VIEW';
+  return '';
+};
 function WelcomePage() {
   const navigate = useNavigate(); // ← フックの呼び出し
   const [refetchGroups, setRefetchGroups] = useState(0); // グループリスト再取得用のステート
@@ -24,7 +30,7 @@ function WelcomePage() {
     mutation: {
       onSuccess: (data) => {
         console.log('Group created successfully:', data);
-        localStorage.setItem(`group_edit_${data.edit_key}`, group.edit_key);
+        localStorage.setItem(`group_key_${data.owner_link}`, data.owner_link ?? '');
         setRefetchGroups((prev) => prev + 1);
       },
       onError: (error) => {
@@ -39,7 +45,7 @@ function WelcomePage() {
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith('group_edit_')) keys.push(key.replace('group_edit_', ''));
+      if (key && key.startsWith('group_key_')) keys.push(key.replace('group_key_', ''));
     }
     return keys;
   }, [refetchGroups]);
@@ -49,8 +55,7 @@ function WelcomePage() {
       ...getGetApiGroupsGroupKeyQueryOptions(key),
       retry: 1,
       select: (data: Group) => {
-        const editKey = data.group_links?.find((link) => link.access_level === 'EDIT')?.short_key;
-        return { ...data, edit_key: editKey };
+        return { ...data, keyType: getKeyType(data) };
       },
     })),
   });
@@ -59,7 +64,7 @@ function WelcomePage() {
       const key = groupKeys[index];
 
       if (query.isSuccess) {
-        console.log('✅ success:', key, query.data);
+        //console.log('✅ success:', key, query.data);
       }
 
       if (query.isError) {
@@ -68,7 +73,7 @@ function WelcomePage() {
         // 404エラーの場合の処理
         if ((query.error as any)?.status === 404) {
           console.warn(`Group not found or forbidden: ${key}, removing from localStorage`);
-          localStorage.removeItem(`group_edit_${key}`);
+          localStorage.removeItem(`group_key_${key}`);
           setRefetchGroups((prev) => prev + 1);
         }
       }
@@ -84,15 +89,12 @@ function WelcomePage() {
     createGroup({ data: { name: name } });
   };
 
-  const handleEnterGroup = async (group) => {
-    const key = group.group_key;
+  const handleEnterGroup = async (group: Group) => {
+    const key = group.owner_link ?? group.edit_link ?? group.view_link;
+    console.log('handleEnterGroup', group, key);
     if (!key) return;
 
-    const editKey = group.edit_key;
-    if (editKey) {
-      await loginByEditKey('group', editKey);
-    }
-    navigate(`/group/${key}?edit=${editKey}`);
+    navigate(`/group/${key}`);
   };
 
   return (
@@ -108,18 +110,22 @@ function WelcomePage() {
       <div className="mahjong-section">
         <h2>登録グループ一覧</h2>
         <ul className="mahjong-list">
-          {groups.map((group) => (
-            <li
-              className="mahjong-list-item"
-              key={group?.edit_key}
-              onClick={() => handleEnterGroup(group)}
-              style={{
-                cursor: 'pointer',
-              }}
-            >
-              {group?.name}（{group?.edit_key}）
-            </li>
-          ))}
+          {groups.map(
+            (group) =>
+              group && (
+                <li
+                  className="mahjong-list-item"
+                  key={group.id}
+                  onClick={() => handleEnterGroup(group)}
+                  style={{
+                    cursor: 'pointer',
+                  }}
+                >
+                  {group?.name}（{group.owner_link ?? group.edit_link ?? group.view_link ?? ''}）
+                  {group.keyType}
+                </li>
+              )
+          )}
         </ul>
       </div>
     </div>
