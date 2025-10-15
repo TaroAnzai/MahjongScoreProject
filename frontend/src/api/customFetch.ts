@@ -44,8 +44,8 @@ export const customFetch = async <T>(
   });
 
   if (!response.ok) {
-    console.error(`[customFetch] ${response.status} ${response.statusText}`);
-    throw new Error(`HTTP error! status: ${response.status}`);
+    console.error(`[customFetch2] ${response.status} ${response.statusText}`);
+    throw response;
   }
 
   // JSON以外のレスポンスにも対応

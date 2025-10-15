@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields
 from app.schemas.common_schemas import ShareLinkSchema
-
+from app.schemas.mixins.share_link_mixin import ShareLinkMixin
 
 class TournamentCreateSchema(Schema):
     """大会作成用リクエスト"""
@@ -16,7 +16,7 @@ class TournamentUpdateSchema(Schema):
     rate = fields.Float(description="レート")
 
 
-class TournamentSchema(Schema):
+class TournamentSchema(ShareLinkMixin,Schema):
     """大会レスポンス"""
     id = fields.Int(dump_only=True)
     group_id = fields.Int(required=True)
@@ -26,7 +26,8 @@ class TournamentSchema(Schema):
     created_by = fields.Str(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
 
-    # ✅ モデルと合わせて tournament_links にリネーム
+    _share_link_field_name = "tournament_links"
+
     tournament_links = fields.List(
         fields.Nested(ShareLinkSchema),
         dump_only=True,

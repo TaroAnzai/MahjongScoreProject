@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields
 from app.schemas.common_schemas import ShareLinkSchema
-
+from app.schemas.mixins.share_link_mixin import ShareLinkMixin
 
 class GameCreateSchema(Schema):
     """対局作成リクエスト"""
@@ -16,7 +16,7 @@ class GameUpdateSchema(Schema):
     played_at = fields.DateTime(allow_none=True, description="対局日時")
 
 
-class GameSchema(Schema):
+class GameSchema(ShareLinkMixin, Schema):
     """対局レスポンス"""
     id = fields.Int(dump_only=True)
     table_id = fields.Int(required=True)
@@ -26,7 +26,8 @@ class GameSchema(Schema):
     created_by = fields.Str(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
 
-    # ✅ share_links → game_links に変更
+    _share_link_field_name = "game_links"
+
     game_links = fields.List(
         fields.Nested(ShareLinkSchema),
         dump_only=True,

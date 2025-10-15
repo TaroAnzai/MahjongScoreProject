@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields
 from app.schemas.common_schemas import ShareLinkSchema
-
+from app.schemas.mixins.share_link_mixin import ShareLinkMixin
 
 class TableCreateSchema(Schema):
     """卓作成リクエスト"""
@@ -14,7 +14,7 @@ class TableUpdateSchema(Schema):
     type = fields.Str(description="卓タイプ")
 
 
-class TableSchema(Schema):
+class TableSchema(ShareLinkMixin,Schema):
     """卓レスポンス"""
     id = fields.Int(dump_only=True)
     tournament_id = fields.Int(required=True)
@@ -23,7 +23,8 @@ class TableSchema(Schema):
     created_by = fields.Str(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
 
-    # ✅ share_links → table_links に変更
+    _share_link_field_name = "table_links"
+
     table_links = fields.List(
         fields.Nested(ShareLinkSchema),
         dump_only=True,

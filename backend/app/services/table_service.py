@@ -76,6 +76,7 @@ def create_table(data: dict, tournament_key: str) -> Table:
     db.session.flush()
     create_default_share_links("table", table.id, table.created_by)
     db.session.refresh(table)
+    table.current_user_access = link.access_level
     return table
 
 
@@ -84,7 +85,8 @@ def create_table(data: dict, tournament_key: str) -> Table:
 # =========================================================
 def get_table_by_key(short_key: str) -> Table:
     """卓共有キーから卓を取得"""
-    _, table = _require_table(short_key)
+    link, table = _require_table(short_key)
+    table.current_user_access = link.access_level
     return table
 
 
@@ -103,6 +105,7 @@ def update_table(short_key: str, data: dict) -> Table:
 
     db.session.commit()
     db.session.refresh(table)
+    table.current_user_access = link.access_level
     return table
 
 

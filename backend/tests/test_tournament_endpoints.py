@@ -33,6 +33,10 @@ class TestTournamentEndpoints:
         levels = {link["access_level"] for link in tournament["tournament_links"]}
         assert levels == {AccessLevel.EDIT.value, AccessLevel.VIEW.value}
 
+        assert "view_link" in tournament
+        assert "edit_link" in tournament
+        assert "owner_link" not in tournament
+
     def test_create_tournament_with_view_link_forbidden(self, client, db_session):
         group_data, links = _create_group(client)
         # VIEW権限では作成不可
@@ -40,20 +44,45 @@ class TestTournamentEndpoints:
         assert res.status_code == 403
 
     def test_get_tournament_requires_view(self, client, db_session):
+        # グループとリンクを作成
         group_data, links = _create_group(client)
+
+        # EDIT権限のリンクで大会を作成
         res = _create_tournament(client, links[AccessLevel.EDIT.value])
         tournament = res.get_json()
 
-        # ✅ tournament_links を使って取得
+        # === 作成された大会のリンク辞書を作成 ===
         t_links = {
-            link["access_level"]: link["short_key"] for link in tournament["tournament_links"]
+            link["access_level"]: link["short_key"]
+            for link in tournament["tournament_links"]
         }
 
+        # === VIEW権限のトーナメントリンクで取得 ===
         ok = client.get(f"/api/tournaments/{t_links[AccessLevel.VIEW.value]}")
         assert ok.status_code == 200
 
+        fetched = ok.get_json()
+        assert "view_link" in fetched
+        # === 検証1: tournament_links が存在する ===
+        assert "tournament_links" in fetched
+        links_data = fetched["tournament_links"]
+
+        # === 検証2: すべて VIEW のみ ===
+        assert all(link["access_level"] == "VIEW" for link in links_data), \
+            f"Expected all VIEW links, got: {[l['access_level'] for l in links_data]}"
+
+        # === 検証3: 他のアクセスレベル(EDIT, OWNER)が含まれない ===
+        levels = [link["access_level"] for link in links_data]
+        assert "EDIT" not in levels, f"Unexpected EDIT links: {links_data}"
+        assert "OWNER" not in levels, f"Unexpected OWNER links: {links_data}"
+
+        # === 検証4: 正しい大会が返ってきている ===
+        assert fetched["id"] == tournament["id"]
+
+        # === 検証5: グループのVIEWキーでは403になる ===
         forbidden = client.get(f"/api/tournaments/{links[AccessLevel.VIEW.value]}")
         assert forbidden.status_code == 403
+
 
     def test_update_tournament_requires_edit(self, client, db_session):
         group_data, links = _create_group(client)
@@ -114,6 +143,12 @@ class TestTournamentEndpoints:
         data = res_list.get_json()
         assert isinstance(data, list)
         assert len(data) == 2
+
+        Tournament1 = data[0]
+        assert "view_link" in Tournament1
+        assert "edit_link" not in Tournament1
+        assert "owner_link" not in Tournament1
+
 
         # 名称で確認
         names = [t["name"] for t in data]

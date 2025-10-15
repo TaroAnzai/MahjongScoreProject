@@ -78,6 +78,7 @@ def create_tournament(data: dict, group_key: str) -> Tournament:
     db.session.flush()
     create_default_share_links("tournament", tournament.id, tournament.created_by)
     db.session.refresh(tournament)
+    tournament.current_user_access = link.access_level
     return tournament
 
 def get_tournaments_by_group(group_key: str):
@@ -92,11 +93,12 @@ def get_tournaments_by_group(group_key: str):
         .order_by(Tournament.created_at.desc())
         .all()
     )
-
+    tournaments = [setattr(t, "current_user_access", link.access_level) or t for t in tournaments]
     return tournaments
 def get_tournament_by_key(short_key: str) -> Tournament:
     """大会共有キーから大会取得"""
-    _, tournament = _require_tournament(short_key)
+    link, tournament = _require_tournament(short_key)
+    tournament.current_user_access = link.access_level
     return tournament
 
 
@@ -114,6 +116,7 @@ def update_tournament(short_key: str, data: dict) -> Tournament:
 
     db.session.commit()
     db.session.refresh(tournament)
+    tournament.current_user_access = link.access_level
     return tournament
 
 

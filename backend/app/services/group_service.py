@@ -61,6 +61,7 @@ def create_group(data: dict) -> Group:
     # デフォルト共有リンク作成
     create_default_share_links("group", group.id, group.created_by)
     db.session.refresh(group)
+    group.current_user_access = "OWNER"
     return group
 
 
@@ -69,7 +70,8 @@ def create_group(data: dict) -> Group:
 # =========================================================
 def get_group_by_key(short_key: str) -> Group:
     """共有リンクキーからグループを取得"""
-    _, group = _require_group(short_key)
+    link, group = _require_group(short_key)
+    group.current_user_access = link.access_level
     return group
 
 
@@ -89,6 +91,7 @@ def update_group(short_key: str, data: dict) -> Group:
     group.last_updated_at = datetime.now(timezone.utc)
     db.session.commit()
     db.session.refresh(group)
+    group.current_user_access = link.access_level
     return group
 
 

@@ -1,7 +1,7 @@
 import pytest
 
 from app.models import AccessLevel, Group
-
+from app.models import ShareLink
 
 @pytest.mark.api
 class TestGroupEndpoints:
@@ -12,6 +12,7 @@ class TestGroupEndpoints:
         )
         assert response.status_code == 201
         data = response.get_json()
+        links = ShareLink.query.all()
         assert data["name"] == "Test Group"
 
         # ✅ share_links → group_links に変更
@@ -33,12 +34,21 @@ class TestGroupEndpoints:
             if link["access_level"] == AccessLevel.VIEW.value
         )
 
-        # ✅ short_key をURLパスとして使用
+        # ✅ VIWE権限のshort_key をURLパスとして使用
         res = client.get(f"/api/groups/{view_key}")
         assert res.status_code == 200
         fetched = res.get_json()
         assert fetched["id"] == group_data["id"]
+        assert "view_link" in fetched
+        assert "edit_link" not in fetched
+        assert "owner_link" not in fetched
         assert "group_links" in fetched
+
+        links = fetched["group_links"]
+        assert all(link["access_level"] == "VIEW" for link in links)
+        levels = [link["access_level"] for link in links]
+        assert "OWNER" not in levels, f"Unexpected OWNER links: {links}"
+        assert "EDIT" not in levels, f"Unexpected EDIT links: {links}"
 
     def test_update_group_requires_owner(self, client, db_session):
         response = client.post("/api/groups", json={"name": "Initial Group"})

@@ -24,6 +24,8 @@ function WelcomePage() {
     mutation: {
       onSuccess: (data) => {
         console.log('Group created successfully:', data);
+        localStorage.setItem(`group_edit_${data.edit_key}`, group.edit_key);
+        setRefetchGroups((prev) => prev + 1);
       },
       onError: (error) => {
         console.error('Error creating group:', error);
@@ -33,6 +35,7 @@ function WelcomePage() {
 
   //LocalStorageからGroup Keyを取得
   const groupKeys = useMemo(() => {
+    console.log('start refetchGroups');
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
@@ -44,47 +47,41 @@ function WelcomePage() {
   const groupQueries = useQueries({
     queries: groupKeys.map((key) => ({
       ...getGetApiGroupsGroupKeyQueryOptions(key),
-      retry: 1, // 1回だけリトライ
+      retry: 1,
       select: (data: Group) => {
         const editKey = data.group_links?.find((link) => link.access_level === 'EDIT')?.short_key;
-
         return { ...data, edit_key: editKey };
       },
-      onError: (error: any) => {
-        // 特定のエラーコードの場合のみ削除
-        if (error?.status === 404) {
+    })),
+  });
+  useEffect(() => {
+    groupQueries.forEach((query, index) => {
+      const key = groupKeys[index];
+
+      if (query.isSuccess) {
+        console.log('✅ success:', key, query.data);
+      }
+
+      if (query.isError) {
+        console.error(`Error fetching group ${key}:`, query.error);
+
+        // 404エラーの場合の処理
+        if ((query.error as any)?.status === 404) {
           console.warn(`Group not found or forbidden: ${key}, removing from localStorage`);
           localStorage.removeItem(`group_edit_${key}`);
           setRefetchGroups((prev) => prev + 1);
         }
-      },
-    })),
-  });
+      }
+    });
+  }, [groupQueries, groupKeys]);
   // 全てのデータが読み込まれたか確認
   const isLoading = groupQueries.some((query) => query.isLoading);
   const groups = groupQueries.map((query) => query.data).filter(Boolean);
 
   const handleCreateGroup = async () => {
-    try {
-      const name = window.prompt('グループ名を入力してください');
-      if (!name) return;
-
-      createGroup({ data: { name: name } });
-      return;
-      const group = await createGroup({ name });
-      if (!group) {
-        alert('グループの作成に失敗しました');
-        return;
-      }
-
-      localStorage.setItem(`group_edit_${group.group_key}`, group.edit_key);
-      await loginByEditKey('group', group.edit_key);
-
-      // Reactルーティングで遷移
-      navigate(`/group/${group.group_key}?edit=${group.edit_key}`);
-    } catch (error) {
-      console.error('グループ作成エラー:', error);
-    }
+    const name = window.prompt('グループ名を入力してください');
+    if (!name) return;
+    createGroup({ data: { name: name } });
   };
 
   const handleEnterGroup = async (group) => {
