@@ -2,9 +2,19 @@
 import React from 'react';
 import Modal from './Modal';
 import styles from './SelectorModal.module.css';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog';
+import { Button } from './ui/button';
 
 interface SelectorModalProps {
   title: string;
+  open: boolean;
   items: any[];
   onSelect: (item: any) => void;
   onClose: () => void;
@@ -13,24 +23,18 @@ interface SelectorModalProps {
 function SelectorModal({
   title,
   items,
+  open,
   onSelect,
   onClose,
   plusDisplayItem = null,
 }: SelectorModalProps) {
   return (
-    <Modal
-      title={title}
-      onClose={onClose}
-      footer={
-        <>
-          <button className="mahjong-button" onClick={onClose}>
-            {' '}
-            閉じる
-          </button>
-        </>
-      }
-    >
-      <div className={styles.listContainer}>
+    <Dialog open={open}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>選択してください</DialogDescription>
+        </DialogHeader>
         <ul className={styles.list}>
           {items.map((item) => (
             <li key={item.id} className={styles.listItem} onClick={() => onSelect(item)}>
@@ -39,8 +43,11 @@ function SelectorModal({
             </li>
           ))}
         </ul>
-      </div>
-    </Modal>
+        <DialogFooter>
+          <Button onClick={onClose}> 閉じる</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

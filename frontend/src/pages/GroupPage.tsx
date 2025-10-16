@@ -133,6 +133,7 @@ function GroupPage() {
       {showDeleteModal && (
         <SelectorModal
           title="削除するメンバーを選択"
+          open={showDeleteModal}
           items={players}
           onSelect={(player: Player) => {
             handleDeletePlayer(player);
@@ -143,6 +144,7 @@ function GroupPage() {
       {showTournamentModal && (
         <SelectorModal
           title="大会を選択"
+          open={showTournamentModal}
           items={tournaments.map((t) => ({
             ...t,
             plusDisplayItem:
