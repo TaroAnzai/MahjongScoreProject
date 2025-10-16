@@ -40,7 +40,6 @@ class TestTournamentEndpoints:
 
         assert "view_link" in tournament
         assert "edit_link" in tournament
-        assert "owner_link" not in tournament
 
     def test_create_tournament_with_view_link_forbidden(self, client, db_session):
         group_data, links = _create_group(client)

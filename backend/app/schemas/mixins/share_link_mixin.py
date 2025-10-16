@@ -37,7 +37,6 @@ class ShareLinkMixin:
             filtered = []
 
         data[field_name] = filtered
-
         # === ショートカットキー設定 ===
         for l in filtered:
             level = l.get("access_level")

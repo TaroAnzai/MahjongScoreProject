@@ -17,7 +17,7 @@ class AccessLevel(StrEnum):
 # グループ（最上位レイヤー）
 # =========================================================
 class Group(db.Model):
-    __tablename__ = "groups"
+    __tablename__ = "tbl_groups"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
@@ -57,10 +57,10 @@ class Group(db.Model):
 # 大会
 # =========================================================
 class Tournament(db.Model):
-    __tablename__ = "tournaments"
+    __tablename__ = "tbl_tournaments"
 
     id = db.Column(db.Integer, primary_key=True)
-    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey("tbl_groups.id"), nullable=False)
     name = db.Column(db.Text, nullable=False)
     rate = db.Column(db.Float, default=1.0)
     description = db.Column(db.Text)
@@ -89,11 +89,11 @@ class Tournament(db.Model):
 # 卓（テーブル）
 # =========================================================
 class Table(db.Model):
-    __tablename__ = "tables"
+    __tablename__ = "tbl_tables"
 
     id = db.Column(db.Integer, primary_key=True)
     tournament_id = db.Column(
-        db.Integer, db.ForeignKey("tournaments.id"), nullable=False
+        db.Integer, db.ForeignKey("tbl_tournaments.id"), nullable=False
     )
     name = db.Column(db.Text, nullable=False)
     type = db.Column(db.String(20), default="normal")  # normal / chip
@@ -121,11 +121,11 @@ class Table(db.Model):
 # 卓プレイヤー（着席情報）
 # =========================================================
 class TablePlayer(db.Model):
-    __tablename__ = "table_players"
+    __tablename__ = "tbl_table_players"
 
     id = db.Column(db.Integer, primary_key=True)
-    table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
-    player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
+    table_id = db.Column(db.Integer, db.ForeignKey("tbl_tables.id"), nullable=False)
+    player_id = db.Column(db.Integer, db.ForeignKey("tbl_players.id"), nullable=False)
     seat_position = db.Column(db.Integer)
     joined_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
@@ -139,10 +139,10 @@ class TablePlayer(db.Model):
 # プレイヤー
 # =========================================================
 class Player(db.Model):
-    __tablename__ = "players"
+    __tablename__ = "tbl_players"
 
     id = db.Column(db.Integer, primary_key=True)
-    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey("tbl_groups.id"), nullable=False)
     name = db.Column(db.Text, nullable=False)
     nickname = db.Column(db.Text)
     display_order = db.Column(db.Integer)
@@ -161,10 +161,10 @@ class Player(db.Model):
 # ゲーム（半荘）
 # =========================================================
 class Game(db.Model):
-    __tablename__ = "games"
+    __tablename__ = "tbl_games"
 
     id = db.Column(db.Integer, primary_key=True)
-    table_id = db.Column(db.Integer, db.ForeignKey("tables.id"), nullable=False)
+    table_id = db.Column(db.Integer, db.ForeignKey("tbl_tables.id"), nullable=False)
     game_index = db.Column(db.Integer, nullable=False)
     memo = db.Column(db.Text)
     played_at = db.Column(db.DateTime)
@@ -191,11 +191,11 @@ class Game(db.Model):
 # スコア（各プレイヤーの点数）
 # =========================================================
 class Score(db.Model):
-    __tablename__ = "scores"
+    __tablename__ = "tbl_scores"
 
     id = db.Column(db.Integer, primary_key=True)
-    game_id = db.Column(db.Integer, db.ForeignKey("games.id"), nullable=False)
-    player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
+    game_id = db.Column(db.Integer, db.ForeignKey("tbl_games.id"), nullable=False)
+    player_id = db.Column(db.Integer, db.ForeignKey("tbl_players.id"), nullable=False)
     score = db.Column(db.Integer, nullable=False)
     rank = db.Column(db.Integer)
     uma = db.Column(db.Float)
@@ -206,11 +206,11 @@ class Score(db.Model):
 # 大会参加者
 # =========================================================
 class TournamentPlayer(db.Model):
-    __tablename__ = "tournament_players"
+    __tablename__ = "tbl_tournament_players"
 
     id = db.Column(db.Integer, primary_key=True)
-    tournament_id = db.Column(db.Integer, db.ForeignKey("tournaments.id"), nullable=False)
-    player_id = db.Column(db.Integer, db.ForeignKey("players.id"), nullable=False)
+    tournament_id = db.Column(db.Integer, db.ForeignKey("tbl_tournaments.id"), nullable=False)
+    player_id = db.Column(db.Integer, db.ForeignKey("tbl_players.id"), nullable=False)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
@@ -225,7 +225,7 @@ class TournamentPlayer(db.Model):
 # 共有リンク（短縮キー方式）
 # =========================================================
 class ShareLink(db.Model):
-    __tablename__ = "share_links"
+    __tablename__ = "tbl_share_links"
 
     id = db.Column(db.Integer, primary_key=True)
     short_key = db.Column(db.String(16), unique=True, nullable=False)
@@ -246,7 +246,7 @@ def touch_group(connection, group_id: int) -> bool:
     if not group_id:
         return False
     connection.execute(
-        db.text("UPDATE groups SET last_updated_at = :now WHERE id = :gid"),
+        db.text("UPDATE tbl_groups SET last_updated_at = :now WHERE id = :gid"),
         {"now": datetime.now(timezone.utc), "gid": group_id},
     )
     return True
@@ -272,7 +272,7 @@ def update_group_on_tournament_change(mapper, connection, target):
 @event.listens_for(Table, "after_delete")
 def update_group_on_table_change(mapper, connection, target):
     result = connection.execute(
-        db.text("SELECT group_id FROM tournaments WHERE id = :tid"),
+        db.text("SELECT group_id FROM tbl_tournaments WHERE id = :tid"),
         {"tid": target.tournament_id},
     ).fetchone()
     if result:
@@ -286,9 +286,9 @@ def update_group_on_table_change(mapper, connection, target):
 def update_group_on_game_change(mapper, connection, target):
     result = connection.execute(
         db.text(
-            "SELECT tr.group_id FROM tournaments tr "
-            "JOIN tables t ON tr.id = t.tournament_id "
-            "JOIN games gm ON gm.table_id = t.id "
+            "SELECT tr.group_id FROM tbl_tournaments tr "
+            "JOIN tbl_tables t ON tr.id = t.tournament_id "
+            "JOIN tbl_games gm ON gm.table_id = t.id "
             "WHERE gm.id = :gid"
         ),
         {"gid": target.id},
