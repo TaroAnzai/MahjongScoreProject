@@ -5,6 +5,7 @@ import {
 import type { TournamentCreate } from '@/api/generated/mahjongApi.schemas';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export const useCreateTournament = () => {
   const navigate = useNavigate();
@@ -13,11 +14,12 @@ export const useCreateTournament = () => {
       return postApiGroupsGroupKeyTournaments(data.groupKey, data.tournament);
     },
     onSuccess: (data) => {
-      console.log('Tournament created, reloading tournaments...', data);
+      toast.success('Tournament created successfully');
       navigate(`/tournament/${data.edit_link}`);
     },
     onError: (error) => {
       console.error('Error creating tournament:', error);
+      toast.error('Error creating tournament');
     },
   });
 };

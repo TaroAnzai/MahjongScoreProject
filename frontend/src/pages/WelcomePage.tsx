@@ -6,6 +6,7 @@ import ButtonGridSection from '../components/ButtonGridSection';
 
 import type { Group } from '@/api/generated/mahjongApi.schemas';
 import { useCreateGroup, useGroupQueries } from '@/hooks/useGroups';
+import { Button } from '@/components/ui/button';
 
 function WelcomePage() {
   const navigate = useNavigate(); // ← フックの呼び出し

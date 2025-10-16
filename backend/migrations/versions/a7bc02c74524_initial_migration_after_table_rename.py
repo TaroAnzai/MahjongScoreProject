@@ -1,8 +1,8 @@
-"""Initial create with tbl_ prefix
+"""Initial migration after table rename
 
-Revision ID: afe88385021b
+Revision ID: a7bc02c74524
 Revises: 
-Create Date: 2025-10-16 05:33:07.667931
+Create Date: 2025-10-16 11:38:37.857775
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'afe88385021b'
+revision = 'a7bc02c74524'
 down_revision = None
 branch_labels = None
 depends_on = None

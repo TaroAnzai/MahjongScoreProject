@@ -5,6 +5,7 @@ import GroupPage from './pages/GroupPage';
 import TablePage from './pages/TablePage';
 import TournamentPage from './pages/TournamentPage';
 import './App.css';
+import { Toaster } from 'sonner';
 
 function NotFoundPage() {
   const location = useLocation();
@@ -25,14 +26,17 @@ function NotFoundPage() {
 }
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<WelcomePage />} />
-      <Route path="/group/:groupKey" element={<GroupPage />} />
-      <Route path="/tournament/:tournamentKey" element={<TournamentPage />} />
-      {/* <Route path="/table/:tableKey" element={<TablePage />} /> */}
-      {/* 404対策 */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/group/:groupKey" element={<GroupPage />} />
+        <Route path="/tournament/:tournamentKey" element={<TournamentPage />} />
+        {/* <Route path="/table/:tableKey" element={<TablePage />} /> */}
+        {/* 404対策 */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+      <Toaster richColors position="top-center" />
+    </>
   );
 }
 

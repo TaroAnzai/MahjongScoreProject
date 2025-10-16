@@ -12,24 +12,22 @@ import { useGetApiGroupsGroupKey } from '@/api/generated/mahjongApi';
 import { useCreatePlayer, useDeletePlayer, useGetPlayer } from '@/hooks/usePlayers';
 import { useCreateTournament, useGetTournaments } from '@/hooks/useTournaments';
 import { useUpdateGroup } from '@/hooks/useGroups';
+import type { Player } from '@/api/generated/mahjongApi.schemas';
 
 function GroupPage() {
   const navigate = useNavigate();
   const { groupKey } = useParams();
+  if (!groupKey) return <div className="mahjong-container">グループキーが不明です</div>;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showTournamentModal, setShowTournamentModal] = useState(false);
 
-  const {
-    data: group,
-
-    refetch: refetchGroup,
-  } = useGetApiGroupsGroupKey(groupKey);
+  const { data: group, refetch: refetchGroup } = useGetApiGroupsGroupKey(groupKey);
   const { mutate: updateGroup } = useUpdateGroup(refetchGroup);
   const { players, isLoadingPlayers, loadPlayers } = useGetPlayer(groupKey);
   const { mutate: createPlayer } = useCreatePlayer(loadPlayers);
 
   const { mutate: deletePlayer } = useDeletePlayer(loadPlayers);
-  const { mutate: createTournament } = useCreateTournament(loadPlayers);
+  const { mutate: createTournament } = useCreateTournament();
   const { tournaments } = useGetTournaments(groupKey);
 
   const handleAddPlayer = () => {
@@ -38,8 +36,8 @@ function GroupPage() {
     createPlayer({ groupKey: groupKey, player: { name: name } });
   };
 
-  const handleDeletePlayer = async (player) => {
-    if (!player) return;
+  const handleDeletePlayer = async (player: Player) => {
+    if (!player || player.id === undefined) return;
     deletePlayer({ groupKey: groupKey, playerId: player.id });
   };
   const handleCreateTournament = async () => {
@@ -57,14 +55,14 @@ function GroupPage() {
     setShowTournamentModal(true);
   };
 
-  const handleTitleChange = (newTitle) => {
+  const handleTitleChange = (newTitle: string) => {
     if (!newTitle) return;
     if (!groupKey) return;
     updateGroup({ groupKey: groupKey, groupUpdate: { name: newTitle } });
   };
 
   const handleAddGroup = () => {
-    if (!groupKey) return;
+    if (!groupKey || !group) return;
     window.confirm(
       `登録グループに${group.name} を追加してよいですか？\n
     ブラウザに登録されます。
@@ -74,7 +72,7 @@ function GroupPage() {
     navigate('/');
   };
   const handleRemoveGroup = () => {
-    if (!groupKey) return;
+    if (!groupKey || !group) return;
     const confirmed = window.confirm(
       `登録グループから${group.name} を削除してよいですか？\n(グループデータ自体は削除されません。)`
     );
@@ -84,7 +82,8 @@ function GroupPage() {
   };
 
   if (!group) return <div className="mahjong-container">読み込み中...</div>;
-
+  if (tournaments === undefined) return <div className="mahjong-container">読み込み中...</div>;
+  if (players === undefined) return <div className="mahjong-container">読み込み中...</div>;
   return (
     <div className="mahjong-container">
       <PageTitleBar
@@ -122,7 +121,7 @@ function GroupPage() {
           <div>Loading...</div>
         ) : (
           <ul className="mahjong-list">
-            {players.map((player) => (
+            {players?.map((player) => (
               <li key={player.id} className="mahjong-list-item">
                 {player.name}
               </li>
@@ -135,7 +134,9 @@ function GroupPage() {
         <SelectorModal
           title="削除するメンバーを選択"
           items={players}
-          onSelect={handleDeletePlayer}
+          onSelect={(player: Player) => {
+            handleDeletePlayer(player);
+          }}
           onClose={() => setShowDeleteModal(false)}
         />
       )}
@@ -144,9 +145,11 @@ function GroupPage() {
           title="大会を選択"
           items={tournaments.map((t) => ({
             ...t,
-            plusDisplayItem: new Date(t.created_at).toLocaleDateString('ja-JP', {
-              timeZone: 'Asia/Tokyo',
-            }),
+            plusDisplayItem:
+              t.created_at &&
+              new Date(t.created_at).toLocaleDateString('ja-JP', {
+                timeZone: 'Asia/Tokyo',
+              }),
           }))}
           plusDisplayItem={'plusDisplayItem'}
           onSelect={(tournament) => {

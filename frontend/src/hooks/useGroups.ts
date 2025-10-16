@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { getGetApiGroupsGroupKeyQueryOptions } from '@/api/generated/mahjongApi';
+import { toast } from 'sonner';
 
 /**
  * Hook to create a new group.
@@ -25,11 +26,13 @@ export const useCreateGroup = (onAfterCreate?: () => void) => {
     },
     onSuccess: (data: Group) => {
       console.log('Group created successfully:', data);
+      toast.success('Group created successfully');
       localStorage.setItem(`group_key_${data.owner_link}`, data.owner_link ?? '');
       onAfterCreate?.();
     },
     onError: (error) => {
       console.error('Error creating group:', error);
+      toast.error('Error creating group');
     },
   });
 };
@@ -39,11 +42,12 @@ export const useUpdateGroup = (onAfterUpdate?: () => void) => {
       return putApiGroupsGroupKey(data.groupKey, data.groupUpdate);
     },
     onSuccess: (data: Group) => {
-      console.log('Group updated successfully:', data);
+      toast.success('Group updated successfully');
       onAfterUpdate?.();
     },
     onError: (error) => {
       console.error('Error updating group:', error);
+      toast.error('Error updating group');
     },
   });
 };

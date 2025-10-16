@@ -10,7 +10,16 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import type { ShareLink } from '@/api/generated/mahjongApi.schemas';
 
+interface PageTitleBarProps {
+  title: string;
+  shareLinks?: readonly ShareLink[];
+  TitleComponent?: React.ComponentType | null;
+  onTitleChange?: (newTitle: string) => void;
+  showBack?: boolean;
+  showForward?: boolean;
+}
 function PageTitleBar({
   title,
   shareLinks = [],
@@ -18,7 +27,7 @@ function PageTitleBar({
   onTitleChange,
   showBack = true,
   showForward = true,
-}) {
+}: PageTitleBarProps) {
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const type = pathSegments[0];
