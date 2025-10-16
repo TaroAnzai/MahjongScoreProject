@@ -1,6 +1,6 @@
 // src/pages/GroupPage.jsx
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, data } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
 // API
 
@@ -8,52 +8,34 @@ import { useParams, useNavigate, data } from 'react-router-dom';
 import PageTitleBar from '../components/PageTitleBar';
 import ButtonGridSection from '../components/ButtonGridSection';
 import SelectorModal from '../components/SelectorModal';
-import {
-  useDeleteApiGroupsGroupKeyPlayersPlayerId,
-  useGetApiGroupsGroupKey,
-  useGetApiGroupsGroupKeyPlayers,
-  usePostApiGroupsGroupKeyPlayers,
-} from '@/api/generated/mahjongApi';
+import { useGetApiGroupsGroupKey } from '@/api/generated/mahjongApi';
+import { useCreatePlayer, useDeletePlayer, useGetPlayer } from '@/hooks/usePlayers';
+import { useCreateTournament, useGetTournaments } from '@/hooks/useTournaments';
+import { useUpdateGroup } from '@/hooks/useGroups';
 
 function GroupPage() {
+  const navigate = useNavigate();
   const { groupKey } = useParams();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const navigate = useNavigate();
   const [showTournamentModal, setShowTournamentModal] = useState(false);
-  const [tournamentOptions, setTournamentOptions] = useState([]);
 
-  const { data: group, isLoadingGroup, isError } = useGetApiGroupsGroupKey(groupKey);
   const {
-    data: players,
-    isLoading: isLoadingPlayers,
-    refetch: loadPlayers,
-  } = useGetApiGroupsGroupKeyPlayers(groupKey);
-  const { mutate: createPlayer } = usePostApiGroupsGroupKeyPlayers({
-    mutation: {
-      onSuccess: async () => {
-        console.log('Player created, reloading players...');
-        loadPlayers();
-      },
-      onError: (error) => {
-        alert('メンバーの追加に失敗しました: ' + error.message);
-      },
-    },
-  });
-  const { mutate: deletePlayer } = useDeleteApiGroupsGroupKeyPlayersPlayerId({
-    mutation: {
-      onSuccess: () => {
-        console.log('Player deleted, reloading players...');
-        loadPlayers();
-      },
-      onError: (error) => {
-        alert('メンバーの削除に失敗しました: ' + error.message);
-      },
-    },
-  });
+    data: group,
+
+    refetch: refetchGroup,
+  } = useGetApiGroupsGroupKey(groupKey);
+  const { mutate: updateGroup } = useUpdateGroup(refetchGroup);
+  const { players, isLoadingPlayers, loadPlayers } = useGetPlayer(groupKey);
+  const { mutate: createPlayer } = useCreatePlayer(loadPlayers);
+
+  const { mutate: deletePlayer } = useDeletePlayer(loadPlayers);
+  const { mutate: createTournament } = useCreateTournament(loadPlayers);
+  const { tournaments } = useGetTournaments(groupKey);
+
   const handleAddPlayer = () => {
     const name = prompt('メンバー名を入力してください');
     if (!name) return;
-    createPlayer({ groupKey: groupKey, data: { name: name } });
+    createPlayer({ groupKey: groupKey, player: { name: name } });
   };
 
   const handleDeletePlayer = async (player) => {
@@ -63,52 +45,32 @@ function GroupPage() {
   const handleCreateTournament = async () => {
     const name = prompt('大会名を入力してください');
     if (!name) return;
-
-    const tournament = await createTournament({ name, group_id: group.id });
-    if (!tournament) {
-      alert('作成に失敗しました');
-      return;
-    }
-    navigate(`/tournament/${tournament.tournament_key}?edit=${tournament.edit_key}`);
+    const payload = { groupKey: groupKey, tournament: { name: name } };
+    createTournament(payload);
   };
 
   const handleSelectTournament = async () => {
-    const tournaments = await getTournamentsByGroup(group.id);
-    console.log('tournaments', tournaments);
     if (!tournaments || tournaments.length === 0) {
       alert('大会が存在しません');
       return;
     }
-    // 日付フォーマット変換
-    const formattedTournaments = tournaments.map((t) => ({
-      ...t,
-      started_at_date: t.started_at ? new Date(t.started_at).toLocaleDateString('ja-JP') : null,
-    }));
-
-    // モーダルで選択肢を表示
-    setTournamentOptions(formattedTournaments);
     setShowTournamentModal(true);
   };
 
-  const handleTitleChange = async (newTitle) => {
-    const res = await updateGroup(group.id, { name: newTitle });
-    if (res?.success !== false) {
-      setGroup({ ...group, name: newTitle });
-    } else {
-      alert('更新に失敗しました');
-    }
+  const handleTitleChange = (newTitle) => {
+    if (!newTitle) return;
+    if (!groupKey) return;
+    updateGroup({ groupKey: groupKey, groupUpdate: { name: newTitle } });
   };
 
   const handleAddGroup = () => {
     if (!groupKey) return;
-    const editKey = new URLSearchParams(window.location.search).get('edit');
-    if (!editKey) return;
-    const confirmed = window.confirm(
+    window.confirm(
       `登録グループに${group.name} を追加してよいですか？\n
     ブラウザに登録されます。
     機種変更やブラウザ変更した場合は、引き継がれません。引継ぎしたい場合はURLを保存しておいてください。`
     );
-    localStorage.setItem(`group_edit_${groupKey}`, editKey);
+    localStorage.setItem(`group_key_${groupKey}`, groupKey);
     navigate('/');
   };
   const handleRemoveGroup = () => {
@@ -117,7 +79,7 @@ function GroupPage() {
       `登録グループから${group.name} を削除してよいですか？\n(グループデータ自体は削除されません。)`
     );
     if (!confirmed) return;
-    localStorage.removeItem(`group_edit_${groupKey}`);
+    localStorage.removeItem(`group_key_${groupKey}`);
     navigate(`/`);
   };
 
@@ -179,11 +141,18 @@ function GroupPage() {
       {showTournamentModal && (
         <SelectorModal
           title="大会を選択"
-          items={tournamentOptions}
-          plusDisplayItem={'started_at_date'}
+          items={tournaments.map((t) => ({
+            ...t,
+            plusDisplayItem: new Date(t.created_at).toLocaleDateString('ja-JP', {
+              timeZone: 'Asia/Tokyo',
+            }),
+          }))}
+          plusDisplayItem={'plusDisplayItem'}
           onSelect={(tournament) => {
             if (tournament) {
-              navigate(`/tournament/${tournament.tournament_key}?edit=${tournament.edit_key}`);
+              const tournament_key = tournament.edit_link ?? tournament.view_link;
+              console.log('tournament', tournament);
+              navigate(`/tournament/${tournament_key}`);
             }
             setShowTournamentModal(false);
           }}
