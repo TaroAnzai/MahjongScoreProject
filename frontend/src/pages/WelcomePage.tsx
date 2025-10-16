@@ -20,7 +20,6 @@ function WelcomePage() {
 
   const handleEnterGroup = async (group: Group) => {
     const key = group.owner_link ?? group.edit_link ?? group.view_link;
-    console.log('handleEnterGroup', group, key);
     if (!key) return;
 
     navigate(`/group/${key}`);

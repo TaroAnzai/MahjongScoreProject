@@ -43,7 +43,6 @@ export const useDeletePlayer = (onAfterDelete?: () => void) => {
       return deleteApiGroupsGroupKeyPlayersPlayerId(data.groupKey, data.playerId);
     },
     onSuccess: (data) => {
-      console.log('Player deleted, reloading players...');
       onAfterDelete?.();
     },
     onError: (error) => {

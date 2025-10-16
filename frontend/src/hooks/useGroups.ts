@@ -63,7 +63,6 @@ export const useGroupQueries = () => {
 
   // LocalStorageからGroup Keyを取得
   const groupKeys = useMemo(() => {
-    console.log('🔁 start refetchGroups');
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);

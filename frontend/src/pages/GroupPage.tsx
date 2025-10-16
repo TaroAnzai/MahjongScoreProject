@@ -89,6 +89,7 @@ function GroupPage() {
     <div className="mahjong-container">
       <PageTitleBar
         title={group.name}
+        shareLinks={group.group_links}
         onTitleChange={handleTitleChange}
         showBack={true}
         showForward={true}
