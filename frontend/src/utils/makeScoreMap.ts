@@ -1,14 +1,12 @@
-// src/utils/getScoresByTournament.jsx
+import type { Table } from '@/api/generated/mahjongApi.schemas';
 
 /**
- * トーナメントに紐づく各テーブルのスコアを集計し、
- * getPlayerTotalScores で取得した合計点/換算点を合成して返す
- * @param {Object} tournament - トーナメントオブジェクト（idを含む）
- * @returns {Promise<Object>} playerId をキーとした scoreMap
+ * Given a list of tables and total scores, build a score map that contains each player's scores by table and total scores.
+ * @param {Table[]} tables - a list of tables
+ * @param {Object} totalScores - an object of total scores by player id
+ * @returns {Object} a score map that contains each player's scores by table and total scores
  */
-export async function getScoresByTournament(tournament) {
-  const tables = await getTablesByTournament(tournament.id);
-  const totalScores = await getPlayerTotalScores(tournament.id); // { [playerId]: { raw, converted } }
+export async function makeScoreMap(table:Table, totalScores:) {
   const scoreMap = {};
 
   for (const table of tables) {

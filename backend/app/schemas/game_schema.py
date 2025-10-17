@@ -1,14 +1,12 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields,validates, ValidationError
 from app.schemas.common_schemas import ShareLinkSchema
 from app.schemas.mixins.share_link_mixin import ShareLinkMixin
 
-class GameCreateSchema(Schema):
-    """対局作成リクエスト"""
-    game_index = fields.Int(required=True, description="対局インデックス（半荘番号など）")
-    memo = fields.Str(allow_none=True, description="メモ")
-    played_at = fields.DateTime(allow_none=True, description="対局日時")
 
 
+class ScoreInputSchema(Schema):
+    player_id = fields.Int(required=True, description="プレイヤーID")
+    score = fields.Float(required=True, description="得点（合計0である必要あり）")
 class GameUpdateSchema(Schema):
     """対局更新リクエスト"""
     game_index = fields.Int(description="対局インデックス")
@@ -25,6 +23,7 @@ class GameSchema(ShareLinkMixin, Schema):
     played_at = fields.DateTime(allow_none=True)
     created_by = fields.Str(dump_only=True)
     created_at = fields.DateTime(dump_only=True)
+    scores = fields.List(fields.Nested(ScoreInputSchema))
 
     _share_link_field_name = "game_links"
 
@@ -34,3 +33,18 @@ class GameSchema(ShareLinkMixin, Schema):
         dump_default=[],
         description="対局に紐づく共有リンク一覧",
     )
+
+class GameCreateSchema(Schema):
+    """卓に対局（ゲーム）を追加"""
+    scores = fields.List(fields.Nested(ScoreInputSchema), required=True, description="スコア一覧")
+    memo = fields.Str(allow_none=True, description="メモ")
+
+    @validates("scores")
+    def validate_scores_sum_zero(self, scores):
+        total = sum(s.get("score", 0) for s in scores)
+        if total != 0:
+            raise ValidationError("スコアの合計は0でなければなりません。")
+
+
+
+

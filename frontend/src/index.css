@@ -69,7 +69,7 @@ body {
   justify-content: center;
   min-width: 320px;
   min-height: 100vh;
-  color: oklch(0.2 0.03 140);
+  color: white;
   background: linear-gradient(135deg, #2f5938 0%, #0d2818 100%);
   background-attachment: fixed;
 }

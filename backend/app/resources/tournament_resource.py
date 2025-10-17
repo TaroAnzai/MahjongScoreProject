@@ -98,3 +98,4 @@ class TableCreateResource(MethodView):
             return tables
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
+

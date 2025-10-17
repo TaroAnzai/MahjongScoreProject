@@ -30,15 +30,15 @@ function PageTitleBar({
 }: PageTitleBarProps) {
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(Boolean);
-  const type = pathSegments[0];
+  const type = pathSegments[0] as keyof typeof typeNameMap;
   const typeNameMap = {
     group: 'グループ',
     tournament: '大会',
     table: '記録表',
   };
 
-  const typeName = typeNameMap[type] || '未定義';
-  const handleShareUrl = async (accessType) => {
+  const typeName = typeNameMap[type] ?? '未定義';
+  const handleShareUrl = async (accessType: string) => {
     const shortKey = shareLinks.find((l) => l.access_level === accessType)?.short_key;
     if (!shortKey) return alert(`${accessType}リンクが存在しません`);
 
@@ -51,14 +51,14 @@ function PageTitleBar({
           text: `このリンクから${typeName}にアクセスできます`,
           url: shareUrl,
         });
-      } catch (err) {
+      } catch (err: any) {
         alert('共有に失敗しました: ' + err.message);
       }
     } else {
       try {
         await navigator.clipboard.writeText(shareUrl);
         alert(`${typeName}のURLをコピーしました:\n` + shareUrl);
-      } catch (err) {
+      } catch (err: any) {
         alert('コピーに失敗しました: ' + err.message);
       }
     }

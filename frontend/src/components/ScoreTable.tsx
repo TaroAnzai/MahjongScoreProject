@@ -2,8 +2,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ScoreTable.module.css';
-
-function ScoreTable({ players, tables, scoreMap }) {
+import type {
+  Table,
+  TournamentExport,
+  TournamentParticipant,
+} from '@/api/generated/mahjongApi.schemas';
+interface ScoreTableProps {
+  players: TournamentParticipant[];
+  tables: Table[];
+  scoreMap: TournamentExport;
+}
+const ScoreTable = ({ players, tables, scoreMap }: ScoreTableProps) => {
   const normalTables = tables.filter((t) => t.type !== 'chip');
   const chipTables = tables.filter((t) => t.type === 'chip');
   const sortedTables = [...normalTables, ...chipTables];
@@ -19,7 +28,8 @@ function ScoreTable({ players, tables, scoreMap }) {
                 key={table.id}
                 className={styles.header}
                 onClick={() => {
-                  navigate(`/table/${table.table_key}?edit=${table.edit_key}`);
+                  const table_key = table.edit_link ?? table.view_link ?? '';
+                  navigate(`/table/${table_key}?edit=${table_key}`);
                 }}
                 style={{ cursor: 'pointer', textDecoration: 'underline' }}
               >
@@ -44,7 +54,11 @@ function ScoreTable({ players, tables, scoreMap }) {
                 <td className={`${styles.cell} ${styles.stickyHeader}`}>{player.name}</td>
                 {sortedTables.map((table) => {
                   const score = playerScores[`table_${table.id}`] ?? '';
-                  return <td key={table.id} className={styles.cell}>{score}</td>;
+                  return (
+                    <td key={table.id} className={styles.cell}>
+                      {score}
+                    </td>
+                  );
                 })}
                 <td className={styles.cell}>{raw}</td>
                 <td className={styles.cell}>{converted}</td>
@@ -55,6 +69,6 @@ function ScoreTable({ players, tables, scoreMap }) {
       </table>
     </div>
   );
-}
+};
 
 export default ScoreTable;

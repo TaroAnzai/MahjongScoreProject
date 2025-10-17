@@ -1,6 +1,8 @@
 import {
   postApiGroupsGroupKeyTournaments,
   useGetApiGroupsGroupKeyTournaments,
+  useGetApiTournamentsTournamentKey,
+  useGetApiTournamentsTournamentKeyParticipants,
 } from '@/api/generated/mahjongApi';
 import type { TournamentCreate } from '@/api/generated/mahjongApi.schemas';
 import { useMutation } from '@tanstack/react-query';
@@ -31,4 +33,22 @@ export const useGetTournaments = (groupKey: string) => {
     refetch: loadTournaments,
   } = useGetApiGroupsGroupKeyTournaments(groupKey);
   return { tournaments, isLoadingTournaments, loadTournaments };
+};
+
+export const useGetTournament = (tournamentKey: string) => {
+  const {
+    data: tournament,
+    isLoading: isLoadingTournament,
+    refetch: loadTournament,
+  } = useGetApiTournamentsTournamentKey(tournamentKey);
+  return { tournament, isLoadingTournament, loadTournament };
+};
+
+export const useGetTournamentPlayers = (tournamentKey: string) => {
+  const {
+    data: players,
+    isLoading: isLoadingPlayers,
+    refetch: loadPlayers,
+  } = useGetApiTournamentsTournamentKeyParticipants(tournamentKey);
+  return { players, isLoadingPlayers, loadPlayers };
 };

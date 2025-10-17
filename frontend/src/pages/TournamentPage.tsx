@@ -15,44 +15,26 @@ import EditTournamentModal from '../components/EditTournamentModal';
 
 // ユーティリティ
 import { getScoresByTournament } from '../utils/getScoresByTournament';
+import { useGetTournament, useGetTournamentPlayers } from '@/hooks/useTournaments';
+import { useGetTables } from '@/hooks/useTables';
+import { useGetTournamentScore } from '@/hooks/useScore';
 
 function TournamentPage() {
   const navigate = useNavigate();
   const { tournamentKey } = useParams();
-  const [tournament, setTournament] = useState(null);
+  const { tournament, isLoadingTournament, loadTournament } = useGetTournament(tournamentKey!);
+  const { players, isLoadingPlayers, loadPlayers } = useGetTournamentPlayers(tournamentKey!);
+  const { tables, isLoadingTables, loadTables } = useGetTables(tournamentKey!);
+  const { score } = useGetTournamentScore(tournamentKey!);
 
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
   const [memberOptions, setMemberOptions] = useState([]);
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
-  const [players, setPlayers] = useState([]);
-  const [tables, setTables] = useState([]);
-  const [scoreMap, setScoreMap] = useState({});
+
   const [isEditingRate, setIsEditingRate] = useState(false);
   const [editedRate, setEditedRate] = useState(tournament?.rate || 1);
   const [showDeletePlayerModal, setShowDeletePlayerModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-
-  useEffect(() => {
-    async function fetchTournament() {
-      const data = await getTournament(tournamentKey);
-      if (!data) {
-        alert('大会情報の取得に失敗しました');
-        return;
-      }
-      const [playersData, tablesData] = await Promise.all([
-        getTournamentPlayers(data.id),
-        getTablesByTournament(data.id),
-      ]);
-      const scoreMap = await getScoresByTournament(data);
-      setTournament(data);
-      setPlayers(playersData);
-      setTables(tablesData);
-      setScoreMap(scoreMap);
-      setEditedRate(data.rate);
-    }
-
-    fetchTournament();
-  }, [tournamentKey]);
 
   const handleOpenAddPlayerModal = async () => {
     if (!tournament?.group_id) {
@@ -242,7 +224,7 @@ function TournamentPage() {
 
       <div className="mahjong-section">
         <h3 className="mahjong-subtitle">大会成績</h3>
-        <ScoreTable players={players} tables={tables} scoreMap={scoreMap} />
+        <ScoreTable players={players} tables={tables} scoreMap={score} />
       </div>
 
       {showAddPlayerModal && (
