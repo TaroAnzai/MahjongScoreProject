@@ -30,7 +30,7 @@ function SelectorModal({
 }: SelectorModalProps) {
   return (
     <Dialog open={open}>
-      <DialogContent>
+      <DialogContent className="dialog-content">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>選択してください</DialogDescription>
