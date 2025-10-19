@@ -14,10 +14,9 @@ import MultiSelectorModal from '../components/MultiSelectorModal';
 import EditTournamentModal from '../components/EditTournamentModal';
 
 // ユーティリティ
-import { getScoresByTournament } from '../utils/getScoresByTournament';
 import { useGetTournament, useGetTournamentPlayers } from '@/hooks/useTournaments';
 import { useGetTables } from '@/hooks/useTables';
-import { useGetTournamentScore } from '@/hooks/useScore';
+import { useGetTournamentScore, useGetTournamentScoreMap } from '@/hooks/useScore';
 
 function TournamentPage() {
   const navigate = useNavigate();
@@ -25,7 +24,7 @@ function TournamentPage() {
   const { tournament, isLoadingTournament, loadTournament } = useGetTournament(tournamentKey!);
   const { players, isLoadingPlayers, loadPlayers } = useGetTournamentPlayers(tournamentKey!);
   const { tables, isLoadingTables, loadTables } = useGetTables(tournamentKey!);
-  const { score } = useGetTournamentScore(tournamentKey!);
+  const { scoreMap, isLoadingScoreMap, loadScoreMap } = useGetTournamentScoreMap(tournamentKey!);
 
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
   const [memberOptions, setMemberOptions] = useState([]);
@@ -224,7 +223,7 @@ function TournamentPage() {
 
       <div className="mahjong-section">
         <h3 className="mahjong-subtitle">大会成績</h3>
-        <ScoreTable players={players} tables={tables} scoreMap={score} />
+        <ScoreTable players={players} tables={tables} scoreMap={scoreMap} />
       </div>
 
       {showAddPlayerModal && (

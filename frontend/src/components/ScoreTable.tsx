@@ -6,13 +6,17 @@ import type {
   Table,
   TournamentExport,
   TournamentParticipant,
+  TournamentScoreMap,
 } from '@/api/generated/mahjongApi.schemas';
 interface ScoreTableProps {
-  players: TournamentParticipant[];
-  tables: Table[];
-  scoreMap: TournamentExport;
+  players: TournamentParticipant[] | undefined;
+  tables: Table[] | undefined;
+  scoreMap: TournamentScoreMap | undefined;
 }
 const ScoreTable = ({ players, tables, scoreMap }: ScoreTableProps) => {
+  if (!players || !tables || !scoreMap) {
+    return <div>成績データがありません</div>;
+  }
   const normalTables = tables.filter((t) => t.type !== 'chip');
   const chipTables = tables.filter((t) => t.type === 'chip');
   const sortedTables = [...normalTables, ...chipTables];

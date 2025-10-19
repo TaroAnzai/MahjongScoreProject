@@ -1,4 +1,8 @@
-import { useGetApiTournamentsTournamentKeyExport } from '@/api/generated/mahjongApi';
+import {
+  useGetApiTournamentsTournamentKey,
+  useGetApiTournamentsTournamentKeyExport,
+  useGetApiTournamentsTournamentKeyScoreMap,
+} from '@/api/generated/mahjongApi';
 
 export const useGetTournamentScore = (tournamentKey: string) => {
   const {
@@ -7,4 +11,13 @@ export const useGetTournamentScore = (tournamentKey: string) => {
     refetch: loadScore,
   } = useGetApiTournamentsTournamentKeyExport(tournamentKey);
   return { score, isLoadingScore, loadScore };
+};
+
+export const useGetTournamentScoreMap = (tournamentKey: string) => {
+  const {
+    data: scoreMap,
+    isLoading: isLoadingScoreMap,
+    refetch: loadScoreMap,
+  } = useGetApiTournamentsTournamentKeyScoreMap(tournamentKey);
+  return { scoreMap, isLoadingScoreMap, loadScoreMap };
 };
