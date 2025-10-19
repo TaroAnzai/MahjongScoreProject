@@ -60,14 +60,13 @@ def create_table_player(table_key: str, data: dict):
     player_id = data.get("player_id")
     if not player_id:
         raise ServiceValidationError("player_id は必須です。")
-    print("in create_table_player:", player_id)
     participant = TournamentPlayer.query.get(player_id)
     if not participant:
         raise ServiceNotFoundError("大会参加者が見つかりません。")
 
     tournament = Tournament.query.get(table.tournament_id)
     if not tournament or participant.tournament_id != tournament.id:
-        raise ServicePermissionError("指定された大会参加者がこの大会に属していません。")
+        raise ServiceNotFoundError(f"指定された大会参加者がこの大会に属していません。{participant.tournament_id} != {tournament.id}")
 
     existing = TablePlayer.query.filter_by(
         table_id=table.id, player_id=player_id

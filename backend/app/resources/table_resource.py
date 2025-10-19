@@ -78,7 +78,7 @@ class GameCreateResource(MethodView):
     def post(self, new_data, table_key):
         """卓共有キーから対局を作成"""
         try:
-            return create_game(new_data, table_key)
+            return create_game(table_key, new_data)
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 

@@ -1,14 +1,15 @@
 """
-| fixture名                           | 役割                 | スコープ     |
-| ---------------------------------- | ------------------ | -------- |
-| `create_group`                     | グループ作成             | function |
-| `create_players`                   | グループ内プレイヤー作成       | function |
-| `create_tournament`                | 大会作成               | function |
-| `register_tournament_participants` | 大会への参加者登録          | function |
-| `create_table`                     | 卓作成                | function |
-| `register_table_players`           | 卓へのプレイヤー登録         | function |
-| `create_game`                      | 対局登録（スコア付き）        | function |
-| `setup_full_tournament`            | 上記すべてをまとめた完全データセット | function | """
+| fixture名                           | 役割                       | スコープ     | 主な引数                                     |
+| ---------------------------------- | -------------------------- | -------- | -------------------------------------------- |
+| `create_group`                     | グループ作成                | function | `name`（任意：グループ名）                       |
+| `create_players`                   | グループ内プレイヤー作成     | function | `group_key`, `names`（任意：プレイヤー名リスト）     |
+| `create_tournament`                | 大会作成                    | function | `group_key`, `name`（任意：大会名）              |
+| `register_tournament_participants` | 大会への参加者登録           | function | `tournament_key`, `players`（プレイヤーリスト）     |
+| `create_table`                     | 卓作成                      | function | `tournament_key`, `name`（任意：卓名）          |
+| `register_table_players`           | 卓へのプレイヤー登録          | function | `table_key`, `players`（プレイヤーリスト）        |
+| `create_game`                      | 対局登録（スコア付き）        | function | `table_key`, `players`, `memo`, `scores`（任意） |
+| `setup_full_tournament`            | 上記すべてをまとめた完全データセット     | function | `client`（pytestのHTTPクライアント）            | """
+
 
 
 import pytest
@@ -95,11 +96,13 @@ def create_table(client):
 @pytest.fixture(scope="function")
 def register_table_players(client):
     def _register_table_players(table_key, players):
+        print("register_table_players",players)
         for p in players:
             res = client.post(
                 f"/api/tables/{table_key}/players",
                 json={"player_id": p["id"]},
             )
+            print(res.get_json())
             assert res.status_code == 201
     return _register_table_players
 

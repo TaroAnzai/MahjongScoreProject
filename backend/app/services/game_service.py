@@ -77,12 +77,18 @@ def create_game(table_key: str, data: dict) -> Game:
     total = sum(s.get("score", 0) for s in scores)
     if total != 0:
         raise ServiceValidationError("スコアの合計は0である必要があります。")
-
+    #作成者情報
+    created_by = table.created_by or "anonymous"
     # game_index 自動採番
     max_index = db.session.query(func.max(Game.game_index)).filter_by(table_id=table.id).scalar()
     next_index = (max_index or 0) + 1
 
-    game = Game(table_id=table.id, game_index=next_index, memo=memo)
+    game = Game(
+        table_id=table.id,
+        game_index=next_index,
+        memo=memo,
+        created_by=created_by,  # ← ここを継承する
+    )
     db.session.add(game)
     db.session.flush()  # game.idを確定
 

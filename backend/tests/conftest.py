@@ -5,7 +5,7 @@ from app import create_app, db
 from app.models import Group, Tournament, Table, Game, Player, ShareLink, AccessLevel
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-
+pytest_plugins = ["tests.utils.test_data_factory"]
 @pytest.fixture(scope="session")
 def test_app():
     """
