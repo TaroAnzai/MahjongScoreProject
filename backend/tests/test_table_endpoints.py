@@ -106,22 +106,29 @@ class TestTableEndpoints:
         assert allowed.status_code == 200
         assert allowed.get_json()["message"] == "Table deleted"
         assert db_session.get(Table, table["id"]) is None
-    def test_get_games_by_table(self, client, db_session):
+    def test_get_games_by_table(self, client, db_session,create_players,register_tournament_participants):
         """GET: /api/tables/<table_key>/games - 卓内対局一覧取得"""
         # --- 前提：グループ・大会・卓を作成 ---
         group_data, group_links = _create_group(client)
+        players = create_players(group_links[AccessLevel.EDIT.value])
         tournament_data, tournament_links = _create_tournament(
             client, group_links[AccessLevel.EDIT.value]
         )
+        register_tournament_participants(tournament_links[AccessLevel.EDIT.value], players)
         table_res = _create_table(client, tournament_links[AccessLevel.EDIT.value])
         table = table_res.get_json()
         table_links = {l["access_level"]: l["short_key"] for l in table["table_links"]}
-
+        scores = [
+                {"player_id": players[0]["id"], "score": 25000},
+                {"player_id": players[1]["id"], "score": -8000},
+                {"player_id": players[2]["id"], "score": -8000},
+                {"player_id": players[3]["id"], "score": -9000},
+            ]
         # --- 対局を2件登録 ---
         for i in range(1, 3):
             res = client.post(
                 f"/api/tables/{table_links[AccessLevel.EDIT.value]}/games",
-                json={"game_index": i, "memo": f"Round {i}"},
+                json={"memo": f"Round {i}", "scores": scores},
             )
             assert res.status_code == 201
 
@@ -134,9 +141,8 @@ class TestTableEndpoints:
         assert len(data) == 2
 
         Game1 = data[0]
-        assert "view_link" in Game1
-        assert "edit_link" not in Game1
-        assert "owner_link" not in Game1
+        assert "game_index" in Game1
+
 
         # 対局インデックスが昇順で並んでいることを確認
         indexes = [g["game_index"] for g in data]
@@ -145,4 +151,4 @@ class TestTableEndpoints:
         # --- 存在しない table_key で 404 ---
         res_404 = client.get("/api/tables/xxxxxx/games")
         assert res_404.status_code == 404
-        assert "table_key" in res_404.get_json()["message"]
+        assert "table_keyが無効です。" in res_404.get_json()["message"]

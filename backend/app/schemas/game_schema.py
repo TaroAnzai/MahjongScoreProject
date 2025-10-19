@@ -12,7 +12,13 @@ class GameUpdateSchema(Schema):
     game_index = fields.Int(description="対局インデックス")
     memo = fields.Str(allow_none=True, description="メモ")
     played_at = fields.DateTime(allow_none=True, description="対局日時")
+    scores = fields.List(fields.Nested(ScoreInputSchema),  description="スコア一覧")
 
+    @validates("scores")
+    def validate_scores_sum_zero(self, scores):
+        total = sum(s.get("score", 0) for s in scores)
+        if total != 0:
+            raise ValidationError("スコアの合計は0でなければなりません。")
 
 class GameSchema(ShareLinkMixin, Schema):
     """対局レスポンス"""

@@ -5,7 +5,7 @@ from marshmallow import Schema, fields
 
 class TablePlayerCreateSchema(Schema):
     """卓への参加登録"""
-    player_id = fields.Int(required=True, description="大会参加者ID")
+    player_id = fields.Int(required=True, description="参加するプレイヤーID")
     seat_position = fields.Int(allow_none=True, description="卓での座席位置")
 
 

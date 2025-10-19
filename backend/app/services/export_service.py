@@ -3,7 +3,7 @@ from app.models import Group, Tournament, Table, Game, Player, Score, Tournament
 from app.service_errors import ServiceNotFoundError
 from app.utils.share_link_utils import get_share_link_by_key
 from app.service_errors import ServiceNotFoundError
-
+from sqlalchemy.orm import joinedload
 
 # =========================================================
 # 内部ユーティリティ
@@ -89,61 +89,52 @@ def get_group_summary(group_key: str):
 
     return result
 
-def get_tournament_score_map(tournament_key: str):
-    """
-    プレイヤーごとのスコア詳細を集計し、
-    {
-        player_id: {
-            table_<table.id>: 合計スコア,
-            total: 大会合計スコア,
-            games_played: 対局数
-        }, ...
-    }
-    の形式で返す。
-    """
-    # --- 大会キー確認 ---
+def get_tournament_score_map(tournament_key: str, rate: float = 0.001):
+    """大会単位のスコアマップを生成"""
+
     link = get_share_link_by_key(tournament_key)
     if not link or link.resource_type != "tournament":
         raise ServiceNotFoundError("大会が見つかりません。")
 
-    tournament = Tournament.query.get(link.resource_id)
+    tournament = Tournament.query.options(
+        joinedload(Tournament.tables).joinedload(Table.games).joinedload(Game.scores)
+    ).get(link.resource_id)
     if not tournament:
         raise ServiceNotFoundError("大会が存在しません。")
 
-    score_map = {}
+    # --- 全テーブル一覧 ---
+    tables = [{"id": t.id, "name": t.name} for t in tournament.tables]
 
-    # --- 大会に含まれる卓を取得 ---
-    tables = Table.query.filter_by(tournament_id=tournament.id).all()
-    for table in tables:
-        games = Game.query.filter_by(table_id=table.id).all()
-        for game in games:
-            scores = Score.query.filter_by(game_id=game.id).all()
-            for s in scores:
-                pid = s.player_id
-                score_map.setdefault(pid, {})
-                key = f"table_{table.id}"
-                score_map[pid][key] = score_map[pid].get(key, 0) + s.score
+    # --- プレイヤー初期辞書 ---
+    player_map = {}
+    for participant in tournament.participants:
+        p = participant.player
+        player_map[p.id] = {
+            "id": p.id,
+            "name": p.name,
+            "scores": {},   # table_idごとのスコア
+            "total": 0,
+            "converted_total": 0,
+        }
 
-    # --- プレイヤーごとの合計スコアと対局数を追加 ---
-    players = (
-        db.session.query(Player)
-        .join(TournamentPlayer, Player.id == TournamentPlayer.player_id)
-        .filter(TournamentPlayer.tournament_id == tournament.id)
-        .all()
-    )
+    # --- 各テーブルのスコアを集計 ---
+    for table in tournament.tables:
+        for game in table.games:
+            for s in game.scores:
+                if s.player_id not in player_map:
+                    continue
+                player_map[s.player_id]["scores"][str(table.id)] = \
+                    player_map[s.player_id]["scores"].get(str(table.id), 0) + s.score
 
-    for p in players:
-        # 合計スコア計算
-        player_scores = (
-            db.session.query(Score)
-            .join(Game, Score.game_id == Game.id)
-            .join(Table, Game.table_id == Table.id)
-            .filter(Table.tournament_id == tournament.id, Score.player_id == p.id)
-            .all()
-        )
-        total = sum(s.score for s in player_scores)
-        score_map.setdefault(p.id, {})
-        score_map[p.id]["total"] = total
-        score_map[p.id]["games_played"] = len(player_scores)
-    print("In service get_tournament_score_map:", score_map)
-    return score_map
+    # --- 合計と換算を計算 ---
+    for p in player_map.values():
+        total = sum(p["scores"].values())
+        p["total"] = total
+        p["converted_total"] = round(total * rate, 2)
+
+    return {
+        "tournament_id": tournament.id,
+        "tables": tables,
+        "players": list(player_map.values()),
+        "rate": rate,
+    }

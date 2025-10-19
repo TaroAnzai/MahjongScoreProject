@@ -2,132 +2,96 @@ import pytest
 from app.models import AccessLevel, Game
 
 
-def _create_group(client):
-    res = client.post("/api/groups", json={"name": "Game Group"})
-    data = res.get_json()
-    links = {l["access_level"]: l["short_key"] for l in data["group_links"]}
-    return data, links
-
-
-def _create_tournament(client, group_key, name="Game Tournament"):
-    res = client.post(
-        f"/api/groups/{group_key}/tournaments",
-        json={"name": name},
-    )
-    data = res.get_json()
-    links = {l["access_level"]: l["short_key"] for l in data["tournament_links"]}
-    return data, links
-
-
-def _create_table(client, tournament_key, name="Game Table"):
-    res = client.post(
-        f"/api/tournaments/{tournament_key}/tables",
-        json={"name": name},
-    )
-    data = res.get_json()
-    links = {l["access_level"]: l["short_key"] for l in data["table_links"]}
-    return data, links
-
-
-def _create_game(client, table_key, memo="Round 1"):
-    """新仕様：卓キーをURLに含める"""
-    return client.post(
-        f"/api/tables/{table_key}/games",
-        json={"game_index": 1, "memo": memo},
-    )
-
 
 @pytest.mark.api
 class TestGameEndpoints:
-    def test_create_game_requires_table_edit(self, client, db_session):
-        group_data, group_links = _create_group(client)
-        tournament_data, tournament_links = _create_tournament(
-            client, group_links[AccessLevel.EDIT.value]
+    def test_create_game_requires_table_edit(self, client, db_session,setup_full_tournament):
+        data = setup_full_tournament(client)
+        players = data["players"]
+        table_links = data["table_links"]
+        table_key_edit = table_links[AccessLevel.EDIT.value]
+        scores = [
+                {"player_id": players[0]["id"], "score": 25000},
+                {"player_id": players[1]["id"], "score": -8000},
+                {"player_id": players[2]["id"], "score": -8000},
+                {"player_id": players[3]["id"], "score": -9000},
+            ]
+        memo = "Test Game Creation"
+        res = client.post(
+            f"/api/tables/{table_key_edit}/games",
+            json={"memo": memo, "scores": scores},
         )
-        table_data, table_links = _create_table(
-            client, tournament_links[AccessLevel.EDIT.value]
-        )
-
-        res = _create_game(client, table_links[AccessLevel.EDIT.value])
         assert res.status_code == 201
         game = res.get_json()
+        assert game["memo"] == memo
+        assert len(game["scores"]) == 4
 
-        # ✅ game_links に変更
-        levels = {l["access_level"] for l in game["game_links"]}
-        assert levels == {AccessLevel.EDIT.value, AccessLevel.VIEW.value}
 
-    def test_create_game_with_view_link_forbidden(self, client, db_session):
-        group_data, group_links = _create_group(client)
-        tournament_data, tournament_links = _create_tournament(
-            client, group_links[AccessLevel.EDIT.value]
+
+
+    def test_create_game_with_view_link_forbidden(self, client, db_session,setup_full_tournament,create_game):
+        data = setup_full_tournament(client)
+        table_links = data["table_links"]
+        table_key_view = table_links[AccessLevel.VIEW.value]
+        players = data["players"]
+        scores = [
+                {"player_id": players[0]["id"], "score": 25000},
+                {"player_id": players[1]["id"], "score": -8000},
+                {"player_id": players[2]["id"], "score": -8000},
+                {"player_id": players[3]["id"], "score": -9000},
+            ]
+        res = client.post(
+            f"/api/tables/{table_key_view}/games",
+            json={"memo": "Should Fail", "scores": scores},
         )
-        table_data, table_links = _create_table(
-            client, tournament_links[AccessLevel.EDIT.value]
-        )
-
-        res = _create_game(client, table_links[AccessLevel.VIEW.value])
         assert res.status_code == 403
 
-    def test_get_game_requires_view(self, client, db_session):
-        group_data, group_links = _create_group(client)
-        tournament_data, tournament_links = _create_tournament(
-            client, group_links[AccessLevel.EDIT.value]
-        )
-        table_data, table_links = _create_table(
-            client, tournament_links[AccessLevel.EDIT.value]
-        )
-        game_res = _create_game(client, table_links[AccessLevel.EDIT.value])
-        game = game_res.get_json()
-        game_links = {l["access_level"]: l["short_key"] for l in game["game_links"]}
+    def test_get_game_requires_view(self, client, db_session,setup_full_tournament):
+        data = setup_full_tournament(client)
+        table_links = data["table_links"]
+        game_data = data["game"]
 
-        ok = client.get(f"/api/games/{game_links[AccessLevel.VIEW.value]}")
+        ok = client.get(f"/api/tables/{table_links[AccessLevel.EDIT.value]}/games/{game_data['id']}")
         assert ok.status_code == 200
 
-        forbidden = client.get(f"/api/games/{table_links[AccessLevel.VIEW.value]}")
-        assert forbidden.status_code == 403
+        forbidden = client.get(f"/api/tables/xxxx/games/{game_data['id']}")
+        assert forbidden.status_code == 404
 
-    def test_update_game_requires_edit(self, client, db_session):
-        group_data, group_links = _create_group(client)
-        tournament_data, tournament_links = _create_tournament(
-            client, group_links[AccessLevel.EDIT.value]
-        )
-        table_data, table_links = _create_table(
-            client, tournament_links[AccessLevel.EDIT.value]
-        )
-        game_res = _create_game(client, table_links[AccessLevel.EDIT.value])
-        game = game_res.get_json()
-        game_links = {l["access_level"]: l["short_key"] for l in game["game_links"]}
-
+    def test_update_game_requires_edit(self, client, db_session,setup_full_tournament):
+        data = setup_full_tournament(client)
+        table_links = data["table_links"]
+        players = data["players"]
+        game_data = data["game"]
+        update_scores = [
+                {"player_id": players[0]["id"], "score": 24000},
+                {"player_id": players[1]["id"], "score": -8000},
+                {"player_id": players[2]["id"], "score": -8000},
+                {"player_id": players[3]["id"], "score": -8000},
+            ]
+        payload ={"memo": "Updated Memo", "scores": update_scores}
         forbidden = client.put(
-            f"/api/games/{game_links[AccessLevel.VIEW.value]}",
-            json={"memo": "Forbidden"},
+            f"/api/tables/{table_links[AccessLevel.VIEW.value]}/games/{game_data['id']}",
+            json=payload,
         )
         assert forbidden.status_code == 403
 
         allowed = client.put(
-            f"/api/games/{game_links[AccessLevel.EDIT.value]}",
-            json={"memo": "Updated Memo"},
+            f"/api/tables/{table_links[AccessLevel.EDIT.value]}/games/{game_data['id']}",
+            json=payload,
         )
+        updated = allowed.get_json()
         assert allowed.status_code == 200
-        updated = db_session.get(Game, game["id"])
-        assert updated.memo == "Updated Memo"
+        assert updated["memo"] == "Updated Memo"
 
-    def test_delete_game_requires_table_edit(self, client, db_session):
-        group_data, group_links = _create_group(client)
-        tournament_data, tournament_links = _create_tournament(
-            client, group_links[AccessLevel.EDIT.value]
-        )
-        table_data, table_links = _create_table(
-            client, tournament_links[AccessLevel.EDIT.value]
-        )
-        game_res = _create_game(client, table_links[AccessLevel.EDIT.value])
-        game = game_res.get_json()
-        game_links = {l["access_level"]: l["short_key"] for l in game["game_links"]}
+    def test_delete_game_requires_table_edit(self, client, db_session, setup_full_tournament):
+        data = setup_full_tournament(client)
+        game = data["game"]
+        table_links = data["table_links"]
 
-        forbidden = client.delete(f"/api/games/{game_links[AccessLevel.VIEW.value]}")
+        forbidden = client.delete(f"/api/tables/{table_links[AccessLevel.VIEW.value]}/games/{game['id']}")
         assert forbidden.status_code == 403
 
-        allowed = client.delete(f"/api/games/{game_links[AccessLevel.EDIT.value]}")
+        allowed = client.delete(f"/api/tables/{table_links[AccessLevel.EDIT.value]}/games/{game['id']}")
         assert allowed.status_code == 200
         assert allowed.get_json()["message"] == "Game deleted"
         assert db_session.get(Game, game["id"]) is None

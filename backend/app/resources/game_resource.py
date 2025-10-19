@@ -20,7 +20,7 @@ from app.services.game_service import (
 game_bp = Blueprint(
     "games",
     __name__,
-    url_prefix="/api/games",
+    url_prefix="/api/tables/<string:table_key>/games",
     description="対局管理API",
 )
 
@@ -29,35 +29,35 @@ game_bp = Blueprint(
 # =========================================================
 # 対局単体操作
 # =========================================================
-@game_bp.route("/<string:game_key>")
+@game_bp.route("/<string:game_id>")
 class GameByKeyResource(MethodView):
     """GET / PUT / DELETE: 対局単体操作"""
 
     @game_bp.response(200, GameSchema)
     @with_common_error_responses(game_bp)
-    def get(self, game_key):
+    def get(self, table_key, game_id):
         """対局詳細取得"""
         try:
-            return get_game_by_key(game_key)
+            return get_game_by_key(table_key, game_id)
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
     @game_bp.arguments(GameUpdateSchema)
     @game_bp.response(200, GameSchema)
     @with_common_error_responses(game_bp)
-    def put(self, update_data, game_key):
+    def put(self, update_data, table_key, game_id):
         """対局更新"""
         try:
-            return update_game(game_key, update_data)
+            return update_game(table_key, game_id, update_data)
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
     @game_bp.response(200, MessageSchema)
     @with_common_error_responses(game_bp)
-    def delete(self, game_key):
+    def delete(self, table_key, game_id):
         """対局削除"""
         try:
-            delete_game(game_key)
+            delete_game(table_key, game_id)
             return {"message": "Game deleted"}
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)

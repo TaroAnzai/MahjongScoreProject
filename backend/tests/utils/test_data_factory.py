@@ -96,13 +96,11 @@ def create_table(client):
 @pytest.fixture(scope="function")
 def register_table_players(client):
     def _register_table_players(table_key, players):
-        print("register_table_players",players)
         for p in players:
             res = client.post(
                 f"/api/tables/{table_key}/players",
                 json={"player_id": p["id"]},
             )
-            print(res.get_json())
             assert res.status_code == 201
     return _register_table_players
 

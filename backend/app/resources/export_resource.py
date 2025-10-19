@@ -2,9 +2,9 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from app.decorators import with_common_error_responses
 from app.schemas.common_schemas import MessageSchema
-from app.schemas.export_schema import TournamentExportSchema, GroupSummarySchema,PlayerScoreMapSchema
+from app.schemas.export_schema import TournamentExportSchema, GroupSummarySchema,TournamentScoreMapSchema
 from app.service_errors import ServiceNotFoundError, ServicePermissionError
-from app.services.export_service import get_tournament_export, get_group_summary
+from app.services.export_service import get_tournament_export, get_group_summary, get_tournament_score_map
 
 # Blueprint
 export_bp = Blueprint(
@@ -53,14 +53,14 @@ class GroupSummaryResource(MethodView):
 # =========================================================
 @export_bp.route("/tournaments/<string:tournament_key>/score_map")
 class TournamentScoreMapResource(MethodView):
-    """GET: プレイヤーごとの卓別スコアを返す"""
+    """GET: 大会スコアマップ"""
 
-    @export_bp.response(200, PlayerScoreMapSchema)
+    @export_bp.response(200, TournamentScoreMapSchema)
     @with_common_error_responses(export_bp)
     def get(self, tournament_key):
-        from app.services.export_service import get_tournament_score_map
+
         try:
             result = get_tournament_score_map(tournament_key)
-            return {"score_map": result}
+            return result
         except ServiceNotFoundError as e:
             abort(e.status_code, message=e.message)

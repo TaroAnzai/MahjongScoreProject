@@ -60,20 +60,29 @@ def create_table_player(table_key: str, data: dict):
     player_id = data.get("player_id")
     if not player_id:
         raise ServiceValidationError("player_id は必須です。")
-    participant = TournamentPlayer.query.get(player_id)
-    if not participant:
-        raise ServiceNotFoundError("大会参加者が見つかりません。")
 
+    # 卓が属する大会を取得
     tournament = Tournament.query.get(table.tournament_id)
-    if not tournament or participant.tournament_id != tournament.id:
-        raise ServiceNotFoundError(f"指定された大会参加者がこの大会に属していません。{participant.tournament_id} != {tournament.id}")
+    if not tournament:
+        raise ServiceNotFoundError("対応する大会が見つかりません。")
 
+    # 大会内の参加者として存在するかを確認
+    participant = (
+        TournamentPlayer.query
+        .filter_by(tournament_id=tournament.id, player_id=player_id)
+        .first()
+    )
+    if not participant:
+        raise ServiceNotFoundError("指定されたプレイヤーはこの大会の参加者ではありません。")
+
+    # すでに同じプレイヤーが卓に登録されていないか確認
     existing = TablePlayer.query.filter_by(
-        table_id=table.id, player_id=player_id
+        table_id=table.id, player_id=participant.id
     ).first()
     if existing:
-        raise ServiceValidationError("この参加者はすでに卓に登録されています。")
+        raise ServiceValidationError("このプレイヤーはすでに卓に登録されています。")
 
+    # 登録処理
     table_player = TablePlayer(
         table_id=table.id,
         player_id=player_id,
@@ -81,6 +90,7 @@ def create_table_player(table_key: str, data: dict):
     )
     db.session.add(table_player)
     db.session.commit()
+
     return table_player
 
 

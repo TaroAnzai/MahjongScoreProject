@@ -83,6 +83,12 @@ class Tournament(db.Model):
         viewonly=True,
         lazy="joined"
     )
+    participants = db.relationship(
+        "TournamentPlayer",
+        back_populates="tournament",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
 
 
 # =========================================================
@@ -177,15 +183,6 @@ class Game(db.Model):
         "Score", backref="game", lazy=True, cascade="all, delete-orphan"
     )
 
-    # ✅ ShareLinkリレーション（ゲーム → game_links に変更）
-    game_links = db.relationship(
-        "ShareLink",
-        primaryjoin="and_(ShareLink.resource_type=='game', "
-                    "foreign(ShareLink.resource_id)==Game.id)",
-        viewonly=True,
-        lazy="joined"
-    )
-
 
 # =========================================================
 # スコア（各プレイヤーの点数）
@@ -215,11 +212,8 @@ class TournamentPlayer(db.Model):
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
 
-    tournament = db.relationship(
-        "Tournament", backref=db.backref("tournament_players", lazy="dynamic")
-    )
+    tournament = db.relationship("Tournament", back_populates="participants")
     player = db.relationship("Player", back_populates="tournament_participations")
-
 
 # =========================================================
 # 共有リンク（短縮キー方式）
