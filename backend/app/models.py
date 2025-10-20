@@ -36,9 +36,7 @@ class Group(db.Model):
     )
 
     # リレーション
-    tournaments = db.relationship(
-        "Tournament", backref="group", lazy=True, cascade="all, delete-orphan"
-    )
+    tournaments = db.relationship("Tournament", back_populates="group")
     players = db.relationship(
         "Player", back_populates="group", cascade="all, delete-orphan"
     )
@@ -71,6 +69,7 @@ class Tournament(db.Model):
     )
 
     # 関連
+    group = db.relationship("Group", back_populates="tournaments")
     tables = db.relationship(
         "Table", backref="tournament", lazy=True, cascade="all, delete-orphan"
     )

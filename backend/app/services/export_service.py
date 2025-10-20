@@ -89,7 +89,7 @@ def get_group_summary(group_key: str):
 
     return result
 
-def get_tournament_score_map(tournament_key: str, rate: float = 0.001):
+def get_tournament_score_map(tournament_key: str):
     """大会単位のスコアマップを生成"""
 
     link = get_share_link_by_key(tournament_key)
@@ -102,6 +102,7 @@ def get_tournament_score_map(tournament_key: str, rate: float = 0.001):
     if not tournament:
         raise ServiceNotFoundError("大会が存在しません。")
 
+    rate = tournament.rate if tournament.rate else 0.001
     # --- 全テーブル一覧 ---
     tables = [{"id": t.id, "name": t.name} for t in tournament.tables]
 

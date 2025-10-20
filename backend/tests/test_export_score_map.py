@@ -69,3 +69,19 @@ class TestTournamentScoreMap:
         assert res.status_code == 404
         msg = res.get_json()["message"]
         assert "大会" in msg
+
+    def test_get_tournament_score_map_empty(self, client,create_group, create_tournament):
+        """正常系: スコアマップが空の大会"""
+        group, group_links = create_group()
+        tournament, tournament_links = create_tournament(group_links[AccessLevel.EDIT.value])
+        res = client.get(
+            f"/api/tournaments/{tournament_links[AccessLevel.VIEW.value]}/score_map"
+        )
+        assert res.status_code == 200
+
+        result = res.get_json()
+        assert result["tournament_id"] == tournament["id"]
+        assert result["tables"] == []
+        assert result["players"] == []
+        assert result["rate"] == 1.0
+

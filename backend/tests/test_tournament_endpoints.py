@@ -82,6 +82,8 @@ class TestTournamentEndpoints:
 
         # === 検証4: 正しい大会が返ってきている ===
         assert fetched["id"] == tournament["id"]
+        print(fetched)
+        assert fetched["group"] == group_data
 
         # === 検証5: グループのVIEWキーでは403になる ===
         forbidden = client.get(f"/api/tournaments/{links[AccessLevel.VIEW.value]}")

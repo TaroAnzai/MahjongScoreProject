@@ -17,17 +17,23 @@ import EditTournamentModal from '../components/EditTournamentModal';
 import { useGetTournament, useGetTournamentPlayers } from '@/hooks/useTournaments';
 import { useGetTables } from '@/hooks/useTables';
 import { useGetTournamentScore, useGetTournamentScoreMap } from '@/hooks/useScore';
+import { useGetPlayer } from '@/hooks/usePlayers';
 
 function TournamentPage() {
   const navigate = useNavigate();
   const { tournamentKey } = useParams();
+  if (!tournamentKey) {
+    return <div className="mahjong-container">大会キーが指定されていません</div>;
+  }
+
   const { tournament, isLoadingTournament, loadTournament } = useGetTournament(tournamentKey!);
   const { players, isLoadingPlayers, loadPlayers } = useGetTournamentPlayers(tournamentKey!);
   const { tables, isLoadingTables, loadTables } = useGetTables(tournamentKey!);
   const { scoreMap, isLoadingScoreMap, loadScoreMap } = useGetTournamentScoreMap(tournamentKey!);
+  const { player } = useGetPlayer(groupKey);
 
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
-  const [memberOptions, setMemberOptions] = useState([]);
+
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
 
   const [isEditingRate, setIsEditingRate] = useState(false);
@@ -170,6 +176,13 @@ function TournamentPage() {
     setTournament((prev) => ({ ...prev, ...updates }));
     setShowEditModal(false);
   };
+  const handleTableClick = (table_id: number) => {
+    if (!tables) return;
+    const table = tables.find((t) => t.id === table_id);
+    if (!table) return;
+    const table_key = table.edit_link ?? table.view_link ?? '';
+    navigate(`/table/${table_key}`);
+  };
   const TitleWithModal = () => (
     <div className="mahjong-editable-title" onClick={() => setShowEditModal(true)}>
       {tournament.name}
@@ -223,7 +236,7 @@ function TournamentPage() {
 
       <div className="mahjong-section">
         <h3 className="mahjong-subtitle">大会成績</h3>
-        <ScoreTable players={players} tables={tables} scoreMap={scoreMap} />
+        <ScoreTable scoreMap={scoreMap} onClick={handleTableClick} />
       </div>
 
       {showAddPlayerModal && (
