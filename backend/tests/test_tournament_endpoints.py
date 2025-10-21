@@ -81,9 +81,15 @@ class TestTournamentEndpoints:
         assert "OWNER" not in levels, f"Unexpected OWNER links: {links_data}"
 
         # === 検証4: 正しい大会が返ってきている ===
+
         assert fetched["id"] == tournament["id"]
+
+        # === 検証5: グループ情報が含まれている ===
         print(fetched)
-        assert fetched["group"] == group_data
+        assert "group" in fetched
+        assert fetched["group"]["name"] == group_data["name"]
+        assert "" in fetched['group']
+
 
         # === 検証5: グループのVIEWキーでは403になる ===
         forbidden = client.get(f"/api/tournaments/{links[AccessLevel.VIEW.value]}")

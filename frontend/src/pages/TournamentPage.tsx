@@ -14,7 +14,11 @@ import MultiSelectorModal from '../components/MultiSelectorModal';
 import EditTournamentModal from '../components/EditTournamentModal';
 
 // ユーティリティ
-import { useGetTournament, useGetTournamentPlayers } from '@/hooks/useTournaments';
+import {
+  useAddTournamentPlayer,
+  useGetTournament,
+  useGetTournamentPlayers,
+} from '@/hooks/useTournaments';
 import { useGetTables } from '@/hooks/useTables';
 import { useGetTournamentScore, useGetTournamentScoreMap } from '@/hooks/useScore';
 import { useGetPlayer } from '@/hooks/usePlayers';
@@ -25,12 +29,15 @@ function TournamentPage() {
   if (!tournamentKey) {
     return <div className="mahjong-container">大会キーが指定されていません</div>;
   }
-
+  //Query系フック設定
   const { tournament, isLoadingTournament, loadTournament } = useGetTournament(tournamentKey!);
+  const groupKey = tournament?.group.edit_link ?? tournament?.group.view_link ?? '';
   const { players, isLoadingPlayers, loadPlayers } = useGetTournamentPlayers(tournamentKey!);
   const { tables, isLoadingTables, loadTables } = useGetTables(tournamentKey!);
   const { scoreMap, isLoadingScoreMap, loadScoreMap } = useGetTournamentScoreMap(tournamentKey!);
-  const { player } = useGetPlayer(groupKey);
+  const { players: groupPlayers, isLoadingPlayers: isLoadingGroupPlayers } = useGetPlayer(groupKey);
+  //Mutation系フック
+  const { mutate: addTournamentPlayer } = useAddTournamentPlayer(loadPlayers);
 
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
 
@@ -42,44 +49,21 @@ function TournamentPage() {
   const [showEditModal, setShowEditModal] = useState(false);
 
   const handleOpenAddPlayerModal = async () => {
-    if (!tournament?.group_id) {
-      alert('グループ情報が取得できません');
+    if (!groupPlayers || groupPlayers.length === 0) {
+      alert('追加可能な参加者がいません');
       return;
     }
-    try {
-      const members = await getPlayersByGroup(tournament.group_id);
-      const existingIds = new Set(players.map((p) => p.id));
-      const filteredMembers = members.filter((member) => !existingIds.has(member.id));
-
-      if (filteredMembers.length === 0) {
-        alert('追加可能な参加者がいません');
-        return;
-      }
-
-      setMemberOptions(filteredMembers);
-      setShowAddPlayerModal(true);
-    } catch (e) {
-      console.error(e);
-      alert('メンバーの取得に失敗しました');
-    }
+    setShowAddPlayerModal(true);
   };
 
   const handleAddPlayer = async (selectedPlayers) => {
-    try {
-      const playerIds = selectedPlayers.map((p) => p.id);
-      await registerTournamentPlayers(tournament.id, playerIds);
+    const playerIds = selectedPlayers.map((p) => p.id);
+    await registerTournamentPlayers(tournament.id, playerIds);
 
-      const [updatedPlayers, updatedScores] = await Promise.all([
-        getTournamentPlayers(tournament.id),
-        getPlayerTotalScores(tournament.id),
-      ]);
-      setPlayers(updatedPlayers);
-      setScoreMap(updatedScores || {});
-      setShowAddPlayerModal(false);
-    } catch (e) {
-      console.error(e);
-      alert('参加者の登録に失敗しました');
-    }
+    const [updatedPlayers, updatedScores] = await Promise.all([
+      getTournamentPlayers(tournament.id),
+      getPlayerTotalScores(tournament.id),
+    ]);
   };
   const handleCreateTable = async () => {
     try {
@@ -242,7 +226,7 @@ function TournamentPage() {
       {showAddPlayerModal && (
         <MultiSelectorModal
           title="参加者を選択"
-          items={memberOptions}
+          items={groupPlayers}
           onConfirm={handleAddPlayer}
           onClose={() => setShowAddPlayerModal(false)}
         />

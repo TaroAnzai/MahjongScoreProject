@@ -3,10 +3,18 @@
 from marshmallow import Schema, fields
 
 
-class TournamentParticipantCreateSchema(Schema):
-    """大会へのプレイヤー登録用"""
-    player_id = fields.Int(required=True, description="大会に登録するプレイヤーID")
-
+class TournamentParticipantsCreateSchema(Schema):
+    """大会への複数プレイヤー登録用"""
+    participants = fields.List(
+        fields.Nested(
+            Schema.from_dict({
+                "player_id": fields.Int(required=True, description="大会に登録するプレイヤーID"),
+            })
+        ),
+        required=True,
+        description="大会に登録するプレイヤー一覧",
+        example=[{"player_id": 1}, {"player_id": 2}],
+    )
 
 class TournamentParticipantSchema(Schema):
     """大会参加者レスポンス"""

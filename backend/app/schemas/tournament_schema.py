@@ -29,7 +29,7 @@ class TournamentSchema(ShareLinkMixin,Schema):
     group = fields.Nested(
         GroupSchema,
         required=True,
-        only=("group_links", "name"),
+        exclude=("description", "id", "created_by", "created_at", "last_updated_at"),
         dump_only=True,
         description="大会が所属するグループ情報（short_keyとグループ名のみ）"
     )

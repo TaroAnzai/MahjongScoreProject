@@ -99,6 +99,9 @@ def get_tournament_by_key(short_key: str) -> Tournament:
     """大会共有キーから大会取得"""
     link, tournament = _require_tournament(short_key)
     tournament.current_user_access = link.access_level
+    # ✅ 親グループにも同じアクセス権を適用
+    if tournament.group:
+        tournament.group.current_user_access = link.access_level
     return tournament
 
 

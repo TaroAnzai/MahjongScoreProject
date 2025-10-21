@@ -47,33 +47,53 @@ def list_participants_by_key(tournament_key: str):
 
 
 # =========================================================
-# 参加者追加
+# 参加者追加（複数対応）
 # =========================================================
-def create_participant(tournament_key: str, data: dict):
-    """大会共有キーからプレイヤーを登録"""
+def create_participants(tournament_key: str, data_list: list[dict]):
+    """大会共有キーから複数のプレイヤーを登録"""
     link, tournament = _require_tournament(tournament_key)
     _ensure_access(link, AccessLevel.EDIT, "参加者を追加する権限がありません。")
 
-    player_id = data.get("player_id")
-    if not player_id:
-        raise ServiceValidationError("player_id は必須です。")
+    if not isinstance(data_list, list) or not data_list:
+        raise ServiceValidationError("data_list は空ではいけません。")
 
-    player = Player.query.get(player_id)
-    if not player:
-        raise ServiceNotFoundError("プレイヤーが見つかりません。")
-    if player.group_id != tournament.group_id:
-        raise ServicePermissionError("プレイヤーが別グループに属しています。")
+    added_participants = []
+    errors = []
 
-    existing = TournamentPlayer.query.filter_by(
-        tournament_id=tournament.id, player_id=player_id
-    ).first()
-    if existing:
-        raise ServiceValidationError("このプレイヤーはすでに大会に登録されています。")
+    for i, data in enumerate(data_list, start=1):
+        player_id = data.get("player_id")
+        if not player_id:
+            errors.append({"index": i, "error": "player_id は必須です。"})
+            continue
 
-    participant = TournamentPlayer(tournament_id=tournament.id, player_id=player.id)
-    db.session.add(participant)
-    db.session.commit()
-    return participant
+        player = Player.query.get(player_id)
+        if not player:
+            errors.append({"index": i, "error": f"プレイヤー（ID={player_id}）が見つかりません。"})
+            continue
+        if player.group_id != tournament.group_id:
+            errors.append({"index": i, "error": f"プレイヤー（ID={player_id}）は別グループに属しています。"})
+            continue
+
+        existing = TournamentPlayer.query.filter_by(
+            tournament_id=tournament.id, player_id=player_id
+        ).first()
+        if existing:
+            errors.append({"index": i, "error": f"プレイヤー（ID={player_id}）はすでに登録されています。"})
+            continue
+
+        participant = TournamentPlayer(tournament_id=tournament.id, player_id=player.id)
+        db.session.add(participant)
+        added_participants.append(participant)
+
+    # 有効なものが1件以上あればコミット
+    if added_participants:
+        db.session.commit()
+
+    return {
+        "added_count": len(added_participants),
+        "errors": errors,
+        "participants": added_participants,
+    }
 
 
 # =========================================================

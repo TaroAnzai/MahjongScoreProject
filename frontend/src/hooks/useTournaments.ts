@@ -1,10 +1,11 @@
 import {
   postApiGroupsGroupKeyTournaments,
+  postApiTournamentsTournamentKeyParticipants,
   useGetApiGroupsGroupKeyTournaments,
   useGetApiTournamentsTournamentKey,
   useGetApiTournamentsTournamentKeyParticipants,
 } from '@/api/generated/mahjongApi';
-import type { TournamentCreate } from '@/api/generated/mahjongApi.schemas';
+import type { Player, TournamentCreate } from '@/api/generated/mahjongApi.schemas';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -51,4 +52,25 @@ export const useGetTournamentPlayers = (tournamentKey: string) => {
     refetch: loadPlayers,
   } = useGetApiTournamentsTournamentKeyParticipants(tournamentKey);
   return { players, isLoadingPlayers, loadPlayers };
+};
+
+export const useAddTournamentPlayer = (onAfterSuccess?: () => void) => {
+  return useMutation({
+    mutationFn: (data: { tournamentKey: string; player: Player }) => {
+      if (!data.player.id) {
+        throw new Error('Player ID is required');
+      }
+      return postApiTournamentsTournamentKeyParticipants(data.tournamentKey, {
+        player_id: data.player.id,
+      });
+    },
+    onSuccess: (data) => {
+      toast.success('Player added successfully');
+      onAfterSuccess?.();
+    },
+    onError: (error) => {
+      console.error('Error adding player:', error);
+      toast.error('Error adding player');
+    },
+  });
 };
