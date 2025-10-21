@@ -42,11 +42,14 @@ def list_participants_by_key(tournament_key: str):
     """大会共有キーから参加者一覧を取得"""
     link, tournament = _require_tournament(tournament_key)
     _ensure_access(link, AccessLevel.VIEW, "参加者一覧を閲覧する権限がありません。")
+    tournament_players = (
+        db.session.query(TournamentPlayer)
+        .filter_by(tournament_id=tournament.id)
+        .all()
+    )
     result = {
         "tournament_id": tournament.id,
-        "participants": db.session.query(TournamentPlayer)
-            .filter_by(tournament_id=tournament.id)
-            .all(),
+        "participants": [tp.player for tp in tournament_players],
     }
 
     return result

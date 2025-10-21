@@ -17,7 +17,7 @@ class PlayerUpdateSchema(Schema):
 
 class PlayerSchema(Schema):
     """プレイヤーレスポンス"""
-    id = fields.Int(dump_only=True)
+    id = fields.Int(required=True, dump_only=True)
     group_id = fields.Int(required=True)
     name = fields.Str(required=True)
     nickname = fields.Str(allow_none=True)

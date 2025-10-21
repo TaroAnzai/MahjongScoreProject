@@ -1,6 +1,7 @@
 # app/schemas/tournament_participant_schema.py
 
 from marshmallow import Schema, fields
+from app.schemas.player_schema import PlayerSchema
 
 class TournamentParticipantSchema(Schema):
     """大会参加者"""
@@ -19,7 +20,7 @@ class TournamentParticipantsSchema(Schema):
     """大会参加者レスポンス"""
     tournament_id = fields.Int(required=True)
     participants = fields.List(
-        fields.Nested(TournamentParticipantSchema),
+        fields.Nested(PlayerSchema),
         required=True,
         description="大会に登録されているプレイヤー一覧",
     )

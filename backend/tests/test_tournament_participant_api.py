@@ -90,7 +90,9 @@ def test_list_tournament_participants(client, setup_group_with_tournament, db_se
     assert res.status_code == 200
     result = res.get_json()['participants']
     assert isinstance(result, list)
-    assert any(p["player_id"] == d["players"][0]["id"] for p in result)
+    assert any(p["id"] == d["players"][0]["id"] for p in result)
+    print("Participants fetched:", result)
+    assert all("name" in p for p in result)  # PlayerSchemaのフィールド確認
 
 
 def test_delete_tournament_participant(client, setup_group_with_tournament, db_session):
@@ -101,12 +103,12 @@ def test_delete_tournament_participant(client, setup_group_with_tournament, db_s
     res = client.post(url, json={"participants":[{"player_id": d["players"][0]["id"]}]})
     assert res.status_code == 201
     participant = res.get_json()['participants'][0]
-    url = f"/api/tournaments/{d['tournament_key']}/participants/{participant['player_id']}"
+    url = f"/api/tournaments/{d['tournament_key']}/participants/{participant['id']}"
     res = client.delete(url)
     assert res.status_code == 200
     assert res.get_json()["message"] == "Tournament participant deleted"
 
-    deleted = db_session.get(TournamentPlayer, participant["player_id"])
+    deleted = db_session.get(TournamentPlayer, participant["id"])
     assert deleted is None
 
 

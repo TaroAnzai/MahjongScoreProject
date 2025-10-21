@@ -79,14 +79,12 @@ def test_create_table_player(client, db_session, setup_table_with_participants):
     url = f"/api/tables/{table_key}/players"
     res = client.post(
         url,
-        json={"player_id": participant["player_id"], "seat_position": 1},
+        json={"player_id": participant["id"], "seat_position": 1},
     )
-    print("participant:", participant)
-    print(res.get_json())
     assert res.status_code == 201
 
     created = db_session.query(TablePlayer).filter_by(
-        table_id=data["table"]["id"], player_id=participant["player_id"]
+        table_id=data["table"]["id"], player_id=participant["id"]
     ).first()
     assert created is not None
 
@@ -100,7 +98,7 @@ def test_list_table_players(client, db_session, setup_table_with_participants):
     db_session.add(
         TablePlayer(
             table_id=data["table"]["id"],
-            player_id=participant["player_id"],
+            player_id=participant["id"],
             seat_position=2,
         )
     )
@@ -112,7 +110,7 @@ def test_list_table_players(client, db_session, setup_table_with_participants):
 
     result = res.get_json()
     assert isinstance(result, list)
-    assert any(p["player_id"] == participant["player_id"] for p in result)
+    assert any(p["player_id"] == participant["id"] for p in result)
 
 
 def test_delete_table_player(client, db_session, setup_table_with_participants):
@@ -122,7 +120,7 @@ def test_delete_table_player(client, db_session, setup_table_with_participants):
     participant = data["participants"][0]
 
     table_player = TablePlayer(
-        table_id=data["table"]["id"], player_id=participant["player_id"]
+        table_id=data["table"]["id"], player_id=participant["id"]
     )
     db_session.add(table_player)
     db_session.commit()
