@@ -88,7 +88,7 @@ class TestTournamentEndpoints:
         print(fetched)
         assert "group" in fetched
         assert fetched["group"]["name"] == group_data["name"]
-        assert "" in fetched['group']
+        assert "view_link" in fetched['group']
 
 
         # === 検証5: グループのVIEWキーでは403になる ===

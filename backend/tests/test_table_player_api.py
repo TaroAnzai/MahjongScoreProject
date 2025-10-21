@@ -39,10 +39,10 @@ def setup_table_with_participants(client):
     # --- 大会参加者登録 ---
     participant_res = client.post(
         f"/api/tournaments/{tournament_key}/participants",
-        json={"player_id": player["id"]},
+        json={'participants':[{"player_id": player["id"]}]},
     )
     assert participant_res.status_code == 201
-    participant = participant_res.get_json()
+    participants = participant_res.get_json()
 
     # --- 卓作成 ---
     table_res = client.post(
@@ -64,7 +64,7 @@ def setup_table_with_participants(client):
         "tournament_key": tournament_key,
         "table": table,
         "table_key": table_key,
-        "participant": participant,
+        "participants": participants['participants'],
     }
 
 
@@ -74,7 +74,7 @@ def test_create_table_player(client, db_session, setup_table_with_participants):
     """POST /api/tables/<table_key>/players — 卓参加者登録"""
     data = setup_table_with_participants
     table_key = data["table_key"]
-    participant = data["participant"]
+    participant = data["participants"][0]
 
     url = f"/api/tables/{table_key}/players"
     res = client.post(
@@ -95,7 +95,7 @@ def test_list_table_players(client, db_session, setup_table_with_participants):
     """GET /api/tables/<table_key>/players — 卓参加者一覧"""
     data = setup_table_with_participants
     table_key = data["table_key"]
-    participant = data["participant"]
+    participant = data["participants"][0]
 
     db_session.add(
         TablePlayer(
@@ -119,7 +119,7 @@ def test_delete_table_player(client, db_session, setup_table_with_participants):
     """DELETE /api/tables/<table_key>/players/<player_id> — 卓参加者削除"""
     data = setup_table_with_participants
     table_key = data["table_key"]
-    participant = data["participant"]
+    participant = data["participants"][0]
 
     table_player = TablePlayer(
         table_id=data["table"]["id"], player_id=participant["player_id"]

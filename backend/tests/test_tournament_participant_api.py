@@ -65,7 +65,7 @@ def test_create_tournament_participant(client, setup_group_with_tournament, db_s
     d = setup_group_with_tournament
     url = f"/api/tournaments/{d['tournament_key']}/participants"
 
-    res = client.post(url, json={"player_id": d["players"][0]["id"]})
+    res = client.post(url, json={'participants':[{"player_id": d["players"][0]["id"]}]})
     assert res.status_code == 201
 
     created = db_session.query(TournamentPlayer).filter_by(
@@ -88,8 +88,7 @@ def test_list_tournament_participants(client, setup_group_with_tournament, db_se
     url = f"/api/tournaments/{d['tournament_key']}/participants"
     res = client.get(url)
     assert res.status_code == 200
-
-    result = res.get_json()
+    result = res.get_json()['participants']
     assert isinstance(result, list)
     assert any(p["player_id"] == d["players"][0]["id"] for p in result)
 
@@ -99,15 +98,15 @@ def test_delete_tournament_participant(client, setup_group_with_tournament, db_s
     d = setup_group_with_tournament
     url = f"/api/tournaments/{d['tournament_key']}/participants"
 
-    res = client.post(url, json={"player_id": d["players"][0]["id"]})
+    res = client.post(url, json={"participants":[{"player_id": d["players"][0]["id"]}]})
     assert res.status_code == 201
-    participant = res.get_json()
-    url = f"/api/tournaments/{d['tournament_key']}/participants/{participant['id']}"
+    participant = res.get_json()['participants'][0]
+    url = f"/api/tournaments/{d['tournament_key']}/participants/{participant['player_id']}"
     res = client.delete(url)
     assert res.status_code == 200
     assert res.get_json()["message"] == "Tournament participant deleted"
 
-    deleted = db_session.get(TournamentPlayer, participant["id"])
+    deleted = db_session.get(TournamentPlayer, participant["player_id"])
     assert deleted is None
 
 
@@ -116,7 +115,7 @@ def test_create_with_invalid_key(client, setup_group_with_tournament):
     d = setup_group_with_tournament
     player = d["players"][0]
     url = f"/api/tournaments/invalid-key/participants"
-    res = client.post(url, json={"player_id": player["id"]})
+    res = client.post(url, json={'participants':[{"player_id": player["id"]}]})
     assert res.status_code == 404
 
 
@@ -127,9 +126,13 @@ def test_create_duplicate_participant(client, setup_group_with_tournament, db_se
     participant = TournamentPlayer(
         tournament_id=d["tournament"]["id"], player_id=p["id"]
     )
+
     db_session.add(participant)
     db_session.commit()
-
     url = f"/api/tournaments/{d['tournament_key']}/participants"
-    res = client.post(url, json={"player_id": p["id"]})
-    assert res.status_code == 400
+    res = client.post(url, json={'participants':[{"player_id": p["id"]}]})
+    print("Response:", res.get_json())
+    assert res.status_code == 201
+    assert res.get_json()["added_count"] == 0
+    assert len(res.get_json()["errors"]) == 1
+    assert "すでに登録されています" in res.get_json()["errors"][0]['error']

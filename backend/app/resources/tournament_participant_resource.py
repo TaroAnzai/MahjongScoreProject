@@ -5,8 +5,8 @@ from flask_smorest import Blueprint, abort
 from app.decorators import with_common_error_responses
 from app.schemas.common_schemas import MessageSchema
 from app.schemas.tournament_participant_schema import (
-    TournamentParticipantCreateSchema,
-    TournamentParticipantSchema,
+    TournamentParticipantsCreateSchema,
+    TournamentParticipantsSchema,
 )
 from app.service_errors import (
     ServiceNotFoundError,
@@ -15,7 +15,7 @@ from app.service_errors import (
 )
 from app.services.tournament_participant_service import (
     list_participants_by_key,
-    create_participant,
+    create_participants,
     delete_participant,
 )
 
@@ -34,7 +34,7 @@ tournament_participant_bp = Blueprint(
 class TournamentParticipantListResource(MethodView):
     """GET: 大会参加者一覧 / POST: プレイヤー登録"""
 
-    @tournament_participant_bp.response(200, TournamentParticipantSchema(many=True))
+    @tournament_participant_bp.response(200, TournamentParticipantsSchema)
     @with_common_error_responses(tournament_participant_bp)
     def get(self, tournament_key):
         """大会共有キーから参加者一覧を取得"""
@@ -43,13 +43,13 @@ class TournamentParticipantListResource(MethodView):
         except (ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 
-    @tournament_participant_bp.arguments(TournamentParticipantCreateSchema)
-    @tournament_participant_bp.response(201, TournamentParticipantSchema)
+    @tournament_participant_bp.arguments(TournamentParticipantsCreateSchema)
+    @tournament_participant_bp.response(201, TournamentParticipantsSchema)
     @with_common_error_responses(tournament_participant_bp)
     def post(self, new_data, tournament_key):
         """大会共有キーからプレイヤーを登録"""
         try:
-            return create_participant(tournament_key, new_data)
+            return create_participants(tournament_key, new_data)
         except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
             abort(e.status_code, message=e.message)
 

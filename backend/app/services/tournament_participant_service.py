@@ -42,18 +42,24 @@ def list_participants_by_key(tournament_key: str):
     """大会共有キーから参加者一覧を取得"""
     link, tournament = _require_tournament(tournament_key)
     _ensure_access(link, AccessLevel.VIEW, "参加者一覧を閲覧する権限がありません。")
+    result = {
+        "tournament_id": tournament.id,
+        "participants": db.session.query(TournamentPlayer)
+            .filter_by(tournament_id=tournament.id)
+            .all(),
+    }
 
-    return TournamentPlayer.query.filter_by(tournament_id=tournament.id).all()
+    return result
 
 
 # =========================================================
 # 参加者追加（複数対応）
 # =========================================================
-def create_participants(tournament_key: str, data_list: list[dict]):
+def create_participants(tournament_key: str, data: list[dict]):
     """大会共有キーから複数のプレイヤーを登録"""
     link, tournament = _require_tournament(tournament_key)
+    data_list = data.get("participants", [])
     _ensure_access(link, AccessLevel.EDIT, "参加者を追加する権限がありません。")
-
     if not isinstance(data_list, list) or not data_list:
         raise ServiceValidationError("data_list は空ではいけません。")
 
@@ -73,7 +79,6 @@ def create_participants(tournament_key: str, data_list: list[dict]):
         if player.group_id != tournament.group_id:
             errors.append({"index": i, "error": f"プレイヤー（ID={player_id}）は別グループに属しています。"})
             continue
-
         existing = TournamentPlayer.query.filter_by(
             tournament_id=tournament.id, player_id=player_id
         ).first()
@@ -90,6 +95,7 @@ def create_participants(tournament_key: str, data_list: list[dict]):
         db.session.commit()
 
     return {
+        "tournament_id": tournament.id,
         "added_count": len(added_participants),
         "errors": errors,
         "participants": added_participants,

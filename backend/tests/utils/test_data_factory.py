@@ -70,7 +70,7 @@ def register_tournament_participants(client):
         for p in players:
             res = client.post(
                 f"/api/tournaments/{tournament_key}/participants",
-                json={"player_id": p["id"]},
+                json={'participants': [{"player_id": p["id"]}]},
             )
             assert res.status_code == 201
     return _register_tournament_participants
