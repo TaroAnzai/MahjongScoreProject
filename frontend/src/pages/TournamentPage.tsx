@@ -16,12 +16,14 @@ import EditTournamentModal from '../components/EditTournamentModal';
 // ユーティリティ
 import {
   useAddTournamentPlayer,
+  useDeleteTounamentsPlayer,
   useGetTournament,
   useGetTournamentPlayers,
 } from '@/hooks/useTournaments';
 import { useGetTables } from '@/hooks/useTables';
 import { useGetTournamentScore, useGetTournamentScoreMap } from '@/hooks/useScore';
 import { useGetPlayer } from '@/hooks/usePlayers';
+import type { Player } from '@/api/generated/mahjongApi.schemas';
 
 function TournamentPage() {
   const navigate = useNavigate();
@@ -37,7 +39,10 @@ function TournamentPage() {
   const { scoreMap, isLoadingScoreMap, loadScoreMap } = useGetTournamentScoreMap(tournamentKey!);
   const { players: groupPlayers, isLoadingPlayers: isLoadingGroupPlayers } = useGetPlayer(groupKey);
   //Mutation系フック
-  const { mutate: addTournamentPlayer } = useAddTournamentPlayer(loadPlayers);
+  const { mutate: addTournamentPlayer } = useAddTournamentPlayer(loadTournament);
+  const { mutate: deleteTournamentPlayer } = useDeleteTounamentsPlayer(loadTournament);
+
+  //ローカルステート
 
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
 
@@ -56,14 +61,9 @@ function TournamentPage() {
     setShowAddPlayerModal(true);
   };
 
-  const handleAddPlayer = async (selectedPlayers) => {
-    const playerIds = selectedPlayers.map((p) => p.id);
-    await registerTournamentPlayers(tournament.id, playerIds);
-
-    const [updatedPlayers, updatedScores] = await Promise.all([
-      getTournamentPlayers(tournament.id),
-      getPlayerTotalScores(tournament.id),
-    ]);
+  const handleAddPlayer = async (selectedPlayers: Player[]) => {
+    addTournamentPlayer({ tournamentKey: tournamentKey!, players: selectedPlayers });
+    setShowAddPlayerModal(false);
   };
   const handleCreateTable = async () => {
     try {
@@ -120,27 +120,19 @@ function TournamentPage() {
     }
   };
   const handleOpenDeletePlayerModal = () => {
-    if (!players.length) {
+    if (!players?.participants?.length) {
       alert('削除対象の参加者がいません');
       return;
     }
+    console.log(players);
     setShowDeletePlayerModal(true);
   };
-  const handleDeletePlayer = async (player) => {
+  const handleDeletePlayer = (player: Player) => {
     const confirmed = window.confirm(`${player.name} を削除してよいですか？`);
     if (!confirmed) return;
-    const responce = await deleteTournamentPlayer(tournament.id, player.id);
-    if (responce.success === false) {
-      alert(`参加者の削除に失敗しました: ${responce.message}`);
-      return;
-    }
+    const payload = { tournamentKey: tournamentKey!, playerId: player.id };
+    deleteTournamentPlayer(payload);
 
-    const [updatedPlayers, updatedScores] = await Promise.all([
-      getTournamentPlayers(tournament.id),
-      getPlayerTotalScores(tournament.id),
-    ]);
-    setPlayers(updatedPlayers);
-    setScoreMap(updatedScores || {});
     setShowDeletePlayerModal(false);
   };
   const handleTitleChange = async (newName) => {
@@ -235,8 +227,8 @@ function TournamentPage() {
       {showDeletePlayerModal && (
         <SelectorModal
           title="削除する参加者を選択"
-          items={players}
-          selectedId={null}
+          open={showDeletePlayerModal}
+          items={players?.participants ?? []}
           onSelect={handleDeletePlayer}
           onClose={() => setShowDeletePlayerModal(false)}
         />

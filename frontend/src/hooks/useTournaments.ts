@@ -1,4 +1,5 @@
 import {
+  deleteApiTournamentsTournamentKeyParticipantsParticipantId,
   postApiGroupsGroupKeyTournaments,
   postApiTournamentsTournamentKeyParticipants,
   useGetApiGroupsGroupKeyTournaments,
@@ -56,21 +57,43 @@ export const useGetTournamentPlayers = (tournamentKey: string) => {
 
 export const useAddTournamentPlayer = (onAfterSuccess?: () => void) => {
   return useMutation({
-    mutationFn: (data: { tournamentKey: string; player: Player }) => {
-      if (!data.player.id) {
+    mutationFn: (data: { tournamentKey: string; players: Player[] }) => {
+      if (!data.players) {
         throw new Error('Player ID is required');
       }
-      return postApiTournamentsTournamentKeyParticipants(data.tournamentKey, {
-        player_id: data.player.id,
-      });
+      const payload = {
+        participants: data.players.map((player) => {
+          return { player_id: player.id };
+        }),
+      };
+      return postApiTournamentsTournamentKeyParticipants(data.tournamentKey, payload);
     },
     onSuccess: (data) => {
       toast.success('Player added successfully');
       onAfterSuccess?.();
     },
     onError: (error) => {
-      console.error('Error adding player:', error);
       toast.error('Error adding player');
+    },
+  });
+};
+
+export const useDeleteTounamentsPlayer = (onAfterSuccess?: () => void) => {
+  return useMutation({
+    mutationFn: (data: { tournamentKey: string; playerId: number }) => {
+      return deleteApiTournamentsTournamentKeyParticipantsParticipantId(
+        data.tournamentKey,
+        data.playerId
+      );
+    },
+    onSuccess: (data) => {
+      toast.success('Player deleted successfully');
+      onAfterSuccess?.();
+    },
+    onError: (error) => {
+      const errorMessage = error;
+      console.error('Error deleting player:', errorMessage);
+      toast.error(`Error deleting player:${errorMessage}`);
     },
   });
 };
