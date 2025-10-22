@@ -67,6 +67,7 @@ class TestTournamentEndpoints:
 
         fetched = ok.get_json()
         assert "view_link" in fetched
+        assert "started_at" in fetched
         # === 検証1: tournament_links が存在する ===
         assert "tournament_links" in fetched
         links_data = fetched["tournament_links"]

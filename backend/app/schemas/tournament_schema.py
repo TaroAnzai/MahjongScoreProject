@@ -15,6 +15,7 @@ class TournamentUpdateSchema(Schema):
     name = fields.Str(description="大会名")
     description = fields.Str(allow_none=True, description="大会説明")
     rate = fields.Float(description="レート")
+    started_at = fields.DateTime(allow_none=True, description="大会開始日時（ISO 8601形式）")
 
 
 class TournamentSchema(ShareLinkMixin,Schema):
@@ -22,10 +23,11 @@ class TournamentSchema(ShareLinkMixin,Schema):
     id = fields.Int(required=True, dump_only=True, description="大会ID")
     group_id = fields.Int(required=True, dump_only=True, description="グループID")
     name = fields.Str(required=True, description="大会名")
-    description = fields.Str(allow_none=True)
+    description = fields.Str(allow_none=True, description="大会説明")
     rate = fields.Float(required=True, description="レート")
-    created_by = fields.Str(dump_only=True)
-    created_at = fields.DateTime(dump_only=True)
+    created_by = fields.Str(dump_only=True, description="作成時のKey")
+    created_at = fields.DateTime(dump_only=True, description="大会作成日時（ISO 8601形式）")
+    started_at = fields.DateTime(allow_none=True, description="大会開始日時（ISO 8601形式）")
     group = fields.Nested(
         GroupSchema,
         required=True,

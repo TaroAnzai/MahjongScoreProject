@@ -71,6 +71,7 @@ def create_tournament(data: dict, group_key: str) -> Tournament:
         description=data.get("description"),
         rate=data.get("rate"),
         created_by=group.created_by,
+        started_at=datetime.now(timezone.utc),
         created_at=datetime.now(timezone.utc),
     )
 
@@ -116,6 +117,8 @@ def update_tournament(short_key: str, data: dict) -> Tournament:
         tournament.description = data["description"]
     if "rate" in data:
         tournament.rate = data["rate"]
+    if "started_at" in data:
+        tournament.started_at = data["started_at"]
 
     db.session.commit()
     db.session.refresh(tournament)
