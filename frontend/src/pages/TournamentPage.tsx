@@ -19,8 +19,9 @@ import {
   useDeleteTounamentsPlayer,
   useGetTournament,
   useGetTournamentPlayers,
+  useUpdateTournament,
 } from '@/hooks/useTournaments';
-import { useGetTables } from '@/hooks/useTables';
+import { useCreateTable, useGetTables } from '@/hooks/useTables';
 import { useGetTournamentScore, useGetTournamentScoreMap } from '@/hooks/useScore';
 import { useGetPlayer } from '@/hooks/usePlayers';
 import type { Player } from '@/api/generated/mahjongApi.schemas';
@@ -32,15 +33,17 @@ function TournamentPage() {
     return <div className="mahjong-container">大会キーが指定されていません</div>;
   }
   //Query系フック設定
-  const { tournament, isLoadingTournament, loadTournament } = useGetTournament(tournamentKey!);
+  const { tournament, isLoadingTournament, loadTournament } = useGetTournament(tournamentKey);
   const groupKey = tournament?.group.edit_link ?? tournament?.group.view_link ?? '';
-  const { players, isLoadingPlayers, loadPlayers } = useGetTournamentPlayers(tournamentKey!);
-  const { tables, isLoadingTables, loadTables } = useGetTables(tournamentKey!);
-  const { scoreMap, isLoadingScoreMap, loadScoreMap } = useGetTournamentScoreMap(tournamentKey!);
+  const { players, isLoadingPlayers, loadPlayers } = useGetTournamentPlayers(tournamentKey);
+  const { tables, isLoadingTables, loadTables } = useGetTables(tournamentKey);
+  const { scoreMap, isLoadingScoreMap, loadScoreMap } = useGetTournamentScoreMap(tournamentKey);
   const { players: groupPlayers, isLoadingPlayers: isLoadingGroupPlayers } = useGetPlayer(groupKey);
   //Mutation系フック
-  const { mutate: addTournamentPlayer } = useAddTournamentPlayer(loadTournament);
-  const { mutate: deleteTournamentPlayer } = useDeleteTounamentsPlayer(loadTournament);
+  const { mutate: addTournamentPlayer } = useAddTournamentPlayer();
+  const { mutate: deleteTournamentPlayer } = useDeleteTounamentsPlayer();
+  const { mutate: createTable } = useCreateTable();
+  const { mutate: updateTournament } = useUpdateTournament();
 
   //ローカルステート
 
@@ -49,7 +52,7 @@ function TournamentPage() {
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
 
   const [isEditingRate, setIsEditingRate] = useState(false);
-  const [editedRate, setEditedRate] = useState(tournament?.rate || 1);
+  const [editedRate, setEditedRate] = useState<number | ''>(tournament?.rate || 1);
   const [showDeletePlayerModal, setShowDeletePlayerModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -65,52 +68,53 @@ function TournamentPage() {
     addTournamentPlayer({ tournamentKey: tournamentKey!, players: selectedPlayers });
     setShowAddPlayerModal(false);
   };
-  const handleCreateTable = async () => {
-    try {
-      // 既存の卓名から使用済み番号を抽出
-      const existingNames = tables.map((t) => t.name);
-      let index = 1;
-      let newName = `卓${index}`;
-      while (existingNames.includes(newName)) {
-        index++;
-        newName = `卓${index}`;
-      }
+  const handleCreateTable = () => {
+    // 既存の卓名から使用済み番号を抽出
+    const existingNames = tables?.map((t) => t.name);
+    let index = 1;
+    let newName = `卓${index}`;
+    while (existingNames?.includes(newName)) {
+      index++;
+      newName = `卓${index}`;
+    }
 
-      // 卓を作成
-      const newTable = await createTable({
+    // 卓を作成
+    const newTable = createTable({
+      tournamentKey: tournamentKey,
+      tableCreate: {
         name: newName,
-        tournament_id: tournament.id,
-        player_ids: [],
-      });
-      if (!newTable || !newTable.table_key || !newTable.edit_key) {
-        alert('卓の作成に失敗しました');
-        return;
-      }
+      },
+    });
+  };
+  const handleRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
 
-      // 遷移
-      navigate(`/table/${newTable.table_key}?edit=${newTable.edit_key}`);
-    } catch (e) {
-      console.error(e);
-      alert('記録用紙の作成に失敗しました');
+    // 入力中は空文字も許容（UIが消えるのを防ぐため文字列のまま保持）
+    if (value === '') {
+      setEditedRate(''); // 型を number | '' にする
+      return;
+    }
+
+    const num = Number(value);
+    if (!Number.isNaN(num)) {
+      setEditedRate(num);
     }
   };
-  const handleRateChange = (e) => {
-    const val = e.target.value;
-    setEditedRate(val === '' ? '' : Number(val));
-  };
-
-  const handleRateBlur = async () => {
+  const handleRateBlur = () => {
     setIsEditingRate(false);
+
+    // 空文字やNaN、0以下の場合はフォールバック
+    if (editedRate === '' || Number.isNaN(Number(editedRate)) || Number(editedRate) <= 0) {
+      setEditedRate(tournament?.rate ?? 1); // ← 元の値に戻す
+      return;
+    }
+
     const newRate = Number(editedRate);
-    if (!isNaN(newRate) && newRate !== tournament.rate) {
-      const result = await updateTournament(tournament.id, { rate: newRate });
-      if (!result) {
-        alert('レートの更新に失敗しました');
-        return;
-      }
-      const scoreMap = await getScoresByTournament(tournament);
-      setScoreMap(scoreMap);
-      setTournament((prev) => ({ ...prev, rate: newRate }));
+    if (newRate !== tournament?.rate) {
+      updateTournament({
+        tournamentKey: tournamentKey!,
+        tournament: { rate: newRate },
+      });
     }
   };
 
@@ -124,7 +128,6 @@ function TournamentPage() {
       alert('削除対象の参加者がいません');
       return;
     }
-    console.log(players);
     setShowDeletePlayerModal(true);
   };
   const handleDeletePlayer = (player: Player) => {
@@ -135,13 +138,8 @@ function TournamentPage() {
 
     setShowDeletePlayerModal(false);
   };
-  const handleTitleChange = async (newName) => {
-    const result = await updateTournament(tournament.id, { name: newName });
-    if (!result) {
-      alert('タイトルの更新に失敗しました');
-      return;
-    }
-    setTournament((prev) => ({ ...prev, name: newName }));
+  const handleTitleChange = (newName: string) => {
+    updateTournament({ tournamentKey: tournamentKey, tournament: { name: newName } });
   };
   const handleUpdateTournament = async (updates) => {
     const result = await updateTournament(tournament.id, updates);
@@ -160,8 +158,14 @@ function TournamentPage() {
     navigate(`/table/${table_key}`);
   };
   const TitleWithModal = () => (
-    <div className="mahjong-editable-title" onClick={() => setShowEditModal(true)}>
-      {tournament.name}
+    <div
+      className="mahjong-editable-title"
+      onClick={() => {
+        console.log('click');
+        setShowEditModal(true);
+      }}
+    >
+      {tournament?.name}
     </div>
   );
 
@@ -171,6 +175,8 @@ function TournamentPage() {
     <div className="mahjong-container">
       <PageTitleBar
         title={tournament.name}
+        shareLinks={tournament.tournament_links}
+        onTitleChange={handleTitleChange}
         TitleComponent={TitleWithModal}
         showBack={true}
         showForward={true}

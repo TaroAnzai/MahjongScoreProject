@@ -1,13 +1,21 @@
 import {
-  deleteApiTournamentsTournamentKeyParticipantsParticipantId,
+  deleteApiTournamentsTournamentKeyParticipantsPlayerId,
+  getGetApiTournamentsTournamentKeyParticipantsQueryOptions,
+  getGetApiTournamentsTournamentKeyQueryOptions,
+  getGetApiTournamentsTournamentKeyScoreMapQueryOptions,
   postApiGroupsGroupKeyTournaments,
   postApiTournamentsTournamentKeyParticipants,
+  putApiTournamentsTournamentKey,
   useGetApiGroupsGroupKeyTournaments,
   useGetApiTournamentsTournamentKey,
   useGetApiTournamentsTournamentKeyParticipants,
 } from '@/api/generated/mahjongApi';
-import type { Player, TournamentCreate } from '@/api/generated/mahjongApi.schemas';
-import { useMutation } from '@tanstack/react-query';
+import type {
+  Player,
+  TournamentCreate,
+  TournamentUpdate,
+} from '@/api/generated/mahjongApi.schemas';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -36,7 +44,39 @@ export const useGetTournaments = (groupKey: string) => {
   } = useGetApiGroupsGroupKeyTournaments(groupKey);
   return { tournaments, isLoadingTournaments, loadTournaments };
 };
-
+export const useUpdateTournament = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { tournamentKey: string; tournament: TournamentUpdate }) => {
+      return putApiTournamentsTournamentKey(data.tournamentKey, data.tournament);
+    },
+    onSuccess: (data, variables) => {
+      toast.success('Tournament updated successfully');
+      const queryKeytournament = getGetApiTournamentsTournamentKeyQueryOptions(
+        variables.tournamentKey
+      ).queryKey;
+      queryClient.invalidateQueries({ queryKey: queryKeytournament });
+    },
+    onError: (error) => {
+      console.error('Error updating tournament:', error);
+      toast.error('Error updating tournament');
+    },
+  });
+};
+export const useDeleteTournament = () => {
+  return useMutation({
+    mutationFn: (data: { tournamentKey: string }) => {
+      return deleteApiTournamentsTournamentKey(data.tournamentKey);
+    },
+    onSuccess: (data) => {
+      toast.success('Tournament deleted successfully');
+    },
+    onError: (error) => {
+      console.error('Error deleting tournament:', error);
+      toast.error('Error deleting tournament');
+    },
+  });
+};
 export const useGetTournament = (tournamentKey: string) => {
   const {
     data: tournament,
@@ -55,7 +95,8 @@ export const useGetTournamentPlayers = (tournamentKey: string) => {
   return { players, isLoadingPlayers, loadPlayers };
 };
 
-export const useAddTournamentPlayer = (onAfterSuccess?: () => void) => {
+export const useAddTournamentPlayer = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tournamentKey: string; players: Player[] }) => {
       if (!data.players) {
@@ -68,27 +109,44 @@ export const useAddTournamentPlayer = (onAfterSuccess?: () => void) => {
       };
       return postApiTournamentsTournamentKeyParticipants(data.tournamentKey, payload);
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       toast.success('Player added successfully');
-      onAfterSuccess?.();
+
+      const queryKeyPlayer = getGetApiTournamentsTournamentKeyParticipantsQueryOptions(
+        variables.tournamentKey
+      ).queryKey;
+      const queryKeyScore = getGetApiTournamentsTournamentKeyScoreMapQueryOptions(
+        variables.tournamentKey
+      ).queryKey;
+      queryClient.invalidateQueries({ queryKey: queryKeyScore });
+      queryClient.invalidateQueries({ queryKey: queryKeyPlayer });
     },
     onError: (error) => {
+      console.error('Error adding player:', error);
       toast.error('Error adding player');
     },
   });
 };
 
 export const useDeleteTounamentsPlayer = (onAfterSuccess?: () => void) => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tournamentKey: string; playerId: number }) => {
-      return deleteApiTournamentsTournamentKeyParticipantsParticipantId(
+      return deleteApiTournamentsTournamentKeyParticipantsPlayerId(
         data.tournamentKey,
         data.playerId
       );
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       toast.success('Player deleted successfully');
-      onAfterSuccess?.();
+      const queryKeyPlayer = getGetApiTournamentsTournamentKeyParticipantsQueryOptions(
+        variables.tournamentKey
+      ).queryKey;
+      const queryKeyScore = getGetApiTournamentsTournamentKeyScoreMapQueryOptions(
+        variables.tournamentKey
+      ).queryKey;
+      queryClient.invalidateQueries({ queryKey: queryKeyScore });
+      queryClient.invalidateQueries({ queryKey: queryKeyPlayer });
     },
     onError: (error) => {
       const errorMessage = error;
