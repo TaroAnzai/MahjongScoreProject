@@ -24,7 +24,7 @@ import {
 import { useCreateTable, useGetTables } from '@/hooks/useTables';
 import { useGetTournamentScore, useGetTournamentScoreMap } from '@/hooks/useScore';
 import { useGetPlayer } from '@/hooks/usePlayers';
-import type { Player } from '@/api/generated/mahjongApi.schemas';
+import type { Player, Tournament, TournamentUpdate } from '@/api/generated/mahjongApi.schemas';
 
 function TournamentPage() {
   const navigate = useNavigate();
@@ -118,9 +118,9 @@ function TournamentPage() {
     }
   };
 
-  const handleRateKeyDown = (e) => {
+  const handleRateKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      e.target.blur();
+      e.currentTarget.blur();
     }
   };
   const handleOpenDeletePlayerModal = () => {
@@ -141,13 +141,8 @@ function TournamentPage() {
   const handleTitleChange = (newName: string) => {
     updateTournament({ tournamentKey: tournamentKey, tournament: { name: newName } });
   };
-  const handleUpdateTournament = async (updates) => {
-    const result = await updateTournament(tournament.id, updates);
-    if (!result) {
-      alert('大会情報の更新に失敗しました');
-      return;
-    }
-    setTournament((prev) => ({ ...prev, ...updates }));
+  const handleUpdateTournament = (updates: TournamentUpdate) => {
+    const result = updateTournament({ tournamentKey: tournamentKey!, tournament: updates });
     setShowEditModal(false);
   };
   const handleTableClick = (table_id: number) => {
@@ -157,14 +152,8 @@ function TournamentPage() {
     const table_key = table.edit_link ?? table.view_link ?? '';
     navigate(`/table/${table_key}`);
   };
-  const TitleWithModal = () => (
-    <div
-      className="mahjong-editable-title"
-      onClick={() => {
-        console.log('click');
-        setShowEditModal(true);
-      }}
-    >
+  const TitleWithModal = ({ onClick }: { onClick?: () => void }) => (
+    <div className="mahjong-editable-title pointer-events-auto cursor-pointer" onClick={onClick}>
       {tournament?.name}
     </div>
   );
@@ -176,6 +165,7 @@ function TournamentPage() {
       <PageTitleBar
         title={tournament.name}
         shareLinks={tournament.tournament_links}
+        onTitleClick={() => setShowEditModal(true)}
         onTitleChange={handleTitleChange}
         TitleComponent={TitleWithModal}
         showBack={true}

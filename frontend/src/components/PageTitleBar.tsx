@@ -15,7 +15,8 @@ import type { ShareLink } from '@/api/generated/mahjongApi.schemas';
 interface PageTitleBarProps {
   title: string;
   shareLinks?: readonly ShareLink[];
-  TitleComponent?: React.ComponentType | null;
+  TitleComponent?: React.ComponentType<{ onClick?: () => void }> | null;
+  onTitleClick?: () => void;
   onTitleChange?: (newTitle: string) => void;
   showBack?: boolean;
   showForward?: boolean;
@@ -24,6 +25,7 @@ function PageTitleBar({
   title,
   shareLinks = [],
   TitleComponent = null,
+  onTitleClick,
   onTitleChange,
   showBack = true,
   showForward = true,
@@ -69,7 +71,7 @@ function PageTitleBar({
       {showBack && <ChevronsLeft className="cursor-pointer" onClick={() => history.back()} />}
       <div className={styles.center}>
         {TitleComponent ? (
-          <TitleComponent />
+          <TitleComponent onClick={onTitleClick} />
         ) : (
           <EditableTitle value={title} onChange={onTitleChange} className={styles.editable} />
         )}

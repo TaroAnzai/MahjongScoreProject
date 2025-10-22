@@ -2,8 +2,15 @@
 import React, { useState } from 'react';
 import Modal from './Modal';
 import styles from './EditTournamentModal.module.css';
+import type { Tournament, TournamentUpdate } from '@/api/generated/mahjongApi.schemas';
 
-function EditTournamentModal({ tournament, onConfirm, onClose }) {
+interface EditTournamentModalProps {
+  tournament: Tournament;
+  onConfirm: (updates: TournamentUpdate) => void;
+  onClose: () => void;
+}
+
+function EditTournamentModal({ tournament, onConfirm, onClose }: EditTournamentModalProps) {
   const [name, setName] = useState(tournament.name || '');
   const [description, setDescription] = useState(tournament.description || '');
   const [startedAt, setStartedAt] = useState(
@@ -19,21 +26,37 @@ function EditTournamentModal({ tournament, onConfirm, onClose }) {
   };
 
   return (
-    <Modal title="大会情報を編集" onClose={onClose}
+    <Modal
+      title="大会情報を編集"
+      onClose={onClose}
       footer={
         <>
-          <button className="mahjong-button" onClick={handleSubmit}>保存</button>
-          <button className="mahjong-button" onClick={onClose}> 閉じる</button>
+          <button className="mahjong-button" onClick={handleSubmit}>
+            保存
+          </button>
+          <button className="mahjong-button" onClick={onClose}>
+            {' '}
+            閉じる
+          </button>
         </>
       }
     >
       <div className={styles.formRow}>
         <label>大会名：</label>
-        <input className={styles.input} type="text" value={name} onChange={(e) => setName(e.target.value)} />
+        <input
+          className={styles.input}
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
       </div>
       <div className={styles.formRow}>
         <label>メモ：</label>
-        <textarea className={styles.input} value={description} onChange={(e) => setDescription(e.target.value)} />
+        <textarea
+          className={styles.input}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
       </div>
       <div className={styles.formRow}>
         <label>開始日：</label>
