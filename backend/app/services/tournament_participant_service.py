@@ -108,13 +108,13 @@ def create_participants(tournament_key: str, data: list[dict]):
 # =========================================================
 # 参加者削除
 # =========================================================
-def delete_participant(tournament_key: str, participant_id: int):
+def delete_participant(tournament_key: str, player_id: int):
     """大会参加者共有キーから削除"""
     link = get_share_link_by_key(tournament_key)
     if not link or link.resource_type != "tournament":
         raise ServicePermissionError("不正な共有リンクです。")
 
-    participant = TournamentPlayer.query.filter_by(id=participant_id, tournament_id=link.resource_id).first()
+    participant = TournamentPlayer.query.filter_by(player_id=player_id, tournament_id=link.resource_id).first()
     if not participant:
         raise ServiceNotFoundError("大会参加者が見つかりません。")
 
