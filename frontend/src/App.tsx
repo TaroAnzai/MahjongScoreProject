@@ -31,7 +31,7 @@ function App() {
         <Route path="/" element={<WelcomePage />} />
         <Route path="/group/:groupKey" element={<GroupPage />} />
         <Route path="/tournament/:tournamentKey" element={<TournamentPage />} />
-        {/* <Route path="/table/:tableKey" element={<TablePage />} /> */}
+        <Route path="/table/:tableKey" element={<TablePage />} />
         {/* 404対策 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

@@ -10,14 +10,18 @@ import ButtonGridSection from '../components/ButtonGridSection';
 import TableScoreBoard from '../components/TableScoreBoard';
 import SelectorModal from '../components/SelectorModal';
 import MultiSelectorModal from '../components/MultiSelectorModal';
+import { useGetTable } from '@/hooks/useTables';
 
 export default function TablePage() {
   const { tableKey } = useParams();
+  //Query系フック設定
+  const { table, isLoadingTable, loadTable } = useGetTable(tableKey!);
+  const isChipTable = table?.type === 'CHIP';
+
   const [searchParams] = useSearchParams();
   const editKey = searchParams.get('edit');
 
   const navigate = useNavigate();
-  const [table, setTable] = useState(null);
   const [players, setPlayers] = useState([]);
   const [games, setGames] = useState([]);
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
@@ -25,32 +29,6 @@ export default function TablePage() {
   const [memberOptions, setMemberOptions] = useState([]);
   const [showDeleteGameModal, setShowDeleteGameModal] = useState(false);
   const hasInitialized = useRef(false); // 🟢 永続的なフラグ
-
-  const isChipTable = table?.type === 'chip';
-  useEffect(() => {
-    fetchTable();
-  }, [tableKey]);
-
-  const fetchTable = async () => {
-    try {
-      const { table, players } = await getTableByKey(tableKey);
-      let games = await getTableGames(table.id);
-      // ゲームデータ取得
-      if (!hasInitialized.current && games.length === 0 && table.type === 'chip') {
-        hasInitialized.current = true;
-        const tournament_players = await getTournamentPlayers(table.tournament_id);
-        const scores = tournament_players.map((player) => ({ player_id: player.id, score: 0 }));
-        const result = await addGameToTable(table.id, scores);
-        games = await getTableGames(table.id); // 再取得
-      }
-      setTable(table);
-      setPlayers(players);
-      setGames(games);
-    } catch (e) {
-      console.error(e);
-      alert('卓情報の取得に失敗しました');
-    }
-  };
 
   const handleTableNameChange = async (newTitle) => {
     await updateTable(table.id, { name: newTitle });
@@ -169,7 +147,6 @@ export default function TablePage() {
         table={table}
         players={players}
         games={games}
-        onReload={fetchTable}
         onUpdateGame={handleUpdateGame}
       />
 
@@ -185,8 +162,8 @@ export default function TablePage() {
       {showDeletePlayerModal && (
         <SelectorModal
           title="参加者を削除"
+          open={showDeletePlayerModal}
           items={memberOptions}
-          Delete
           onSelect={handleDeletePlayer}
           onClose={() => setShowDeletePlayerModal(false)}
         />
@@ -194,6 +171,7 @@ export default function TablePage() {
       {showDeleteGameModal && (
         <SelectorModal
           title="削除するゲームを選択"
+          open={showDeleteGameModal}
           items={games.map((g, index) => ({ id: g.game_id, name: `第${index + 1}局` }))}
           onSelect={handleDeleteGame}
           onClose={() => setShowDeleteGameModal(false)}

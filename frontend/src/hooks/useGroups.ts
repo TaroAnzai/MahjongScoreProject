@@ -1,6 +1,6 @@
 // src/hooks/useGroupQueries.ts
 import { postApiGroups, putApiGroupsGroupKey, usePostApiGroups } from '@/api/generated/mahjongApi';
-import type { Group, GroupCreate, GroupUpdate } from '@/api/generated/mahjongApi.schemas';
+import type { Group, Group1, GroupCreate, GroupUpdate } from '@/api/generated/mahjongApi.schemas';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useEffect, useMemo, useState } from 'react';
@@ -82,7 +82,7 @@ export const useGroupQueries = () => {
     queries: groupKeys.map((key) => ({
       ...getGetApiGroupsGroupKeyQueryOptions(key),
       retry: 1,
-      select: (data: Group) => ({
+      select: (data: Group1) => ({
         ...data,
         keyType: getKeyType(data),
       }),

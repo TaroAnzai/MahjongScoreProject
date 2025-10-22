@@ -1,7 +1,14 @@
 // src/components/TableScoreBoard.jsx
+import type { Game } from '@/api/generated/mahjongApi.schemas';
 import styles from './TableScoreBoard.module.css';
 import React, { useState } from 'react';
 
+interface TableScoreBoardProps {
+  table: any;
+  players: Array<{ id: number; name: string }>;
+  games: Game[];
+  onUpdateGame: () => void;
+}
 function TableScoreBoard({ table, players, games, onUpdateGame }) {
   const [editingGameIndex, setEditingGameIndex] = useState(null);
   const [editingScores, setEditingScores] = useState({});
@@ -22,33 +29,33 @@ function TableScoreBoard({ table, players, games, onUpdateGame }) {
   if (!isChipTable) {
     let targetLength;
     if (games.length <= 3) {
-      targetLength = 4;  // 常に4行表示
+      targetLength = 4; // 常に4行表示
     } else {
-      targetLength = games.length + extraEmptyRows;  // それ以上は追加分も表示
+      targetLength = games.length + extraEmptyRows; // それ以上は追加分も表示
     }
 
     while (displayGames.length < targetLength) {
       displayGames.push(null);
     }
-  } 
-const handleRowClick = (index) => {
-  if (editingGameIndex === index) return; // ← 編集中なら無視
+  }
+  const handleRowClick = (index) => {
+    if (editingGameIndex === index) return; // ← 編集中なら無視
 
-  const game = displayGames[index];
-  const initialScores = {};
-  displayPlayers.forEach(player => {
-    const scoreEntry = game?.scores?.find((s) => s.player_id === player.id);
-    initialScores[player.id] = scoreEntry?.score ?? '';
-  });
-  setEditingGameIndex(index);
-  setEditingScores(initialScores);
+    const game = displayGames[index];
+    const initialScores = {};
+    displayPlayers.forEach((player) => {
+      const scoreEntry = game?.scores?.find((s) => s.player_id === player.id);
+      initialScores[player.id] = scoreEntry?.score ?? '';
+    });
+    setEditingGameIndex(index);
+    setEditingScores(initialScores);
 
-  const initialTotal = Object.values(initialScores).reduce((acc, val) => {
-    const num = parseFloat(val);
-    return acc + (isNaN(num) ? 0 : num);
-  }, 0);
-  setRowTotal(initialTotal);
-};
+    const initialTotal = Object.values(initialScores).reduce((acc, val) => {
+      const num = parseFloat(val);
+      return acc + (isNaN(num) ? 0 : num);
+    }, 0);
+    setRowTotal(initialTotal);
+  };
 
   const handleConfirm = async () => {
     const game = displayGames[editingGameIndex];
@@ -58,7 +65,7 @@ const handleRowClick = (index) => {
     }));
     const gameId = game?.game_id ?? null;
     const res = await onUpdateGame?.(editingGameIndex, gameId, formatted);
-    if(res){
+    if (res) {
       setEditingGameIndex(null);
       setEditingScores({});
     }
@@ -86,12 +93,14 @@ const handleRowClick = (index) => {
 
   return (
     <div className={styles.scoreWrapper}>
-      <table className={`${styles.scoreTable} table`} >
+      <table className={`${styles.scoreTable} table`}>
         <thead>
           <tr>
             <th className={styles.header}>回</th>
             {displayPlayers.map((player) => (
-              <th key={player.id} className={styles.header}>{player.name}</th>
+              <th key={player.id} className={styles.header}>
+                {player.name}
+              </th>
             ))}
           </tr>
         </thead>
@@ -99,9 +108,7 @@ const handleRowClick = (index) => {
           {displayGames.map((game, index) => (
             <React.Fragment key={game?.game_id ?? `row-${index}`}>
               <tr onClick={() => handleRowClick(index)}>
-                <td className={styles.cell}>
-                  {isChipTable ? 'チップ' : `第${index + 1}回`}
-                </td>
+                <td className={styles.cell}>{isChipTable ? 'チップ' : `第${index + 1}回`}</td>
                 {displayPlayers.map((player) => (
                   <td key={`${index}-${player.id}`} className={styles.cell}>
                     {editingGameIndex === index ? (
@@ -109,7 +116,7 @@ const handleRowClick = (index) => {
                         type="number"
                         className={styles.input}
                         value={editingScores[player.id] ?? ''}
-                        onChange={(e) =>{
+                        onChange={(e) => {
                           const newScores = { ...editingScores, [player.id]: e.target.value };
                           setEditingScores(newScores);
 
@@ -127,25 +134,40 @@ const handleRowClick = (index) => {
                 ))}
               </tr>
               {editingGameIndex === index && (
-                <> 
+                <>
                   <tr className={styles.sumRow}>
-                      <td className={styles.totalCell} colSpan={displayPlayers.length + 1} style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                        合計: {rowTotal}
-                      </td>
-                    </tr>
+                    <td
+                      className={styles.totalCell}
+                      colSpan={displayPlayers.length + 1}
+                      style={{ textAlign: 'right', fontWeight: 'bold' }}
+                    >
+                      合計: {rowTotal}
+                    </td>
+                  </tr>
                   <tr className={styles.confirmRow}>
                     <td colSpan={displayPlayers.length + 1} className={styles.confirmCell}>
                       <div className={styles.confirmBtnRow}>
-                        <button onClick={handleConfirm} className={`${styles.addButton} mahjong-button`}>確定</button>
-                        <button onClick={handleCancel} className={`${styles.addButton} mahjong-button`} style={{ marginLeft: '1rem' }}>キャンセル</button>
+                        <button
+                          onClick={handleConfirm}
+                          className={`${styles.addButton} mahjong-button`}
+                        >
+                          確定
+                        </button>
+                        <button
+                          onClick={handleCancel}
+                          className={`${styles.addButton} mahjong-button`}
+                          style={{ marginLeft: '1rem' }}
+                        >
+                          キャンセル
+                        </button>
                       </div>
                     </td>
                   </tr>
-                </> 
+                </>
               )}
             </React.Fragment>
           ))}
-          {!isChipTable &&(
+          {!isChipTable && (
             <tr className={styles.totalRow}>
               <td className={styles.header}>合計</td>
               {displayPlayers.map((player) => (
@@ -155,7 +177,6 @@ const handleRowClick = (index) => {
               ))}
             </tr>
           )}
-
         </tbody>
       </table>
     </div>
