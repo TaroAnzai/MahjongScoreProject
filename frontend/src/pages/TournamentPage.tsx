@@ -34,7 +34,8 @@ function TournamentPage() {
   }
   //Query系フック設定
   const { tournament, isLoadingTournament, loadTournament } = useGetTournament(tournamentKey);
-  const groupKey = tournament?.group.edit_link ?? tournament?.group.view_link ?? '';
+  const groupKey =
+    tournament?.parent_group_link.edit_link ?? tournament?.parent_group_link.view_link ?? '';
   const { players, isLoadingPlayers, loadPlayers } = useGetTournamentPlayers(tournamentKey);
   const { tables, isLoadingTables, loadTables } = useGetTables(tournamentKey);
   const { scoreMap, isLoadingScoreMap, loadScoreMap } = useGetTournamentScoreMap(tournamentKey);
@@ -124,7 +125,7 @@ function TournamentPage() {
     }
   };
   const handleOpenDeletePlayerModal = () => {
-    if (!players?.participants?.length) {
+    if (!players?.length) {
       alert('削除対象の参加者がいません');
       return;
     }
@@ -214,7 +215,7 @@ function TournamentPage() {
       {showAddPlayerModal && (
         <MultiSelectorModal
           title="参加者を選択"
-          items={groupPlayers?? []}
+          items={groupPlayers ?? []}
           onConfirm={handleAddPlayer}
           onClose={() => setShowAddPlayerModal(false)}
         />
@@ -224,7 +225,7 @@ function TournamentPage() {
         <SelectorModal
           title="削除する参加者を選択"
           open={showDeletePlayerModal}
-          items={players ?? []}
+          items={players}
           onSelect={handleDeletePlayer}
           onClose={() => setShowDeletePlayerModal(false)}
         />

@@ -16,3 +16,7 @@ class TablePlayerSchema(Schema):
     player_id = fields.Int(required=True)
     seat_position = fields.Int(allow_none=True)
     created_at = fields.DateTime(dump_only=True)
+
+class TablePlayersSchema(Schema):
+    """複数卓参加者レスポンス"""
+    table_players = fields.List(fields.Nested(TablePlayerSchema), dump_only=True)

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'; // ← 追加
 
 import ButtonGridSection from '../components/ButtonGridSection';
 
-import type { Group, Group1 } from '@/api/generated/mahjongApi.schemas';
+import type { Group } from '@/api/generated/mahjongApi.schemas';
 import { useCreateGroup, useGroupQueries } from '@/hooks/useGroups';
 import { Button } from '@/components/ui/button';
 
@@ -19,7 +19,7 @@ function WelcomePage() {
     createGroup.mutate({ name: name });
   };
 
-  const handleEnterGroup = (group: Group1) => {
+  const handleEnterGroup = (group: Group) => {
     const key = group.owner_link ?? group.edit_link ?? group.view_link;
     if (!key) return;
 
@@ -54,7 +54,6 @@ function WelcomePage() {
                     }}
                   >
                     {group?.name}（{group.owner_link ?? group.edit_link ?? group.view_link ?? ''}）
-                    {group.keyType}
                   </li>
                 )
             )}

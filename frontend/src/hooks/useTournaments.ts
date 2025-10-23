@@ -89,19 +89,12 @@ export const useGetTournament = (tournamentKey: string) => {
 };
 
 export const useGetTournamentPlayers = (tournamentKey: string) => {
-  if (!tournamentKey) {
-    console.error('Tournament key is required');
-    return {
-      players: [],
-      isLoadingPlayers: false,
-      loadPlayers: () => {},
-    };
-  }
   const {
-    data: players,
+    data,
     isLoading: isLoadingPlayers,
     refetch: loadPlayers,
   } = useGetApiTournamentsTournamentKeyParticipants(tournamentKey);
+  const players = data?.participants;
   return { players, isLoadingPlayers, loadPlayers };
 };
 

@@ -1,6 +1,7 @@
 import {
   deleteApiTablesTableKey,
   getGetApiTablesTableKeyQueryOptions,
+  postApiTablesTableKeyPlayers,
   postApiTournamentsTournamentKeyTables,
   putApiTablesTableKey,
   useGetApiTablesTableKey,
@@ -93,4 +94,25 @@ export const useGetTablePlayer = (tableKey: string) => {
     refetch: loadPlayers,
   } = useGetApiTablesTableKeyPlayers(tableKey);
   return { players, isLoadingPlayers, loadPlayers };
+};
+
+export const useAddTablePlayer = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { tableKey: string; playerIds: string[] }) => {
+      return postApiTablesTableKeyPlayers(data.tableKey, {
+        player_ids: data.playerIds,
+      });
+    },
+    onSuccess: (data, variables) => {
+      toast.success('Players added to table successfully');
+      // キャッシュ更新
+      const queryKey = getGetApiTablesTableKeyQueryOptions(variables.tableKey).queryKey;
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
+      console.error('Error adding players to table:', error);
+      toast.error('Error adding players to table');
+    },
+  });
 };

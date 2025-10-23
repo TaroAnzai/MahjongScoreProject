@@ -17,12 +17,10 @@ export default function TablePage() {
   const { tableKey } = useParams();
   //Query系フック設定
   const { table, isLoadingTable, loadTable } = useGetTable(tableKey!);
-  console.log('table', table);
   const isChipTable = table?.type === 'CHIP';
-  const tournament_key = table?.tournament.edit_link ?? table?.tournament.view_link ?? '';
-  console.log('tournament_key', tournament_key);
+  const tournament_key =
+    table?.parent_tournament_link.edit_link ?? table?.parent_tournament_link.view_link ?? '';
   const { players: tournamentPlayers, isLoadingPlayers } = useGetTournamentPlayers(tournament_key);
-  console.log('tournamentPlayers top', tournamentPlayers);
   //no cofirmation
   const [searchParams] = useSearchParams();
   const editKey = searchParams.get('edit');
@@ -151,7 +149,7 @@ export default function TablePage() {
       {showAddPlayerModal && (
         <MultiSelectorModal
           title="参加者を選択"
-          items={tournamentPlayers.participants}
+          items={tournamentPlayers}
           onConfirm={handleAddPlayer}
           onClose={() => setShowAddPlayerModal(false)}
         />

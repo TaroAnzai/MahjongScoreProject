@@ -15,7 +15,7 @@ import { Button } from './ui/button';
 interface SelectorModalProps {
   title: string;
   open: boolean;
-  items: any[];
+  items: any[] | undefined;
   onSelect: (item: any) => void;
   onClose: () => void;
   plusDisplayItem?: string | null;
@@ -36,7 +36,7 @@ function SelectorModal({
           <DialogDescription>選択してください</DialogDescription>
         </DialogHeader>
         <ul className={styles.list}>
-          {items.map((item) => (
+          {items?.map((item) => (
             <li key={item.id} className={styles.listItem} onClick={() => onSelect(item)}>
               <div>{item.name}</div>
               {plusDisplayItem && <div>{item[plusDisplayItem]}</div>}
