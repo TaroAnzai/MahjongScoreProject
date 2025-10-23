@@ -31,10 +31,11 @@ class TableSchema(ShareLinkMixin,Schema):
     type = fields.Str(required=True, description="卓タイプ")
     created_by = fields.Str(dump_only=True, description="作成時のKey")
     created_at = fields.DateTime(dump_only=True, description="卓作成日時（ISO 8601形式）")
-    tournament = fields.Nested(
+    parent_tournament_link = fields.Nested(
         TournamentLinkSchema,
         required=True,
         dump_only=True,
+        attribute="tournament",
         description="卓が所属する大会の情報"
     )
 
@@ -46,13 +47,4 @@ class TableSchema(ShareLinkMixin,Schema):
         dump_default=[],
         description="卓に紐づく共有リンク一覧",
     )
-    @post_dump
-    def rename_and_cleanup_tournament(self, data, **kwargs):
-        """tournament → tournament_link に変更し、不要な tournament_links を削除"""
-        if "tournament" in data:
-            tournament_link = data.pop("tournament")
-            # tournament_links が存在するなら削除
-            if isinstance(tournament_link, dict) and "tournament_links" in tournament_link:
-                tournament_link.pop("tournament_links", None)
-            data["parent_tournament_link"] = tournament_link
-        return data
+
