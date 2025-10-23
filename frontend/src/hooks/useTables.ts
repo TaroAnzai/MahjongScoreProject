@@ -1,4 +1,5 @@
 import {
+  deleteApiTablesTableKey,
   getGetApiTablesTableKeyQueryOptions,
   postApiTournamentsTournamentKeyTables,
   putApiTablesTableKey,
@@ -29,7 +30,7 @@ export const useCreateTable = () => {
     onSuccess: (data, variables) => {
       toast.success('Table created successfully');
       // 遷移
-      navigate(`/table/${variables.tournamentKey}`);
+      navigate(`/table/${data.edit_link}`);
     },
     onError: (error) => {
       console.error('Error creating table:', error);
@@ -64,6 +65,25 @@ export const useGetTable = (tableKey: string) => {
     refetch: loadTable,
   } = useGetApiTablesTableKey(tableKey);
   return { table, isLoadingTable, loadTable };
+};
+
+export const useDeleteTable = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { tableKey: string }) => {
+      return deleteApiTablesTableKey(data.tableKey);
+    },
+    onSuccess: (data, variables) => {
+      toast.success('Table deleted successfully');
+      // キャッシュ更新
+      const queryKey = getGetApiTablesTableKeyQueryOptions(variables.tableKey).queryKey;
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
+      console.error('Error deleting table:', error);
+      toast.error('Error deleting table');
+    },
+  });
 };
 
 export const useGetTablePlayer = (tableKey: string) => {

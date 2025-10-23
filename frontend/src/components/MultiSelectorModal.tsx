@@ -3,13 +3,23 @@ import React, { useState } from 'react';
 import Modal from './Modal';
 import styles from './MultiSelectorModal.module.css';
 
-function MultiSelectorModal({ title, items, onConfirm, onClose }) {
-  const [selectedIds, setSelectedIds] = useState([]);
+interface multiSelectorModalProps<T extends { id: number | string }> {
+  title: string;
+  items: T[];
+  onConfirm: (selectedItems: any[]) => void;
+  onClose: () => void;
+}
 
-  const toggleSelect = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+function MultiSelectorModal<T extends { id: number; name: string }>({
+  title,
+  items,
+  onConfirm,
+  onClose,
+}: multiSelectorModalProps<T>) {
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const handleConfirm = () => {
@@ -18,13 +28,22 @@ function MultiSelectorModal({ title, items, onConfirm, onClose }) {
   };
 
   return (
-    <Modal 
-      title={title} 
+    <Modal
+      title={title}
       onClose={onClose}
       footer={
         <>
-          <button className="mahjong-button" onClick={handleConfirm} disabled={selectedIds.length === 0}>OK</button>
-          <button className="mahjong-button" onClick={onClose}> 閉じる</button>
+          <button
+            className="mahjong-button"
+            onClick={handleConfirm}
+            disabled={selectedIds.length === 0}
+          >
+            OK
+          </button>
+          <button className="mahjong-button" onClick={onClose}>
+            {' '}
+            閉じる
+          </button>
         </>
       }
     >
@@ -37,15 +56,13 @@ function MultiSelectorModal({ title, items, onConfirm, onClose }) {
                   type="checkbox"
                   checked={selectedIds.includes(item.id)}
                   onChange={() => toggleSelect(item.id)}
-                />
-                {' '}
+                />{' '}
                 {item.name}
               </label>
             </li>
           ))}
         </ul>
       </div>
-
     </Modal>
   );
 }

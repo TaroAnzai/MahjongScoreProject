@@ -214,7 +214,7 @@ function TournamentPage() {
       {showAddPlayerModal && (
         <MultiSelectorModal
           title="参加者を選択"
-          items={groupPlayers}
+          items={groupPlayers?? []}
           onConfirm={handleAddPlayer}
           onClose={() => setShowAddPlayerModal(false)}
         />
@@ -224,7 +224,7 @@ function TournamentPage() {
         <SelectorModal
           title="削除する参加者を選択"
           open={showDeletePlayerModal}
-          items={players?.participants ?? []}
+          items={players ?? []}
           onSelect={handleDeletePlayer}
           onClose={() => setShowDeletePlayerModal(false)}
         />

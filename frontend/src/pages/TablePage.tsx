@@ -11,13 +11,19 @@ import TableScoreBoard from '../components/TableScoreBoard';
 import SelectorModal from '../components/SelectorModal';
 import MultiSelectorModal from '../components/MultiSelectorModal';
 import { useGetTable } from '@/hooks/useTables';
+import { useGetTournamentPlayers } from '@/hooks/useTournaments';
 
 export default function TablePage() {
   const { tableKey } = useParams();
   //Query系フック設定
   const { table, isLoadingTable, loadTable } = useGetTable(tableKey!);
+  console.log('table', table);
   const isChipTable = table?.type === 'CHIP';
-
+  const tournament_key = table?.tournament.edit_link ?? table?.tournament.view_link ?? '';
+  console.log('tournament_key', tournament_key);
+  const { players: tournamentPlayers, isLoadingPlayers } = useGetTournamentPlayers(tournament_key);
+  console.log('tournamentPlayers top', tournamentPlayers);
+  //no cofirmation
   const [searchParams] = useSearchParams();
   const editKey = searchParams.get('edit');
 
@@ -33,20 +39,6 @@ export default function TablePage() {
   const handleTableNameChange = async (newTitle) => {
     await updateTable(table.id, { name: newTitle });
     setTable({ ...table, name: newTitle });
-  };
-
-  const handleAddPlayerClick = async () => {
-    const all = await getTournamentPlayers(table.tournament_id);
-    const existingIds = new Set(players.map((p) => p.id));
-    const options = all.filter((p) => !existingIds.has(p.id));
-
-    if (options.length === 0) {
-      alert('追加可能な参加者がいません');
-      return;
-    }
-
-    setMemberOptions(options);
-    setShowAddPlayerModal(true);
   };
 
   const handleDeletePlayerClick = async () => {
@@ -128,7 +120,13 @@ export default function TablePage() {
 
       {!isChipTable && (
         <ButtonGridSection>
-          <button className="mahjong-button" onClick={handleAddPlayerClick}>
+          <button
+            className="mahjong-button"
+            onClick={() => {
+              console.log('tournamentPlayers', tournamentPlayers);
+              setShowAddPlayerModal(true);
+            }}
+          >
             参加者を追加
           </button>
           <button className="mahjong-button" onClick={handleDeletePlayerClick}>
@@ -153,7 +151,7 @@ export default function TablePage() {
       {showAddPlayerModal && (
         <MultiSelectorModal
           title="参加者を選択"
-          items={memberOptions}
+          items={tournamentPlayers.participants}
           onConfirm={handleAddPlayer}
           onClose={() => setShowAddPlayerModal(false)}
         />

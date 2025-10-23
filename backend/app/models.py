@@ -71,7 +71,10 @@ class Tournament(db.Model):
     # 関連
     group = db.relationship("Group", back_populates="tournaments")
     tables = db.relationship(
-        "Table", backref="tournament", lazy=True, cascade="all, delete-orphan"
+        "Table",
+        back_populates="tournament",
+        lazy=True,
+        cascade="all, delete-orphan"
     )
 
     # ✅ ShareLinkリレーション（大会 → tournament_links に変更）
@@ -106,7 +109,11 @@ class Table(db.Model):
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
-
+    tournament = db.relationship(
+        "Tournament",
+        back_populates="tables",
+        lazy="joined"  # join で一括取得（パフォーマンス向上）
+    )
     table_players = db.relationship("TablePlayer", back_populates="table", lazy=True)
     games = db.relationship(
         "Game", backref="table", lazy=True, cascade="all, delete-orphan"

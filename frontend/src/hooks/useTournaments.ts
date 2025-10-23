@@ -1,4 +1,5 @@
 import {
+  deleteApiTournamentsTournamentKey,
   deleteApiTournamentsTournamentKeyParticipantsPlayerId,
   getGetApiTournamentsTournamentKeyParticipantsQueryOptions,
   getGetApiTournamentsTournamentKeyQueryOptions,
@@ -6,6 +7,7 @@ import {
   postApiGroupsGroupKeyTournaments,
   postApiTournamentsTournamentKeyParticipants,
   putApiTournamentsTournamentKey,
+  useDeleteApiTournamentsTournamentKey,
   useGetApiGroupsGroupKeyTournaments,
   useGetApiTournamentsTournamentKey,
   useGetApiTournamentsTournamentKeyParticipants,
@@ -87,6 +89,14 @@ export const useGetTournament = (tournamentKey: string) => {
 };
 
 export const useGetTournamentPlayers = (tournamentKey: string) => {
+  if (!tournamentKey) {
+    console.error('Tournament key is required');
+    return {
+      players: [],
+      isLoadingPlayers: false,
+      loadPlayers: () => {},
+    };
+  }
   const {
     data: players,
     isLoading: isLoadingPlayers,
