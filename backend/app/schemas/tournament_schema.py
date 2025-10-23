@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields,post_dump
 from app.schemas.common_schemas import ShareLinkSchema
 from app.schemas.mixins.share_link_mixin import ShareLinkMixin
 from app.schemas.group_schema import GroupSchema
@@ -17,6 +17,14 @@ class TournamentUpdateSchema(Schema):
     rate = fields.Float(description="レート")
     started_at = fields.DateTime(allow_none=True, description="大会開始日時（ISO 8601形式）")
 
+class GroupLinkSchema(ShareLinkMixin,Schema):
+    """グループ共有リンク情報（短縮版）"""
+    _share_link_field_name = "group_links"
+    group_links = fields.List(
+        fields.Nested(ShareLinkSchema),
+        dump_only=True,
+        description="グループに紐づく共有リンク一覧",
+    )
 
 class TournamentSchema(ShareLinkMixin,Schema):
     """大会レスポンス"""
@@ -29,11 +37,10 @@ class TournamentSchema(ShareLinkMixin,Schema):
     created_at = fields.DateTime(dump_only=True, description="大会作成日時（ISO 8601形式）")
     started_at = fields.DateTime(allow_none=True, description="大会開始日時（ISO 8601形式）")
     group = fields.Nested(
-        GroupSchema,
+        GroupLinkSchema,
         required=True,
-        exclude=("description", "id", "created_by", "created_at", "last_updated_at"),
         dump_only=True,
-        description="大会が所属するグループ情報（short_keyとグループ名のみ）"
+        description="大会が所属するグループ情報"
     )
     _share_link_field_name = "tournament_links"
 
@@ -44,3 +51,13 @@ class TournamentSchema(ShareLinkMixin,Schema):
         dump_default=[],
         description="大会に紐づく共有リンク一覧",
     )
+    @post_dump
+    def rename_and_cleanup_group(self, data, **kwargs):
+        """group → group_link に変更し、不要な group_links を削除"""
+        if "group" in data:
+            group_link = data.pop("group")
+            # group_links が存在するなら削除
+            if isinstance(group_link, dict) and "group_links" in group_link:
+                group_link.pop("group_links", None)
+            data["parent_group_link"] = group_link
+        return data

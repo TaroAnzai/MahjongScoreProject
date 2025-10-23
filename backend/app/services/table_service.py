@@ -96,6 +96,8 @@ def get_table_by_key(short_key: str) -> Table:
     """卓共有キーから卓を取得"""
     link, table = _require_table(short_key)
     table.current_user_access = link.access_level
+    if table:
+        table.tournament.current_user_access = link.access_level
     return table
 
 

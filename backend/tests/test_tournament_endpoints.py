@@ -86,10 +86,9 @@ class TestTournamentEndpoints:
         assert fetched["id"] == tournament["id"]
 
         # === 検証5: グループ情報が含まれている ===
-        print(fetched)
-        assert "group" in fetched
-        assert fetched["group"]["name"] == group_data["name"]
-        assert "view_link" in fetched['group']
+        print(fetched["parent_group_link"])
+        assert "parent_group_link" in fetched
+        assert "view_link" in fetched['parent_group_link']
 
 
         # === 検証5: グループのVIEWキーでは403になる ===

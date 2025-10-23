@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, post_dump
 from app.schemas.common_schemas import ShareLinkSchema
 from app.schemas.mixins.share_link_mixin import ShareLinkMixin
 from app.schemas.tournament_schema import TournamentSchema
@@ -15,6 +15,14 @@ class TableUpdateSchema(Schema):
     type = fields.Str(description="卓タイプ")
 
 
+class TournamentLinkSchema(ShareLinkMixin,Schema):
+    """グループ共有リンク情報（短縮版）"""
+    _share_link_field_name = "tournament_links"
+    tournament_links = fields.List(
+        fields.Nested(ShareLinkSchema),
+        dump_only=True,
+        description="親トーナメントに紐づく共有リンク一覧",
+    )
 class TableSchema(ShareLinkMixin,Schema):
     """卓レスポンス"""
     id = fields.Int(required=True, dump_only=True, description="卓ID")
@@ -24,8 +32,7 @@ class TableSchema(ShareLinkMixin,Schema):
     created_by = fields.Str(dump_only=True, description="作成時のKey")
     created_at = fields.DateTime(dump_only=True, description="卓作成日時（ISO 8601形式）")
     tournament = fields.Nested(
-        TournamentSchema,
-        exclude=("group","id","created_by","created_at", "rate"),
+        TournamentLinkSchema,
         required=True,
         dump_only=True,
         description="卓が所属する大会の情報"
@@ -39,3 +46,13 @@ class TableSchema(ShareLinkMixin,Schema):
         dump_default=[],
         description="卓に紐づく共有リンク一覧",
     )
+    @post_dump
+    def rename_and_cleanup_tournament(self, data, **kwargs):
+        """tournament → tournament_link に変更し、不要な tournament_links を削除"""
+        if "tournament" in data:
+            tournament_link = data.pop("tournament")
+            # tournament_links が存在するなら削除
+            if isinstance(tournament_link, dict) and "tournament_links" in tournament_link:
+                tournament_link.pop("tournament_links", None)
+            data["parent_tournament_link"] = tournament_link
+        return data

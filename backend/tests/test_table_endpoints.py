@@ -65,7 +65,8 @@ class TestTableEndpoints:
         assert ok.status_code == 200
         table_data = ok.get_json()
         print(table_data)
-        assert "tournament" in table_data
+        assert "parent_tournament_link" in table_data
+        assert "view_link" in table_data["parent_tournament_link"]
 
         forbidden = client.get(f"/api/tables/{tournament_links[AccessLevel.VIEW.value]}")
         assert forbidden.status_code == 403
