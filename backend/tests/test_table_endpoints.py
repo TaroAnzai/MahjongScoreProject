@@ -155,4 +155,5 @@ class TestTableEndpoints:
         # --- 存在しない table_key で 404 ---
         res_404 = client.get("/api/tables/xxxxxx/games")
         assert res_404.status_code == 404
-        assert "table_keyが無効です。" in res_404.get_json()["message"]
+        json = res_404.get_json()
+        assert "table_keyが無効です。" in json['errors']['json']["message"]

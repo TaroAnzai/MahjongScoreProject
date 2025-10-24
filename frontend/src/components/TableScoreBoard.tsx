@@ -1,31 +1,32 @@
 // src/components/TableScoreBoard.jsx
-import type { Game } from '@/api/generated/mahjongApi.schemas';
+import type { Game, Player, ScoreInput, Table } from '@/api/generated/mahjongApi.schemas';
 import styles from './TableScoreBoard.module.css';
 import React, { useState } from 'react';
 
 interface TableScoreBoardProps {
-  table: any;
-  players: Array<{ id: number; name: string }>;
+  table: Table;
+  players: readonly Player[];
   games: Game[];
-  onUpdateGame: () => void;
+  onUpdateGame: (gameId: number | null, scres: ScoreInput[]) => void;
 }
-function TableScoreBoard({ table, players, games, onUpdateGame }) {
-  const [editingGameIndex, setEditingGameIndex] = useState(null);
-  const [editingScores, setEditingScores] = useState({});
+function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoardProps) {
+  if (!table || !players || !games) return null;
+  const [editingGameIndex, setEditingGameIndex] = useState<number | null>(null);
+  const [editingScores, setEditingScores] = useState<Record<number, number | string>>({});
   const [rowTotal, setRowTotal] = useState(0);
   const extraEmptyRows = 1;
 
-  const isChipTable = table?.type === 'chip';
-  // プレイヤー列の準備
+  const isChipTable = table.type === 'chip';
+  // プレイヤー列の準備 4名以下の場合はダミーを追加
   const displayPlayers = [...players];
   if (!isChipTable) {
     while (displayPlayers.length < 4) {
-      displayPlayers.push({ id: `empty-${displayPlayers.length}`, name: '' });
+      displayPlayers.push({ id: displayPlayers.length * -1, name: '', group_id: 0 });
     }
   }
 
   // ゲーム行の準備
-  const displayGames = [...games];
+  const displayGames: (Game | null)[] = [...games];
   if (!isChipTable) {
     let targetLength;
     if (games.length <= 3) {
@@ -38,37 +39,36 @@ function TableScoreBoard({ table, players, games, onUpdateGame }) {
       displayGames.push(null);
     }
   }
-  const handleRowClick = (index) => {
+  const handleRowClick = (index: number) => {
     if (editingGameIndex === index) return; // ← 編集中なら無視
 
     const game = displayGames[index];
-    const initialScores = {};
+    const initialScores: Record<number, number> = {};
     displayPlayers.forEach((player) => {
       const scoreEntry = game?.scores?.find((s) => s.player_id === player.id);
-      initialScores[player.id] = scoreEntry?.score ?? '';
+      initialScores[player.id] = scoreEntry?.score ?? 0;
     });
     setEditingGameIndex(index);
     setEditingScores(initialScores);
 
     const initialTotal = Object.values(initialScores).reduce((acc, val) => {
-      const num = parseFloat(val);
-      return acc + (isNaN(num) ? 0 : num);
+      return acc + val;
     }, 0);
     setRowTotal(initialTotal);
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = () => {
+    if (editingGameIndex === null) return;
     const game = displayGames[editingGameIndex];
+    console.log('editingGameIndex', editingGameIndex);
     const formatted = Object.entries(editingScores).map(([playerId, score]) => ({
       player_id: parseInt(playerId),
-      score: parseFloat(score),
+      score: Number(score),
     }));
-    const gameId = game?.game_id ?? null;
-    const res = await onUpdateGame?.(editingGameIndex, gameId, formatted);
-    if (res) {
-      setEditingGameIndex(null);
-      setEditingScores({});
-    }
+    const gameId = game?.id ?? null;
+    onUpdateGame(gameId, formatted);
+    setEditingGameIndex(null);
+    setEditingScores({});
   };
 
   const handleCancel = () => {
@@ -76,7 +76,7 @@ function TableScoreBoard({ table, players, games, onUpdateGame }) {
     setEditingScores({});
   };
 
-  const totalScores = {};
+  const totalScores: Record<number, number> = {};
   displayPlayers.forEach((player) => {
     totalScores[player.id] = 0;
   });
@@ -90,7 +90,6 @@ function TableScoreBoard({ table, players, games, onUpdateGame }) {
       });
     }
   });
-
   return (
     <div className={styles.scoreWrapper}>
       <table className={`${styles.scoreTable} table`}>
@@ -106,7 +105,7 @@ function TableScoreBoard({ table, players, games, onUpdateGame }) {
         </thead>
         <tbody>
           {displayGames.map((game, index) => (
-            <React.Fragment key={game?.game_id ?? `row-${index}`}>
+            <React.Fragment key={game?.id ?? `row-${index}`}>
               <tr onClick={() => handleRowClick(index)}>
                 <td className={styles.cell}>{isChipTable ? 'チップ' : `第${index + 1}回`}</td>
                 {displayPlayers.map((player) => (
@@ -120,9 +119,9 @@ function TableScoreBoard({ table, players, games, onUpdateGame }) {
                           const newScores = { ...editingScores, [player.id]: e.target.value };
                           setEditingScores(newScores);
 
-                          const total = Object.values(newScores).reduce((acc, val) => {
-                            const num = parseFloat(val);
-                            return acc + (isNaN(num) ? 0 : num);
+                          const total = Object.values(newScores).reduce((acc: number, val) => {
+                            const num = typeof val === 'string' ? parseFloat(val) : val;
+                            return acc + num;
                           }, 0);
                           setRowTotal(total);
                         }}

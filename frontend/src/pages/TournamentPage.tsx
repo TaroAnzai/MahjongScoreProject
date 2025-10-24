@@ -225,7 +225,7 @@ function TournamentPage() {
         <SelectorModal
           title="削除する参加者を選択"
           open={showDeletePlayerModal}
-          items={players}
+          items={players ?? []}
           onSelect={handleDeletePlayer}
           onClose={() => setShowDeletePlayerModal(false)}
         />

@@ -48,6 +48,7 @@ function MultiSelectorModal<T extends { id: number; name: string }>({
       }
     >
       <div className={styles.listContainer}>
+        {items.length === 0 && <p>表示する項目がありません</p>}
         <ul className={styles.list}>
           {items.map((item) => (
             <li key={item.id} className={styles.listItem}>

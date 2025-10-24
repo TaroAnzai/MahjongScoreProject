@@ -1,5 +1,7 @@
 import {
   deleteApiTablesTableKey,
+  deleteApiTablesTableKeyPlayersPlayerId,
+  getGetApiTablesTableKeyPlayersQueryOptions,
   getGetApiTablesTableKeyQueryOptions,
   postApiTablesTableKeyPlayers,
   postApiTournamentsTournamentKeyTables,
@@ -8,7 +10,7 @@ import {
   useGetApiTablesTableKeyPlayers,
   useGetApiTournamentsTournamentKeyTables,
 } from '@/api/generated/mahjongApi';
-import type { TableCreate, TableUpdate } from '@/api/generated/mahjongApi.schemas';
+import type { TableCreate, TablePlayerItem, TableUpdate } from '@/api/generated/mahjongApi.schemas';
 import { Mutation, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -70,6 +72,7 @@ export const useGetTable = (tableKey: string) => {
 
 export const useDeleteTable = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   return useMutation({
     mutationFn: (data: { tableKey: string }) => {
       return deleteApiTablesTableKey(data.tableKey);
@@ -79,6 +82,7 @@ export const useDeleteTable = () => {
       // キャッシュ更新
       const queryKey = getGetApiTablesTableKeyQueryOptions(variables.tableKey).queryKey;
       queryClient.invalidateQueries({ queryKey });
+      navigate(-1);
     },
     onError: (error) => {
       console.error('Error deleting table:', error);
@@ -89,20 +93,19 @@ export const useDeleteTable = () => {
 
 export const useGetTablePlayer = (tableKey: string) => {
   const {
-    data: players,
+    data,
     isLoading: isLoadingPlayers,
     refetch: loadPlayers,
   } = useGetApiTablesTableKeyPlayers(tableKey);
+  const players = data?.table_players;
   return { players, isLoadingPlayers, loadPlayers };
 };
 
 export const useAddTablePlayer = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: { tableKey: string; playerIds: string[] }) => {
-      return postApiTablesTableKeyPlayers(data.tableKey, {
-        player_ids: data.playerIds,
-      });
+    mutationFn: (data: { tableKey: string; tablePlayersItem: TablePlayerItem[] }) => {
+      return postApiTablesTableKeyPlayers(data.tableKey, { players: data.tablePlayersItem });
     },
     onSuccess: (data, variables) => {
       toast.success('Players added to table successfully');
@@ -113,6 +116,25 @@ export const useAddTablePlayer = () => {
     onError: (error) => {
       console.error('Error adding players to table:', error);
       toast.error('Error adding players to table');
+    },
+  });
+};
+
+export const useDeleteTablePlayer = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { tableKey: string; playerId: number }) => {
+      return deleteApiTablesTableKeyPlayersPlayerId(data.tableKey, data.playerId);
+    },
+    onSuccess: (data, variables) => {
+      toast.success('Players removed from table successfully');
+      // キャッシュ更新
+      const queryKey = getGetApiTablesTableKeyPlayersQueryOptions(variables.tableKey).queryKey;
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (error) => {
+      console.error('Error removing players from table:', error);
+      toast.error('Error removing players from table');
     },
   });
 };

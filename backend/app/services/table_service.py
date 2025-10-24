@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from sqlalchemy.exc import IntegrityError
 from app import db
 from app.models import AccessLevel, Table, Tournament
 from app.service_errors import (
@@ -128,5 +129,11 @@ def delete_table(short_key: str) -> None:
     link, table = _require_table(short_key)
     _ensure_access(link, AccessLevel.EDIT, "卓を削除する権限がありません。")
 
-    db.session.delete(table)
-    db.session.commit()
+    try:
+        db.session.delete(table)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        raise ServiceValidationError("この卓には関連データが存在するため削除できません。")
+
+    return {"message": "卓を削除しました。"}

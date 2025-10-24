@@ -15,7 +15,7 @@ import { Button } from './ui/button';
 interface SelectorModalProps {
   title: string;
   open: boolean;
-  items: any[] | undefined;
+  items: any[] | readonly any[] | undefined;
   onSelect: (item: any) => void;
   onClose: () => void;
   plusDisplayItem?: string | null;
