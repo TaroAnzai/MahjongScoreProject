@@ -9,11 +9,10 @@ from app.schemas.group_schema import (
     GroupSchema,
 )
 from app.schemas.tournament_schema import TournamentSchema, TournamentCreateSchema
-from app.service_errors import (
-    ServiceNotFoundError,
-    ServicePermissionError,
-    ServiceValidationError,
-)
+from app.service_errors import ServiceError
+from flask import jsonify
+from app.service_errors import format_error_response
+
 from app.services.group_service import (
     create_group,
     get_group_by_key,
@@ -30,7 +29,9 @@ group_bp = Blueprint(
     url_prefix="/api/groups",
     description="グループ管理API",
 )
-
+@group_bp.errorhandler(ServiceError)
+def handle_service_error(e: ServiceError):
+    return jsonify(format_error_response(e.code, e.name, e.description)), e.code
 
 # =========================================================
 # 作成
@@ -43,10 +44,8 @@ class GroupsResource(MethodView):
     @with_common_error_responses(group_bp)
     def post(self, new_data):
         """グループ新規作成"""
-        try:
-            return create_group(new_data)
-        except ServiceValidationError as e:
-            abort(e.status_code, message=e.message)
+        return create_group(new_data)
+
 
 
 # =========================================================
@@ -60,30 +59,24 @@ class GroupByKeyResource(MethodView):
     @with_common_error_responses(group_bp)
     def get(self, group_key):
         """グループ詳細取得"""
-        try:
-            return get_group_by_key(group_key)
-        except ServiceNotFoundError as e:
-            abort(e.status_code, message=e.message)
+        return get_group_by_key(group_key)
+
 
     @group_bp.arguments(GroupUpdateSchema)
     @group_bp.response(200, GroupSchema)
     @with_common_error_responses(group_bp)
     def put(self, update_data, group_key):
         """グループ更新"""
-        try:
-            return update_group(group_key, update_data)
-        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+        return update_group(group_key, update_data)
+
 
     @group_bp.response(200, MessageSchema)
     @with_common_error_responses(group_bp)
     def delete(self, group_key):
         """グループ削除"""
-        try:
-            delete_group(group_key)
-            return {"message": "Group deleted"}
-        except (ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+        delete_group(group_key)
+        return {"message": "Group deleted"}
+
 
 # =========================================================
 # 大会作成
@@ -97,16 +90,12 @@ class TournamentCreateResource(MethodView):
     @with_common_error_responses(group_bp)
     def post(self, new_data, group_key):
         """グループ共有キーから大会を作成"""
-        try:
-            return create_tournament(new_data, group_key)
-        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+        return create_tournament(new_data, group_key)
+
 
     @group_bp.response(200, TournamentSchema(many=True))
     @with_common_error_responses(group_bp)
     def get(self, group_key):
         """グループキーから大会一覧を取得"""
-        try:
-            return get_tournaments_by_group(group_key)
-        except (ServiceNotFoundError,) as e:
-            abort(e.status_code, message=e.message)
+        return get_tournaments_by_group(group_key)
+

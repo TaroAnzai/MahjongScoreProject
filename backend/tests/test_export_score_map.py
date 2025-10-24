@@ -67,8 +67,8 @@ class TestTournamentScoreMap:
         """異常系: 存在しない大会キー"""
         res = client.get("/api/tournaments/xxxxxx/score_map")
         assert res.status_code == 404
-        msg = res.get_json()["message"]
-        assert "大会" in msg
+        msg = res.get_json()['errors']['json']["message"]
+        assert any("大会" in m for m in msg)
 
     def test_get_tournament_score_map_empty(self, client,create_group, create_tournament):
         """正常系: スコアマップが空の大会"""

@@ -9,11 +9,9 @@ from app.schemas.tournament_schema import (
     TournamentSchema,
 )
 from app.schemas.table_schema import TableSchema, TableCreateSchema
-from app.service_errors import (
-    ServiceNotFoundError,
-    ServicePermissionError,
-    ServiceValidationError,
-)
+from app.service_errors import ServiceError
+from flask import jsonify
+from app.service_errors import format_error_response
 from app.services.tournament_service import (
     get_tournament_by_key,
     update_tournament,
@@ -29,8 +27,9 @@ tournament_bp = Blueprint(
     description="大会管理API",
 )
 
-
-
+@tournament_bp.errorhandler(ServiceError)
+def handle_service_error(e: ServiceError):
+    return jsonify(format_error_response(e.code, e.name, e.description)), e.code
 
 
 # =========================================================
@@ -44,30 +43,21 @@ class TournamentByKeyResource(MethodView):
     @with_common_error_responses(tournament_bp)
     def get(self, tournament_key):
         """大会詳細取得"""
-        try:
-            return get_tournament_by_key(tournament_key)
-        except (ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+        return get_tournament_by_key(tournament_key)
 
     @tournament_bp.arguments(TournamentUpdateSchema)
     @tournament_bp.response(200, TournamentSchema)
     @with_common_error_responses(tournament_bp)
     def put(self, update_data, tournament_key):
         """大会更新"""
-        try:
-            return update_tournament(tournament_key, update_data)
-        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+        return update_tournament(tournament_key, update_data)
 
     @tournament_bp.response(200, MessageSchema)
     @with_common_error_responses(tournament_bp)
     def delete(self, tournament_key):
         """大会削除"""
-        try:
-            delete_tournament(tournament_key)
-            return {"message": "Tournament deleted"}
-        except (ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+        delete_tournament(tournament_key)
+        return {"message": "Tournament deleed"}
 
 # =========================================================
 # 卓作成
@@ -81,10 +71,7 @@ class TableCreateResource(MethodView):
     @with_common_error_responses(tournament_bp)
     def post(self, new_data, tournament_key):
         """大会共有キーから卓を作成"""
-        try:
-            return create_table(new_data, tournament_key)
-        except (ServiceValidationError, ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+        return create_table(new_data, tournament_key)
 
 # =========================================================
 # 卓一覧取得
@@ -93,9 +80,6 @@ class TableCreateResource(MethodView):
     @with_common_error_responses(tournament_bp)
     def get(self, tournament_key):
         """大会内の卓一覧取得"""
-        try:
-            tables = get_table_by_tournament(tournament_key)
-            return tables
-        except (ServicePermissionError, ServiceNotFoundError) as e:
-            abort(e.status_code, message=e.message)
+        tables = get_table_by_tournament(tournament_key)
+        return tables
 
