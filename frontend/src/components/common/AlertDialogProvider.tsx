@@ -18,6 +18,7 @@ type AlertDialogOptions = {
   description?: string;
   confirmText?: string;
   cancelText?: string;
+  showCancelButton?: boolean;
 };
 
 type AlertDialogContextType = {
@@ -59,9 +60,11 @@ export const AlertDialogProvider: React.FC<{ children: React.ReactNode }> = ({ c
             <AlertDialogDescription>{options.description ?? ''}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancel}>
-              {options.cancelText ?? 'キャンセル'}
-            </AlertDialogCancel>
+            {options.showCancelButton !== false && (
+              <AlertDialogCancel onClick={handleCancel}>
+                {options.cancelText ?? 'キャンセル'}
+              </AlertDialogCancel>
+            )}
             <AlertDialogAction onClick={handleConfirm}>
               {options.confirmText ?? 'OK'}
             </AlertDialogAction>

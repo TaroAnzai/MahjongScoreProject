@@ -19,11 +19,13 @@ import {
   useUpdateTable,
 } from '@/hooks/useTables';
 import { useGetTournamentPlayers } from '@/hooks/useTournaments';
-import type { Player, ScoreInput, TablePlayerItem } from '@/api/generated/mahjongApi.schemas';
-import { useCreateGame, useGetTableGames, useUpdateGame } from '@/hooks/useGames';
+import type { Game, Player, ScoreInput, TablePlayerItem } from '@/api/generated/mahjongApi.schemas';
+import { useCreateGame, useDeleteGame, useGetTableGames, useUpdateGame } from '@/hooks/useGames';
+import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 
 export default function TablePage() {
   const { tableKey } = useParams();
+  const { alertDialog } = useAlertDialog();
   //Query系フック設定
   const { table, isLoadingTable, loadTable } = useGetTable(tableKey!);
   const { players: tablePlayers, isLoadingPlayers: isLoadingTablePlayers } = useGetTablePlayer(
@@ -44,11 +46,11 @@ export default function TablePage() {
   const { mutate: deleteTablePlayer } = useDeleteTablePlayer();
   const { mutate: createGame } = useCreateGame();
   const { mutate: updateGame } = useUpdateGame();
+  const { mutate: deleteGame } = useDeleteGame();
   //no cofirmation
   const [searchParams] = useSearchParams();
   const editKey = searchParams.get('edit');
 
-  const navigate = useNavigate();
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
   const [showDeletePlayerModal, setShowDeletePlayerModal] = useState(false);
   const [showDeleteGameModal, setShowDeleteGameModal] = useState(false);
@@ -80,7 +82,10 @@ export default function TablePage() {
   };
 
   const handleDeleteTable = async () => {
-    const confirmed = confirm('記録表を削除してもよいですか？');
+    const confirmed = await alertDialog({
+      title: 'Delete Table',
+      description: 'Are you sure you want to delete this table?',
+    });
     if (!confirmed) return;
     deleteTable({ tableKey: tableKey! });
   };
@@ -88,14 +93,13 @@ export default function TablePage() {
   const handleDeleteGameClick = () => {
     setShowDeleteGameModal(true);
   };
-  const handleDeleteGame = async (game) => {
-    try {
-      const result = await deleteGame(game.id);
-      setShowDeleteGameModal(false);
-      fetchTable();
-    } catch (e) {
-      alert(`ゲームの削除に失敗しました${e.message}`);
-    }
+  const handleDeleteGame = async (game: Game) => {
+    const confirmed = await alertDialog({
+      title: 'Delete Game',
+      description: 'Are you sure you want to delete this game?',
+    });
+    if (confirmed) deleteGame({ tableKey: tableKey!, gameId: game.id! });
+    setShowDeleteGameModal(false);
   };
 
   if (!table) return <div>読み込み中...</div>;

@@ -1,6 +1,7 @@
 import {
   deleteApiTablesTableKey,
   deleteApiTablesTableKeyPlayersPlayerId,
+  getGetApiTablesTableKeyPlayersQueryKey,
   getGetApiTablesTableKeyPlayersQueryOptions,
   getGetApiTablesTableKeyQueryOptions,
   postApiTablesTableKeyPlayers,
@@ -88,7 +89,11 @@ export const useDeleteTable = () => {
     },
     onError: (error) => {
       console.error('Error deleting table:', error);
-      alertDialog({ title: 'Error deleting table', description: 'Error deleting table' });
+      alertDialog({
+        title: 'Error deleting table',
+        description: 'Error deleting table',
+        showCancelButton: false,
+      });
     },
   });
 };
@@ -112,7 +117,7 @@ export const useAddTablePlayer = () => {
     onSuccess: (data, variables) => {
       toast.success('Players added to table successfully');
       // キャッシュ更新
-      const queryKey = getGetApiTablesTableKeyQueryOptions(variables.tableKey).queryKey;
+      const queryKey = getGetApiTablesTableKeyPlayersQueryKey(variables.tableKey);
       queryClient.invalidateQueries({ queryKey });
     },
     onError: (error) => {
@@ -123,6 +128,7 @@ export const useAddTablePlayer = () => {
 };
 
 export const useDeleteTablePlayer = () => {
+  const alertDialog = useAlertDialog();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tableKey: string; playerId: number }) => {
@@ -131,12 +137,12 @@ export const useDeleteTablePlayer = () => {
     onSuccess: (data, variables) => {
       toast.success('Players removed from table successfully');
       // キャッシュ更新
-      const queryKey = getGetApiTablesTableKeyPlayersQueryOptions(variables.tableKey).queryKey;
+      const queryKey = getGetApiTablesTableKeyPlayersQueryKey(variables.tableKey);
       queryClient.invalidateQueries({ queryKey });
     },
     onError: (error) => {
       console.error('Error removing players from table:', error);
-      toast.error('Error removing players from table');
+      alertDialog.alertDialog({ title: 'Error', description: 'Error removing players from table' });
     },
   });
 };

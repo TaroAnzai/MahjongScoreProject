@@ -17,13 +17,15 @@
   --radius: 24px;
 
   /* ===== グリーン系ライトテーマ ===== */
-  --background: oklch(0.96 0.05 140); /* 明るい卓面 */
+  --background-color: oklch(0 0 0 / 0);
+  --background-gradient: linear-gradient(145deg, rgba(34, 139, 34, 0.15), rgba(0, 100, 0, 0.1));
+  --background: var(--background-color);
   --foreground: oklch(0.2 0.03 140);
 
-  --card: oklch(0.97 0.04 140);
+  --card: oklch(90.458% 0.20337 139.622);
   --card-foreground: oklch(0.22 0.03 140);
 
-  --popover: oklch(0.96 0.05 140);
+  --popover: oklch(87.915% 0.26854 140.667);
   --popover-foreground: oklch(0.22 0.03 140);
 
   --primary: oklch(0.58 0.15 140); /* 深めグリーン（麻雀卓） */
@@ -33,14 +35,14 @@
   --secondary-foreground: oklch(0.25 0.03 140);
 
   --muted: oklch(0.9 0.04 140);
-  --muted-foreground: oklch(0.35 0.05 140);
+  --muted-foreground: oklch(100% 0.00011 271.152);
 
   --accent: oklch(0.92 0.05 140);
   --accent-foreground: oklch(0.22 0.03 140);
 
   --destructive: oklch(0.6 0.25 20); /* 赤系破壊ボタン */
 
-  --border: oklch(0.85 0.04 140);
+  --border: rgba(144, 238, 144, 0.3);
   --input: oklch(0.85 0.04 140);
   --ring: oklch(0.6 0.1 140);
 
@@ -69,7 +71,7 @@ body {
   justify-content: center;
   min-width: 320px;
   min-height: 100vh;
-  color: white;
+  color: rgb(255, 255, 255);
   background: linear-gradient(135deg, #2f5938 0%, #0d2818 100%);
   background-attachment: fixed;
 }
@@ -136,7 +138,9 @@ button:focus-visible {
   --chart-5: oklch(0.52 0.16 120);
 }
 
-/* === Tailwindのベース適用 === */
+/* =========================================================
+   Tailwindのベース適用 (OKLCH互換版)
+   ========================================================= */
 @layer base {
   * {
     border-color: var(--border);
@@ -147,7 +151,71 @@ button:focus-visible {
     background-color: var(--background);
     color: var(--foreground);
   }
+
+  /* --- shadcn互換クラスをすべてOKLCHベースに置換 --- */
   .bg-background {
     background-color: var(--background) !important;
+    background-image: var(--background-gradient) !important;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+  }
+  .text-foreground {
+    color: var(--foreground) !important;
+  }
+
+  .bg-card {
+    background-color: var(--card) !important;
+  }
+  .text-card-foreground {
+    color: var(--card-foreground) !important;
+  }
+
+  .bg-popover {
+    background-color: var(--popover) !important;
+  }
+  .text-popover-foreground {
+    color: var(--popover-foreground) !important;
+  }
+
+  .bg-primary {
+    background-color: var(--primary) !important;
+  }
+  .text-primary-foreground {
+    color: var(--primary-foreground) !important;
+  }
+
+  .bg-secondary {
+    background-color: var(--secondary) !important;
+  }
+  .text-secondary-foreground {
+    color: var(--secondary-foreground) !important;
+  }
+
+  .bg-muted {
+    background-color: var(--muted) !important;
+  }
+  .text-muted-foreground {
+    color: var(--muted-foreground) !important;
+  }
+
+  .bg-accent {
+    background-color: var(--accent) !important;
+  }
+  .text-accent-foreground {
+    color: var(--accent-foreground) !important;
+  }
+
+  .bg-destructive {
+    background-color: var(--destructive) !important;
+  }
+  .text-destructive-foreground {
+    color: var(--destructive-foreground) !important;
+  }
+
+  .border-border {
+    border-color: var(--border) !important;
+  }
+  .bg-input {
+    background-color: var(--input) !important;
   }
 }

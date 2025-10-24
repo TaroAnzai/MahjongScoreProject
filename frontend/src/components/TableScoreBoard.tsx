@@ -2,6 +2,7 @@
 import type { Game, Player, ScoreInput, Table } from '@/api/generated/mahjongApi.schemas';
 import styles from './TableScoreBoard.module.css';
 import React, { useState } from 'react';
+import { Button } from './ui/button';
 
 interface TableScoreBoardProps {
   table: Table;
@@ -60,7 +61,6 @@ function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoar
   const handleConfirm = () => {
     if (editingGameIndex === null) return;
     const game = displayGames[editingGameIndex];
-    console.log('editingGameIndex', editingGameIndex);
     const formatted = Object.entries(editingScores).map(([playerId, score]) => ({
       player_id: parseInt(playerId),
       score: Number(score),
@@ -146,19 +146,20 @@ function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoar
                   <tr className={styles.confirmRow}>
                     <td colSpan={displayPlayers.length + 1} className={styles.confirmCell}>
                       <div className={styles.confirmBtnRow}>
-                        <button
+                        <Button
                           onClick={handleConfirm}
                           className={`${styles.addButton} mahjong-button`}
+                          disabled={rowTotal !== 0}
                         >
                           確定
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={handleCancel}
                           className={`${styles.addButton} mahjong-button`}
                           style={{ marginLeft: '1rem' }}
                         >
                           キャンセル
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>
