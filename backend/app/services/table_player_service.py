@@ -127,7 +127,7 @@ def delete_table_player(table_key: str, player_id: int):
     if not link or link.resource_type != "table":
         raise ServicePermissionError("不正な共有リンクです。")
 
-    table_player = TablePlayer.query.filter_by(id=player_id, table_id=link.resource_id).first()
+    table_player = TablePlayer.query.filter_by(player_id=player_id, table_id=link.resource_id).first()
     if not table_player:
         raise ServiceNotFoundError("卓参加者が見つかりません。")
 

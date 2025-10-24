@@ -29,7 +29,7 @@ game_bp = Blueprint(
 # =========================================================
 # 対局単体操作
 # =========================================================
-@game_bp.route("/<string:game_id>")
+@game_bp.route("/<int:game_id>")
 class GameByKeyResource(MethodView):
     """GET / PUT / DELETE: 対局単体操作"""
 
