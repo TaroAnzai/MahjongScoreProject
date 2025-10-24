@@ -1,7 +1,7 @@
 # app/services/table_player_service.py
 
 from app import db
-from app.models import AccessLevel, Table, TablePlayer, TournamentPlayer, Tournament, Player
+from app.models import AccessLevel, Table, TablePlayer, TournamentPlayer, Tournament, Player, Game, Score
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
@@ -132,6 +132,17 @@ def delete_table_player(table_key: str, player_id: int):
         raise ServiceNotFoundError("卓参加者が見つかりません。")
 
     _ensure_access(link, AccessLevel.EDIT, "卓参加者を削除する権限がありません。")
+
+    # 1. 同じ卓のゲームを取得
+    games = Game.query.filter_by(table_id=table_player.table_id).all()
+    # 2. そのゲームにスコアが登録されているか確認
+    for game in games:
+        existing_score = Score.query.filter_by(
+            game_id=game.id, player_id=table_player.player_id
+        ).first()
+        if existing_score:
+            raise ServiceValidationError("スコアが登録されているプレイヤーは削除できません。")
+
 
     db.session.delete(table_player)
     db.session.commit()
