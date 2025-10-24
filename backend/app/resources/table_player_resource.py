@@ -4,7 +4,7 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from app.decorators import with_common_error_responses
 from app.schemas.common_schemas import MessageSchema
-from app.schemas.table_player_schema import TablePlayerCreateSchema, TablePlayerSchema
+from app.schemas.table_player_schema import TablePlayerCreateSchema, TablePlayersSchema
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
@@ -31,7 +31,7 @@ table_player_bp = Blueprint(
 class TablePlayerListResource(MethodView):
     """GET: 卓参加者一覧 / POST: 卓に参加者追加"""
 
-    @table_player_bp.response(200, TablePlayerSchema(many=True))
+    @table_player_bp.response(200, TablePlayersSchema)
     @with_common_error_responses(table_player_bp)
     def get(self, table_key):
         """卓共有キーから参加者一覧を取得"""
@@ -41,7 +41,7 @@ class TablePlayerListResource(MethodView):
             abort(e.status_code, message=e.message)
 
     @table_player_bp.arguments(TablePlayerCreateSchema)
-    @table_player_bp.response(201, TablePlayerSchema)
+    @table_player_bp.response(201, TablePlayersSchema)
     @with_common_error_responses(table_player_bp)
     def post(self, new_data, table_key):
         """卓共有キーから大会参加者を登録"""

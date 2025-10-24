@@ -79,7 +79,7 @@ def test_create_table_player(client, db_session, setup_table_with_participants):
     url = f"/api/tables/{table_key}/players"
     res = client.post(
         url,
-        json={"player_id": participant["id"], "seat_position": 1},
+        json={'players':[{"player_id": participant["id"], "seat_position": 1}]},
     )
     assert res.status_code == 201
 
@@ -107,10 +107,9 @@ def test_list_table_players(client, db_session, setup_table_with_participants):
     url = f"/api/tables/{table_key}/players"
     res = client.get(url)
     assert res.status_code == 200
-
-    result = res.get_json()
+    result = res.get_json()['table_players']
     assert isinstance(result, list)
-    assert any(p["player_id"] == participant["id"] for p in result)
+    assert any(p["id"] == participant["id"] for p in result)
 
 
 def test_delete_table_player(client, db_session, setup_table_with_participants):
