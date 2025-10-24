@@ -136,12 +136,6 @@ button:focus-visible {
   --chart-5: oklch(0.52 0.16 120);
 }
 
-.dialog-content {
-  background: linear-gradient(145deg, rgba(34, 139, 34, 0.2), rgba(0, 100, 0, 0.15));
-  backdrop-filter: blur(6px);
-  border: 1px solid var(--border);
-  color: white;
-}
 /* === Tailwindのベース適用 === */
 @layer base {
   * {
@@ -152,5 +146,8 @@ button:focus-visible {
   body {
     background-color: var(--background);
     color: var(--foreground);
+  }
+  .bg-background {
+    background-color: var(--background) !important;
   }
 }

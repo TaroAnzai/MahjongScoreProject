@@ -1,4 +1,4 @@
-import {loginByEditKey} from '../api/auth_api';
+import { loginByEditKey } from '../api/auth_api';
 
 function getTypeFromUrlPath() {
   const path = window.location.pathname; // 例: "/mahjong/group/GtEAuh4S4zz_7HTd"
@@ -28,7 +28,7 @@ export async function fetchWithAutoLogin(url, options = {}, type = null) {
     const loginRes = await loginByEditKey(resolvedType, editKey);
     if (loginRes) {
       // ログイン成功後、少し待ってから再試行
-      await new Promise(resolve => setTimeout(resolve, 100)); // ここに100msの遅延を追加
+      await new Promise((resolve) => setTimeout(resolve, 100)); // ここに100msの遅延を追加
       res = await fetch(url, { ...options, credentials: 'include' });
     } else {
       console.error('再ログインに失敗しました。');

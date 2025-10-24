@@ -11,6 +11,7 @@ import {
   useGetApiTournamentsTournamentKeyTables,
 } from '@/api/generated/mahjongApi';
 import type { TableCreate, TablePlayerItem, TableUpdate } from '@/api/generated/mahjongApi.schemas';
+import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { Mutation, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -73,6 +74,7 @@ export const useGetTable = (tableKey: string) => {
 export const useDeleteTable = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { alertDialog } = useAlertDialog();
   return useMutation({
     mutationFn: (data: { tableKey: string }) => {
       return deleteApiTablesTableKey(data.tableKey);
@@ -86,7 +88,7 @@ export const useDeleteTable = () => {
     },
     onError: (error) => {
       console.error('Error deleting table:', error);
-      toast.error('Error deleting table');
+      alertDialog({ title: 'Error deleting table', description: 'Error deleting table' });
     },
   });
 };
