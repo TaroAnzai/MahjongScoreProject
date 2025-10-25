@@ -8,11 +8,12 @@ import {
   useGetApiTablesTableKeyGames,
 } from '@/api/generated/mahjongApi';
 import type { GameCreate, GameUpdate } from '@/api/generated/mahjongApi.schemas';
-import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 
 export const useCreateGame = () => {
+  const { alertDialog } = useAlertDialog();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tableKey: string; gameCreate: GameCreate }) => {
@@ -23,9 +24,18 @@ export const useCreateGame = () => {
       const queryKey = getGetApiTablesTableKeyGamesQueryKey(variables.tableKey);
       queryClient.invalidateQueries({ queryKey });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error creating game:', error);
-      toast.error('Error creating game');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error creating game',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
@@ -34,6 +44,7 @@ export const useGetTableGames = (tableKey: string) => {
   return { games, isLoadingGames };
 };
 export const useUpdateGame = () => {
+  const { alertDialog } = useAlertDialog();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tableKey: string; gameId: number; gameUpdate: GameUpdate }) => {
@@ -44,9 +55,18 @@ export const useUpdateGame = () => {
       const queryKey = getGetApiTablesTableKeyGamesQueryKey(variables.tableKey);
       queryClient.invalidateQueries({ queryKey });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating game:', error);
-      toast.error('Error updating game');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error updating game',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
@@ -63,9 +83,18 @@ export const useDeleteGame = () => {
       const queryKey = getGetApiTablesTableKeyGamesQueryKey(variables.tableKey);
       queryClient.invalidateQueries({ queryKey });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error deleting game:', error);
-      alertDialog({ title: 'Error', description: 'Error deleting game' });
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error deleting game',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };

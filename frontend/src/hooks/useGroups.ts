@@ -3,6 +3,8 @@ import { postApiGroups, putApiGroupsGroupKey, usePostApiGroups } from '@/api/gen
 import type { Group, GroupCreate, GroupUpdate } from '@/api/generated/mahjongApi.schemas';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useAlertDialog } from '@/components/common/AlertDialogProvider';
+
 import { useEffect, useMemo, useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { getGetApiGroupsGroupKeyQueryOptions } from '@/api/generated/mahjongApi';
@@ -20,6 +22,7 @@ import { toast } from 'sonner';
  * createGroup(createGroupData).then((data) => console.log(data)).catch((error) => console.error(error));
  */
 export const useCreateGroup = (onAfterCreate?: () => void) => {
+  const { alertDialog } = useAlertDialog();
   return useMutation({
     mutationFn: (data: GroupCreate) => {
       return postApiGroups(data);
@@ -30,13 +33,23 @@ export const useCreateGroup = (onAfterCreate?: () => void) => {
       localStorage.setItem(`group_key_${data.owner_link}`, data.owner_link ?? '');
       onAfterCreate?.();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error creating group:', error);
-      toast.error('Error creating group');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error creating group',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
 export const useUpdateGroup = (onAfterUpdate?: () => void) => {
+  const { alertDialog } = useAlertDialog();
   return useMutation({
     mutationFn: (data: { groupKey: string; groupUpdate: GroupUpdate }) => {
       return putApiGroupsGroupKey(data.groupKey, data.groupUpdate);
@@ -45,9 +58,18 @@ export const useUpdateGroup = (onAfterUpdate?: () => void) => {
       toast.success('Group updated successfully');
       onAfterUpdate?.();
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating group:', error);
-      toast.error('Error updating group');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error updating group',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };

@@ -20,8 +20,10 @@ import type {
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 
 export const useCreateTournament = () => {
+  const { alertDialog } = useAlertDialog();
   const navigate = useNavigate();
   return useMutation({
     mutationFn: (data: { groupKey: string; tournament: TournamentCreate }) => {
@@ -31,9 +33,18 @@ export const useCreateTournament = () => {
       toast.success('Tournament created successfully');
       navigate(`/tournament/${data.edit_link}`);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error creating tournament:', error);
-      toast.error('Error creating tournament');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error creating tournament',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
@@ -47,6 +58,7 @@ export const useGetTournaments = (groupKey: string) => {
   return { tournaments, isLoadingTournaments, loadTournaments };
 };
 export const useUpdateTournament = () => {
+  const { alertDialog } = useAlertDialog();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tournamentKey: string; tournament: TournamentUpdate }) => {
@@ -59,13 +71,23 @@ export const useUpdateTournament = () => {
       ).queryKey;
       queryClient.invalidateQueries({ queryKey: queryKeytournament });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating tournament:', error);
-      toast.error('Error updating tournament');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error updating tournament',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
 export const useDeleteTournament = () => {
+  const { alertDialog } = useAlertDialog();
   return useMutation({
     mutationFn: (data: { tournamentKey: string }) => {
       return deleteApiTournamentsTournamentKey(data.tournamentKey);
@@ -73,9 +95,18 @@ export const useDeleteTournament = () => {
     onSuccess: (data) => {
       toast.success('Tournament deleted successfully');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error deleting tournament:', error);
-      toast.error('Error deleting tournament');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error deleting tournament',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
@@ -99,6 +130,7 @@ export const useGetTournamentPlayers = (tournamentKey: string) => {
 };
 
 export const useAddTournamentPlayer = () => {
+  const { alertDialog } = useAlertDialog();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tournamentKey: string; players: Player[] }) => {
@@ -124,14 +156,24 @@ export const useAddTournamentPlayer = () => {
       queryClient.invalidateQueries({ queryKey: queryKeyScore });
       queryClient.invalidateQueries({ queryKey: queryKeyPlayer });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error adding player:', error);
-      toast.error('Error adding player');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error adding player to tournament',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
 
 export const useDeleteTounamentsPlayer = (onAfterSuccess?: () => void) => {
+  const { alertDialog } = useAlertDialog();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tournamentKey: string; playerId: number }) => {
@@ -151,10 +193,18 @@ export const useDeleteTounamentsPlayer = (onAfterSuccess?: () => void) => {
       queryClient.invalidateQueries({ queryKey: queryKeyScore });
       queryClient.invalidateQueries({ queryKey: queryKeyPlayer });
     },
-    onError: (error) => {
-      const errorMessage = error;
-      console.error('Error deleting player:', errorMessage);
-      toast.error(`Error deleting player:${errorMessage}`);
+    onError: (error: any) => {
+      console.error('Error deleting player from tournament:', error);
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error deleting player from tournament',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
