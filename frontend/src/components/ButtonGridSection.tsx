@@ -1,7 +1,9 @@
 import React from 'react';
 import styles from './ButtonGridSection.module.css';
-
-function ButtonGridSection({ children }) {
+interface ButtonGridSectionProps {
+  children?: React.ReactNode;
+}
+function ButtonGridSection({ children }: ButtonGridSectionProps) {
   return (
     <div className={`${styles.gridSection} mahjong-section`}>
       {React.Children.map(children, (child, index) => (

@@ -2,7 +2,12 @@
 import React, { useState } from 'react';
 import styles from './EditableTitle.module.css';
 
-function EditableTitle({ value, onChange, className = '' }) {
+interface EditableTitleProps {
+  value: string;
+  onChange?: (newValue: string) => void;
+  className?: string;
+}
+function EditableTitle({ value, onChange, className = '' }: EditableTitleProps) {
   const [editing, setEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value);
 
@@ -14,20 +19,17 @@ function EditableTitle({ value, onChange, className = '' }) {
   const handleFinishEdit = () => {
     setEditing(false);
     if (tempValue.trim() && tempValue !== value) {
-      onChange(tempValue.trim());
+      onChange?.(tempValue.trim());
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') handleFinishEdit();
     if (e.key === 'Escape') setEditing(false);
   };
 
   return (
-    <div
-      className={`${styles.wrapper} ${className}`}
-      onClick={handleStartEdit}
-    >
+    <div className={`${styles.wrapper} ${className}`} onClick={handleStartEdit}>
       {editing ? (
         <input
           type="text"
