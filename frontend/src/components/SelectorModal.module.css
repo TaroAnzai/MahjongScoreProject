@@ -1,5 +1,5 @@
 /* SelectorModal.module.css */
-.listContainer{
+.listContainer {
   flex-grow: 1;
   overflow-y: auto;
 }
@@ -7,8 +7,8 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  display:inline-block ;
-  width:100%;
+  display: inline-block;
+  width: 100%;
 
   list-style: none;
   padding: 0;
@@ -18,7 +18,6 @@
   overflow-y: auto;
   flex-grow: 1;
 }
-
 
 .listItem {
   margin-bottom: 0.5rem;
@@ -32,12 +31,12 @@
 
   color: white;
   background: linear-gradient(135deg, #32cd32, #228b22);
-  box-shadow: 0 8px 24px rgba(50, 205, 50, 0.3);
+  /* box-shadow: 0 8px 24px rgba(50, 205, 50, 0.3); */
   border: 1px solid rgba(144, 238, 144, 0.3);
 
   cursor: pointer;
 }
 
 .listItem:hover {
-  background-color: #3c5d3c;
+  background-color: #94a994;
 }

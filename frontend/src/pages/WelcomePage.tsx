@@ -7,14 +7,16 @@ import ButtonGridSection from '../components/ButtonGridSection';
 import type { Group } from '@/api/generated/mahjongApi.schemas';
 import { useCreateGroup, useGroupQueries } from '@/hooks/useGroups';
 import { Button } from '@/components/ui/button';
+import { TextInputModal } from '@/components/TextInputModal';
 
 function WelcomePage() {
   const navigate = useNavigate(); // ← フックの呼び出し
   const { groups, isLoading, refetch } = useGroupQueries();
   const createGroup = useCreateGroup(refetch);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleCreateGroup = async () => {
-    const name = window.prompt('グループ名を入力してください');
+  const handleCreateGroup = (name: string) => {
+    console.log(name);
     if (!name) return;
     createGroup.mutate({ name: name });
   };
@@ -31,7 +33,7 @@ function WelcomePage() {
       <h2 className="mahjong-title">麻雀大会 集計</h2>
 
       <ButtonGridSection>
-        <button className="mahjong-button" onClick={handleCreateGroup}>
+        <button className="mahjong-button" onClick={() => setIsModalOpen(true)}>
           新しいグループを作成
         </button>
       </ButtonGridSection>
@@ -60,6 +62,16 @@ function WelcomePage() {
           </ul>
         )}
       </div>
+      <TextInputModal
+        open={isModalOpen}
+        title="新しいグループを作成"
+        discription="グループ名を入力してください"
+        onComfirm={(inputText) => {
+          handleCreateGroup(inputText);
+          setIsModalOpen(false);
+        }}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

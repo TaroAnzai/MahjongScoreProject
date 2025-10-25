@@ -20,13 +20,13 @@
   --background-color: oklch(0 0 0 / 0);
   --background-gradient: linear-gradient(145deg, rgba(34, 139, 34, 0.15), rgba(0, 100, 0, 0.1));
   --background: var(--background-color);
-  --foreground: oklch(0.2 0.03 140);
+  --foreground: oklch(100% 0.00011 271.152);
 
   --card: oklch(90.458% 0.20337 139.622);
   --card-foreground: oklch(0.22 0.03 140);
 
-  --popover: oklch(87.915% 0.26854 140.667);
-  --popover-foreground: oklch(0.22 0.03 140);
+  --popover: var(--background-color);
+  --popover-foreground: var(--foreground);
 
   --primary: oklch(0.58 0.15 140); /* 深めグリーン（麻雀卓） */
   --primary-foreground: oklch(0.99 0 0);
@@ -157,7 +157,7 @@ button:focus-visible {
     background-color: var(--background) !important;
     background-image: var(--background-gradient) !important;
     box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
+    backdrop-filter: blur(10px);
   }
   .text-foreground {
     color: var(--foreground) !important;
@@ -171,7 +171,10 @@ button:focus-visible {
   }
 
   .bg-popover {
-    background-color: var(--popover) !important;
+    background-color: var(--background) !important;
+    background-image: var(--background-gradient) !important;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
   }
   .text-popover-foreground {
     color: var(--popover-foreground) !important;

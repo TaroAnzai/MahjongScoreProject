@@ -13,13 +13,18 @@ import { useCreatePlayer, useDeletePlayer, useGetPlayer } from '@/hooks/usePlaye
 import { useCreateTournament, useGetTournaments } from '@/hooks/useTournaments';
 import { useUpdateGroup } from '@/hooks/useGroups';
 import type { Player } from '@/api/generated/mahjongApi.schemas';
+import { TextInputModal } from '@/components/TextInputModal';
+import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 
 function GroupPage() {
   const navigate = useNavigate();
+  const { alertDialog } = useAlertDialog();
   const { groupKey } = useParams();
   if (!groupKey) return <div className="mahjong-container">グループキーが不明です</div>;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showTournamentModal, setShowTournamentModal] = useState(false);
+  const [isCreateTournamentModalOpen, setIsCreateTournamentModalOpen] = useState(false);
+  const [isCreatePlayerModalOpen, setIsCreatePlayerModalOpen] = useState(false);
 
   const { data: group, refetch: refetchGroup } = useGetApiGroupsGroupKey(groupKey);
   const { mutate: updateGroup } = useUpdateGroup(refetchGroup);
@@ -30,24 +35,22 @@ function GroupPage() {
   const { mutate: createTournament } = useCreateTournament();
   const { tournaments } = useGetTournaments(groupKey);
 
-  const handleAddPlayer = () => {
-    const name = prompt('メンバー名を入力してください');
+  const handleAddPlayer = (name: string) => {
     if (!name) return;
     createPlayer({ groupKey: groupKey, player: { name: name } });
   };
 
-  const handleDeletePlayer = async (player: Player) => {
+  const handleDeletePlayer = (player: Player) => {
     if (!player || player.id === undefined) return;
     deletePlayer({ groupKey: groupKey, playerId: player.id });
   };
-  const handleCreateTournament = async () => {
-    const name = prompt('大会名を入力してください');
+  const handleCreateTournament = (name: string) => {
     if (!name) return;
     const payload = { groupKey: groupKey, tournament: { name: name } };
     createTournament(payload);
   };
 
-  const handleSelectTournament = async () => {
+  const handleSelectTournament = () => {
     if (!tournaments || tournaments.length === 0) {
       alert('大会が存在しません');
       return;
@@ -61,21 +64,27 @@ function GroupPage() {
     updateGroup({ groupKey: groupKey, groupUpdate: { name: newTitle } });
   };
 
-  const handleAddGroup = () => {
+  const handleAddGroup = async () => {
     if (!groupKey || !group) return;
-    window.confirm(
-      `登録グループに${group.name} を追加してよいですか？\n
+    const res = await alertDialog({
+      title: '登録グループ追加',
+      description: `登録グループに${group.name} を追加してよいですか？\n
     ブラウザに登録されます。
-    機種変更やブラウザ変更した場合は、引き継がれません。引継ぎしたい場合はURLを保存しておいてください。`
-    );
+    機種変更やブラウザ変更した場合は、引き継がれません。引継ぎしたい場合はURLを保存しておいてください。`,
+      showCancelButton: true,
+    });
+
+    if (!res) return;
     localStorage.setItem(`group_key_${groupKey}`, groupKey);
     navigate('/');
   };
-  const handleRemoveGroup = () => {
+  const handleRemoveGroup = async () => {
     if (!groupKey || !group) return;
-    const confirmed = window.confirm(
-      `登録グループから${group.name} を削除してよいですか？\n(グループデータ自体は削除されません。)`
-    );
+    const confirmed = await alertDialog({
+      title: '登録グループから削除',
+      description: `登録グループから${group.name} を削除してよいですか？\n(グループデータ自体は削除されません。)`,
+      showCancelButton: true,
+    });
     if (!confirmed) return;
     localStorage.removeItem(`group_key_${groupKey}`);
     navigate(`/`);
@@ -95,13 +104,13 @@ function GroupPage() {
       />
 
       <ButtonGridSection>
-        <button className="mahjong-button" onClick={handleAddPlayer}>
+        <button className="mahjong-button" onClick={() => setIsCreatePlayerModalOpen(true)}>
           メンバーを追加
         </button>
         <button className="mahjong-button" onClick={() => setShowDeleteModal(true)}>
           メンバーを削除
         </button>
-        <button className="mahjong-button" onClick={handleCreateTournament}>
+        <button className="mahjong-button" onClick={() => setIsCreateTournamentModalOpen(true)}>
           大会を新規作成
         </button>
         <button className="mahjong-button" onClick={handleSelectTournament}>
@@ -157,7 +166,6 @@ function GroupPage() {
           onSelect={(tournament) => {
             if (tournament) {
               const tournament_key = tournament.edit_link ?? tournament.view_link;
-              console.log('tournament', tournament);
               navigate(`/tournament/${tournament_key}`);
             }
             setShowTournamentModal(false);
@@ -165,6 +173,20 @@ function GroupPage() {
           onClose={() => setShowTournamentModal(false)}
         />
       )}
+      <TextInputModal
+        open={isCreatePlayerModalOpen}
+        onComfirm={handleAddPlayer}
+        onClose={() => setIsCreatePlayerModalOpen(false)}
+        title="グループメンバー追加"
+        discription="メンバー名を入力してください"
+      />
+      <TextInputModal
+        open={isCreateTournamentModalOpen}
+        onComfirm={handleCreateTournament}
+        onClose={() => setIsCreateTournamentModalOpen(false)}
+        title="大会新規作成"
+        discription="大会名を入力してください"
+      />
     </div>
   );
 }
