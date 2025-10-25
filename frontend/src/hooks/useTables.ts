@@ -27,6 +27,7 @@ export const useGetTables = (tournamentKey: string) => {
 };
 
 export const useCreateTable = () => {
+  const { alertDialog } = useAlertDialog();
   const navigate = useNavigate();
   return useMutation({
     mutationFn: (data: { tournamentKey: string; tableCreate: TableCreate }) => {
@@ -37,14 +38,24 @@ export const useCreateTable = () => {
       // 遷移
       navigate(`/table/${data.edit_link}`);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error creating table:', error);
-      toast.error('Error creating table');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error creating table',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
 
 export const useUpdateTable = () => {
+  const { alertDialog } = useAlertDialog();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tableKey: string; tableUpdate: TableUpdate }) => {
@@ -56,9 +67,18 @@ export const useUpdateTable = () => {
       const queryKey = getGetApiTablesTableKeyQueryOptions(variables.tableKey).queryKey;
       queryClient.invalidateQueries({ queryKey });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error updating table:', error);
-      toast.error('Error updating table');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error updating table',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
@@ -114,6 +134,7 @@ export const useGetTablePlayer = (tableKey: string) => {
 };
 
 export const useAddTablePlayer = () => {
+  const { alertDialog } = useAlertDialog();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tableKey: string; tablePlayersItem: TablePlayerItem[] }) => {
@@ -125,15 +146,24 @@ export const useAddTablePlayer = () => {
       const queryKey = getGetApiTablesTableKeyPlayersQueryKey(variables.tableKey);
       queryClient.invalidateQueries({ queryKey });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error adding players to table:', error);
-      toast.error('Error adding players to table');
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error adding players to table',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
 
 export const useDeleteTablePlayer = () => {
-  const alertDialog = useAlertDialog();
+  const { alertDialog } = useAlertDialog();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { tableKey: string; playerId: number }) => {
@@ -145,9 +175,18 @@ export const useDeleteTablePlayer = () => {
       const queryKey = getGetApiTablesTableKeyPlayersQueryKey(variables.tableKey);
       queryClient.invalidateQueries({ queryKey });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error removing players from table:', error);
-      alertDialog.alertDialog({ title: 'Error', description: 'Error removing players from table' });
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error removing players from table',
+        description: message,
+        showCancelButton: false,
+      });
     },
   });
 };
