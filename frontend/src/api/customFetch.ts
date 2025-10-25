@@ -50,8 +50,13 @@ export const customFetch = async <T>(
   });
 
   if (!response.ok) {
-    console.error(`[customFetch2] ${response.status} ${response.statusText}`);
-    throw response;
+    const errorBody = await response.json().catch(() => ({}));
+    throw {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorBody,
+      url: urlWithParams,
+    };
   }
 
   // JSON以外のレスポンスにも対応

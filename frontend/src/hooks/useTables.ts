@@ -87,11 +87,16 @@ export const useDeleteTable = () => {
       queryClient.invalidateQueries({ queryKey });
       navigate(-1);
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Error deleting table:', error);
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
       alertDialog({
         title: 'Error deleting table',
-        description: 'Error deleting table',
+        description: message,
         showCancelButton: false,
       });
     },
