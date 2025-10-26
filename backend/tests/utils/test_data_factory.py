@@ -73,6 +73,7 @@ def register_tournament_participants(client):
                 json={'participants': [{"player_id": p["id"]}]},
             )
             assert res.status_code == 201
+
     return _register_tournament_participants
 
 

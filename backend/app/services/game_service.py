@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from app import db
-from app.models import AccessLevel, Game, Table, Score
+from app.models import AccessLevel, Game, Table, Score,TablePlayer
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
@@ -82,6 +82,12 @@ def create_game(table_key: str, data: dict) -> Game:
     total = sum(s.get("score", 0) for s in scores)
     if total != 0:
         raise ServiceValidationError("スコアの合計は0である必要があります。")
+    # ✅ 卓に登録されているプレイヤーID一覧を取得
+    table_player_ids = {
+        tp.player_id for tp in TablePlayer.query.filter_by(table_id=table.id).all()
+    }
+    if not table_player_ids:
+        raise ServiceValidationError("この卓にはまだプレイヤーが登録されていません。")
     #作成者情報
     created_by = table.created_by or "anonymous"
     # game_index 自動採番
@@ -101,7 +107,10 @@ def create_game(table_key: str, data: dict) -> Game:
         pid = s.get("player_id")
         val = s.get("score")
         if pid is None or val is None:
-            continue
+            raise ServiceValidationError("player_id と score は必須です。")
+
+        if pid not in table_player_ids:
+            raise ServiceValidationError(f"player_id {pid} はこの卓に登録されていません。")
         db.session.add(Score(game_id=game.id, player_id=pid, score=val))
 
     db.session.commit()

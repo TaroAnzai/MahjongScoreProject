@@ -25,6 +25,14 @@ def _create_table(client, tournament_key, name="Primary Table"):
         f"/api/tournaments/{tournament_key}/tables",
         json={"name": name},
     )
+def _add_table_player(client, table_key, players):
+    print(players)
+    ids =[{"player_id": p["id"]} for p in players]
+    res = client.post(
+        f"/api/tables/{table_key}/players",
+        json={'players': ids},
+    )
+    return res
 
 
 @pytest.mark.api
@@ -122,6 +130,10 @@ class TestTableEndpoints:
         table_res = _create_table(client, tournament_links[AccessLevel.EDIT.value])
         table = table_res.get_json()
         table_links = {l["access_level"]: l["short_key"] for l in table["table_links"]}
+        # --- 卓参加者登録 ---
+
+        _add_table_player(client,table_links[AccessLevel.EDIT.value] ,players)
+
         scores = [
                 {"player_id": players[0]["id"], "score": 25000},
                 {"player_id": players[1]["id"], "score": -8000},
@@ -134,6 +146,7 @@ class TestTableEndpoints:
                 f"/api/tables/{table_links[AccessLevel.EDIT.value]}/games",
                 json={"memo": f"Round {i}", "scores": scores},
             )
+            print(res.get_json())
             assert res.status_code == 201
 
         # --- GET: 一覧取得 ---
