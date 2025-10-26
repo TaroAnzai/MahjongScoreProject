@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from sqlalchemy.exc import IntegrityError
 from app import db
 from app.models import AccessLevel, Group, Tournament
 from app.service_errors import (
@@ -130,6 +131,9 @@ def delete_tournament(short_key: str) -> None:
     """大会共有キーから大会削除"""
     link, tournament = _require_tournament(short_key)
     _ensure_access(link, AccessLevel.EDIT, "大会を削除する権限がありません。")
-
-    db.session.delete(tournament)
-    db.session.commit()
+    try:
+        db.session.delete(tournament)
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        raise ServiceValidationError("この大会には関連データが存在するため削除できません。")

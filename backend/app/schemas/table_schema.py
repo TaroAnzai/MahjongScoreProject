@@ -2,11 +2,12 @@ from marshmallow import Schema, fields, post_dump
 from app.schemas.common_schemas import ShareLinkSchema
 from app.schemas.mixins.share_link_mixin import ShareLinkMixin
 from app.schemas.tournament_schema import TournamentSchema
+from app.models import TableTypeEnum
 
 class TableCreateSchema(Schema):
     """卓作成リクエスト"""
     name = fields.Str(required=True, description="卓名")
-    type = fields.Str(load_default="normal", description="卓タイプ(normal/chip)")
+    type = fields.Enum(TableTypeEnum, load_default=TableTypeEnum.NORMAL, description="卓タイプ(NORMAL or CHIP)")
 
 
 class TableUpdateSchema(Schema):

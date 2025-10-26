@@ -12,6 +12,10 @@ class AccessLevel(StrEnum):
     EDIT = "EDIT"
     OWNER = "OWNER"
 
+class TableTypeEnum(StrEnum):
+    NORMAL = "NOMAL"
+    CHIP = "CHIP"
+
 
 # =========================================================
 # グループ（最上位レイヤー）
@@ -74,7 +78,6 @@ class Tournament(db.Model):
         "Table",
         back_populates="tournament",
         lazy=True,
-        cascade="all, delete-orphan"
     )
 
     # ✅ ShareLinkリレーション（大会 → tournament_links に変更）
@@ -104,7 +107,7 @@ class Table(db.Model):
         db.Integer, db.ForeignKey("tbl_tournaments.id"), nullable=False
     )
     name = db.Column(db.Text, nullable=False)
-    type = db.Column(db.String(20), default="normal")  # normal / chip
+    type = db.Column(db.Enum(TableTypeEnum), nullable=False, default=TableTypeEnum.NORMAL)
     created_by = db.Column(db.String(64), nullable=False)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)

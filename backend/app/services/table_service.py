@@ -68,7 +68,7 @@ def create_table(data: dict, tournament_key: str) -> Table:
     table = Table(
         tournament_id=tournament.id,
         name=name,
-        type=data.get("type", "normal"),
+        type=data.get("type", "NOMAL"),
         created_by=tournament.created_by,
         created_at=datetime.now(timezone.utc),
     )
