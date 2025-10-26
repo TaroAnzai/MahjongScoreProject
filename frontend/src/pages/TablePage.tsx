@@ -24,21 +24,12 @@ import { useCreateGame, useDeleteGame, useGetTableGames, useUpdateGame } from '@
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 
 export default function TablePage() {
-  const { tableKey } = useParams();
   const { alertDialog } = useAlertDialog();
-  //Query系フック設定
-  const { table, isLoadingTable, loadTable } = useGetTable(tableKey!);
-  const { players: tablePlayers, isLoadingPlayers: isLoadingTablePlayers } = useGetTablePlayer(
-    tableKey!
-  );
-  const isChipTable = table?.type === 'CHIP';
-  const tournament_key =
-    table?.parent_tournament_link.edit_link ?? table?.parent_tournament_link.view_link ?? '';
-  const { players: tournamentPlayers, isLoadingPlayers } = useGetTournamentPlayers(tournament_key);
-  const remainingPlayers = tournamentPlayers?.filter(
-    (p) => !tablePlayers?.find((t) => t.id === p.id)
-  );
-  const { games, isLoadingGames } = useGetTableGames(tableKey!);
+  const navigate = useNavigate();
+  //State系フック設定
+  const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
+  const [showDeletePlayerModal, setShowDeletePlayerModal] = useState(false);
+  const [showDeleteGameModal, setShowDeleteGameModal] = useState(false);
   //Mutation系フック
   const { mutate: updateTable } = useUpdateTable();
   const { mutate: deleteTable } = useDeleteTable();
@@ -47,19 +38,41 @@ export default function TablePage() {
   const { mutate: createGame } = useCreateGame();
   const { mutate: updateGame } = useUpdateGame();
   const { mutate: deleteGame } = useDeleteGame();
-  //no cofirmation
-  const [searchParams] = useSearchParams();
-  const editKey = searchParams.get('edit');
+  //Query系フック設定
+  const { tableKey } = useParams();
+  const { table, isLoadingTable, loadTable } = useGetTable(tableKey ?? '', { enabled: !!tableKey });
+  const { players: tablePlayers, isLoadingPlayers: isLoadingTablePlayers } = useGetTablePlayer(
+    tableKey ?? '',
+    { enabled: !!tableKey }
+  );
+  const { games, isLoadingGames } = useGetTableGames(tableKey ?? '', { enabled: !!tableKey });
 
-  const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
-  const [showDeletePlayerModal, setShowDeletePlayerModal] = useState(false);
-  const [showDeleteGameModal, setShowDeleteGameModal] = useState(false);
-  const hasInitialized = useRef(false); // 🟢 永続的なフラグ
-
+  const isChipTable = table?.type === 'CHIP';
+  const tournament_key =
+    table?.parent_tournament_link.edit_link ?? table?.parent_tournament_link.view_link ?? undefined;
+  const { players: tournamentPlayers, isLoadingPlayers } = useGetTournamentPlayers(
+    tournament_key ?? '',
+    { enabled: !!tournament_key }
+  );
+  const remainingPlayers = tournamentPlayers?.filter(
+    (p) => !tablePlayers?.find((t) => t.id === p.id)
+  );
+  // Early retrurn
+  // --- ① 不正URL対応 ---
+  if (!tableKey) {
+    return <div>不正なアクセスです（卓キーが指定されていません）</div>;
+  }
   const handleTableNameChange = (newTitle: string) => {
     updateTable({ tableKey: tableKey!, tableUpdate: { name: newTitle } });
   };
-
+  // --- ③ ロード中 ---
+  if (isLoadingTable || isLoadingTablePlayers || isLoadingGames) {
+    return <div>読み込み中...</div>;
+  }
+  // --- ④ データが存在しない ---
+  if (!table) {
+    return <div>卓が見つかりませんでした。</div>;
+  }
   const handleAddPlayer = (selectedPlayers: Player[]) => {
     const plyerIds: TablePlayerItem[] = selectedPlayers.map((p) => ({ player_id: p.id }));
     addTablePlayer({ tableKey: tableKey!, tablePlayersItem: plyerIds });

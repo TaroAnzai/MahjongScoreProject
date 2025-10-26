@@ -83,12 +83,12 @@ export const useUpdateTable = () => {
   });
 };
 
-export const useGetTable = (tableKey: string) => {
+export const useGetTable = (tableKey: string, optins?: Object) => {
   const {
     data: table,
     isLoading: isLoadingTable,
     refetch: loadTable,
-  } = useGetApiTablesTableKey(tableKey);
+  } = useGetApiTablesTableKey(tableKey, optins);
   return { table, isLoadingTable, loadTable };
 };
 
@@ -102,9 +102,6 @@ export const useDeleteTable = () => {
     },
     onSuccess: (data, variables) => {
       toast.success('Table deleted successfully');
-      // キャッシュ更新
-      const queryKey = getGetApiTablesTableKeyQueryOptions(variables.tableKey).queryKey;
-      queryClient.invalidateQueries({ queryKey });
       navigate(-1);
     },
     onError: (error: any) => {
@@ -123,12 +120,12 @@ export const useDeleteTable = () => {
   });
 };
 
-export const useGetTablePlayer = (tableKey: string) => {
+export const useGetTablePlayer = (tableKey: string, optins?: Object) => {
   const {
     data,
     isLoading: isLoadingPlayers,
     refetch: loadPlayers,
-  } = useGetApiTablesTableKeyPlayers(tableKey);
+  } = useGetApiTablesTableKeyPlayers(tableKey, optins);
   const players = data?.table_players;
   return { players, isLoadingPlayers, loadPlayers };
 };

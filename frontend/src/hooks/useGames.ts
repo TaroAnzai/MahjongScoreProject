@@ -39,8 +39,8 @@ export const useCreateGame = () => {
     },
   });
 };
-export const useGetTableGames = (tableKey: string) => {
-  const { data: games, isLoading: isLoadingGames } = useGetApiTablesTableKeyGames(tableKey);
+export const useGetTableGames = (tableKey: string, optins?: Object) => {
+  const { data: games, isLoading: isLoadingGames } = useGetApiTablesTableKeyGames(tableKey, optins);
   return { games, isLoadingGames };
 };
 export const useUpdateGame = () => {

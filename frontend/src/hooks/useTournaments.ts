@@ -88,12 +88,14 @@ export const useUpdateTournament = () => {
 };
 export const useDeleteTournament = () => {
   const { alertDialog } = useAlertDialog();
+  const navigate = useNavigate();
   return useMutation({
     mutationFn: (data: { tournamentKey: string }) => {
       return deleteApiTournamentsTournamentKey(data.tournamentKey);
     },
     onSuccess: (data) => {
       toast.success('Tournament deleted successfully');
+      navigate(-1);
     },
     onError: (error: any) => {
       console.error('Error deleting tournament:', error);
@@ -119,12 +121,12 @@ export const useGetTournament = (tournamentKey: string) => {
   return { tournament, isLoadingTournament, loadTournament };
 };
 
-export const useGetTournamentPlayers = (tournamentKey: string) => {
+export const useGetTournamentPlayers = (tournamentKey: string, options?: Object) => {
   const {
     data,
     isLoading: isLoadingPlayers,
     refetch: loadPlayers,
-  } = useGetApiTournamentsTournamentKeyParticipants(tournamentKey);
+  } = useGetApiTournamentsTournamentKeyParticipants(tournamentKey, options);
   const players = data?.participants;
   return { players, isLoadingPlayers, loadPlayers };
 };

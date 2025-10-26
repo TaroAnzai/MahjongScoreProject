@@ -17,6 +17,7 @@ import EditTournamentModal from '../components/EditTournamentModal';
 import {
   useAddTournamentPlayer,
   useDeleteTounamentsPlayer,
+  useDeleteTournament,
   useGetTournament,
   useGetTournamentPlayers,
   useUpdateTournament,
@@ -25,9 +26,11 @@ import { useCreateTable, useGetTables } from '@/hooks/useTables';
 import { useGetTournamentScore, useGetTournamentScoreMap } from '@/hooks/useScore';
 import { useGetPlayer } from '@/hooks/usePlayers';
 import type { Player, Tournament, TournamentUpdate } from '@/api/generated/mahjongApi.schemas';
+import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 
 function TournamentPage() {
   const navigate = useNavigate();
+  const { alertDialog } = useAlertDialog();
   const { tournamentKey } = useParams();
   if (!tournamentKey) {
     return <div className="mahjong-container">大会キーが指定されていません</div>;
@@ -45,6 +48,7 @@ function TournamentPage() {
   const { mutate: deleteTournamentPlayer } = useDeleteTounamentsPlayer();
   const { mutate: createTable } = useCreateTable();
   const { mutate: updateTournament } = useUpdateTournament();
+  const { mutate: deleteTournament } = useDeleteTournament();
 
   //ローカルステート
 
@@ -158,7 +162,14 @@ function TournamentPage() {
       {tournament?.name}
     </div>
   );
-
+  const handleDeleteTournament = async () => {
+    const confirmed = await alertDialog({
+      title: 'Delete Tournament',
+      description: 'Are you sure you want to delete this tournament?',
+    });
+    if (!confirmed) return;
+    deleteTournament({ tournamentKey: tournamentKey! });
+  };
   if (!tournament) return <div className="mahjong-container">読み込み中...</div>;
 
   return (
@@ -204,6 +215,9 @@ function TournamentPage() {
         </button>
         <button className="mahjong-button" onClick={handleCreateTable}>
           記録用紙を新規作成
+        </button>
+        <button className="mahjong-button" onClick={handleDeleteTournament}>
+          大会を削除
         </button>
       </ButtonGridSection>
 
