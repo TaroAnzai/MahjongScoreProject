@@ -152,8 +152,12 @@ function TournamentPage() {
     }
     setShowDeletePlayerModal(true);
   };
-  const handleDeletePlayer = (player: Player) => {
-    const confirmed = window.confirm(`${player.name} を削除してよいですか？`);
+  const handleDeletePlayer = async (player: Player) => {
+    const confirmed = await alertDialog({
+      title: 'Delete Player',
+      description: `${player.name} を削除してよいですか？`,
+    });
+    //
     if (!confirmed) return;
     const payload = { tournamentKey: tournamentKey!, playerId: player.id };
     deleteTournamentPlayer(payload);

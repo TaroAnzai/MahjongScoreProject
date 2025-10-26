@@ -39,6 +39,10 @@ function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoar
     while (displayGames.length < targetLength) {
       displayGames.push(null);
     }
+  } else {
+    if (games.length === 0) {
+      displayGames.push(null);
+    }
   }
   const handleRowClick = (index: number) => {
     if (editingGameIndex === index) return; // ← 編集中なら無視
