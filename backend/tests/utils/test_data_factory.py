@@ -98,7 +98,6 @@ def create_table(client):
 def register_table_players(client):
     def _register_table_players(table_key, players):
         player_ids = [{"player_id": p["id"] }for p in players]
-        print(player_ids)
         payload ={
             "players": player_ids
         }

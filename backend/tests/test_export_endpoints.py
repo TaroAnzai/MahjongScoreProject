@@ -14,7 +14,6 @@ class TestExportEndpoints:
 
         # --- 実行 ---
         res = client.get(f"/api/tournaments/{tournament_links[AccessLevel.VIEW.value]}/export")
-        print(res.get_json())
         assert res.status_code == 200
 
         data = res.get_json()
@@ -41,7 +40,6 @@ class TestExportEndpoints:
         t2_data, t2_links = create_tournament(group_links[AccessLevel.EDIT.value], name="Summer Cup")
         register_tournament_participants(t2_links[AccessLevel.EDIT.value], players)
         res = client.get(f"/api/tournaments/{t1_links[AccessLevel.VIEW.value]}/participants")
-        print("T2 participants", res.get_json())
         # 卓・対局データを追加
         table1, table1_links = create_table(t1_links[AccessLevel.EDIT.value])
         register_table_players(table1_links[AccessLevel.EDIT.value], players)

@@ -16,8 +16,9 @@ const ScoreTable = ({ scoreMap, onClick }: ScoreTableProps) => {
   if (!scoreMap) {
     return <div>成績データがありません</div>;
   }
-  const normalTables = scoreMap.tables.filter((t) => t.type !== 'chip');
-  const chipTables = scoreMap.tables.filter((t) => t.type === 'chip');
+  console.log('ScoreTable rendered with scoreMap:', scoreMap);
+  const normalTables = scoreMap.tables.filter((t) => t.type !== 'CHIP');
+  const chipTables = scoreMap.tables.filter((t) => t.type === 'CHIP');
   const sortedTables = [...normalTables, ...chipTables];
 
   return (

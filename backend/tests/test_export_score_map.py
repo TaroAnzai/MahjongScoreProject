@@ -19,6 +19,7 @@ class TestTournamentScoreMap:
         assert res.status_code == 200
 
         result = res.get_json()
+        print("Tournament Score Map:", result)
         # --- トップレベル構造確認 ---
         assert "tournament_id" in result
         assert "tables" in result
@@ -27,8 +28,11 @@ class TestTournamentScoreMap:
 
         # --- tables 構造確認 ---
         tables = result["tables"]
+
         assert isinstance(tables, list)
         assert all("id" in t and "name" in t for t in tables)
+        assert all("id" in t and "type" in t for t in tables)
+
 
         # --- players 構造確認 ---
         players = result["players"]

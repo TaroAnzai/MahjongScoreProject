@@ -104,7 +104,8 @@ def get_tournament_score_map(tournament_key: str):
 
     rate = tournament.rate if tournament.rate else 0.001
     # --- 全テーブル一覧 ---
-    tables = [{"id": t.id, "name": t.name} for t in tournament.tables]
+    # tables = [{"id": t.id, "name": t.name} for t in tournament.tables]
+    tables = tournament.tables
 
     # --- プレイヤー初期辞書 ---
     player_map = {}
