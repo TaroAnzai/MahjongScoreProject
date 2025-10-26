@@ -17,7 +17,7 @@ function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoar
   const [rowTotal, setRowTotal] = useState(0);
   const extraEmptyRows = 1;
 
-  const isChipTable = table.type === 'chip';
+  const isChipTable = table.type === 'CHIP';
   // プレイヤー列の準備 4名以下の場合はダミーを追加
   const displayPlayers = [...players];
   if (!isChipTable) {

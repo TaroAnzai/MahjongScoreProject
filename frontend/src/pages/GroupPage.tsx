@@ -15,6 +15,7 @@ import { useUpdateGroup } from '@/hooks/useGroups';
 import type { Player } from '@/api/generated/mahjongApi.schemas';
 import { TextInputModal } from '@/components/TextInputModal';
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
+import { useCreateTable } from '@/hooks/useTables';
 
 function GroupPage() {
   const navigate = useNavigate();
@@ -32,22 +33,31 @@ function GroupPage() {
   const { mutate: createPlayer } = useCreatePlayer(loadPlayers);
 
   const { mutate: deletePlayer } = useDeletePlayer(loadPlayers);
-  const { mutate: createTournament } = useCreateTournament();
+  const { mutateAsync: createTournament } = useCreateTournament();
+  const { mutateAsync: createChipTable } = useCreateTable();
   const { tournaments } = useGetTournaments(groupKey);
 
   const handleAddPlayer = (name: string) => {
     if (!name) return;
     createPlayer({ groupKey: groupKey, player: { name: name } });
+    setIsCreatePlayerModalOpen(false);
   };
 
   const handleDeletePlayer = (player: Player) => {
     if (!player || player.id === undefined) return;
     deletePlayer({ groupKey: groupKey, playerId: player.id });
   };
-  const handleCreateTournament = (name: string) => {
+  const handleCreateTournament = async (name: string) => {
     if (!name) return;
     const payload = { groupKey: groupKey, tournament: { name: name } };
-    createTournament(payload);
+    const data = await createTournament(payload);
+    //CHIPテーブルを作成
+    if (!data.edit_link) return;
+    await createChipTable({
+      tournamentKey: data.edit_link,
+      tableCreate: { name: 'チップ', type: 'CHIP' },
+    });
+    navigate(`/tournament/${data.edit_link}`);
   };
 
   const handleSelectTournament = () => {
@@ -177,6 +187,7 @@ function GroupPage() {
         open={isCreatePlayerModalOpen}
         onComfirm={handleAddPlayer}
         onClose={() => setIsCreatePlayerModalOpen(false)}
+        value=""
         title="グループメンバー追加"
         discription="メンバー名を入力してください"
       />

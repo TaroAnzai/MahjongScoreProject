@@ -22,10 +22,15 @@ import {
   useGetTournamentPlayers,
   useUpdateTournament,
 } from '@/hooks/useTournaments';
-import { useCreateTable, useGetTables } from '@/hooks/useTables';
+import { useAddTablePlayer, useCreateTable, useGetTables } from '@/hooks/useTables';
 import { useGetTournamentScore, useGetTournamentScoreMap } from '@/hooks/useScore';
 import { useGetPlayer } from '@/hooks/usePlayers';
-import type { Player, Tournament, TournamentUpdate } from '@/api/generated/mahjongApi.schemas';
+import type {
+  Player,
+  TablePlayerItem,
+  Tournament,
+  TournamentUpdate,
+} from '@/api/generated/mahjongApi.schemas';
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 
 function TournamentPage() {
@@ -44,17 +49,16 @@ function TournamentPage() {
   const { scoreMap, isLoadingScoreMap, loadScoreMap } = useGetTournamentScoreMap(tournamentKey);
   const { players: groupPlayers, isLoadingPlayers: isLoadingGroupPlayers } = useGetPlayer(groupKey);
   //Mutation系フック
-  const { mutate: addTournamentPlayer } = useAddTournamentPlayer();
+  const { mutateAsync: addTournamentPlayer } = useAddTournamentPlayer();
   const { mutate: deleteTournamentPlayer } = useDeleteTounamentsPlayer();
   const { mutate: createTable } = useCreateTable();
   const { mutate: updateTournament } = useUpdateTournament();
   const { mutate: deleteTournament } = useDeleteTournament();
+  const { mutate: addTablePlayer } = useAddTablePlayer();
 
   //ローカルステート
 
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
-
-  const [selectedPlayerId, setSelectedPlayerId] = useState('');
 
   const [isEditingRate, setIsEditingRate] = useState(false);
   const [editedRate, setEditedRate] = useState<number | ''>(tournament?.rate || 1);
@@ -70,8 +74,21 @@ function TournamentPage() {
   };
 
   const handleAddPlayer = async (selectedPlayers: Player[]) => {
-    addTournamentPlayer({ tournamentKey: tournamentKey!, players: selectedPlayers });
     setShowAddPlayerModal(false);
+    const result = await addTournamentPlayer({
+      tournamentKey: tournamentKey!,
+      players: selectedPlayers,
+    });
+    //CHIPテーブルにも追加する。
+    const chipTables = tables?.filter((t) => t.type === 'CHIP');
+    chipTables?.forEach((table) => {
+      const tableKey = table.edit_link;
+      if (!tableKey) return;
+      const tablePlayers = selectedPlayers.map<TablePlayerItem>((player) => ({
+        player_id: player.id,
+      }));
+      addTablePlayer({ tableKey: tableKey, tablePlayersItem: tablePlayers });
+    });
   };
   const handleCreateTable = () => {
     // 既存の卓名から使用済み番号を抽出

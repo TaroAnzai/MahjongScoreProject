@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +27,9 @@ export const TextInputModal = ({
   discription,
 }: TextInputModalProps) => {
   const [inputText, setInputText] = useState(value || '');
+  useEffect(() => {
+    setInputText(value || '');
+  }, [value]);
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent showCloseButton={false}>

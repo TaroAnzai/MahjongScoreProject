@@ -31,7 +31,6 @@ export const useCreateTournament = () => {
     },
     onSuccess: (data) => {
       toast.success('Tournament created successfully');
-      navigate(`/tournament/${data.edit_link}`);
     },
     onError: (error: any) => {
       console.error('Error creating tournament:', error);
