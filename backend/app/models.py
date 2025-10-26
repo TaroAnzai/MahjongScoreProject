@@ -114,10 +114,9 @@ class Table(db.Model):
         back_populates="tables",
         lazy="joined"  # join で一括取得（パフォーマンス向上）
     )
-    table_players = db.relationship("TablePlayer", back_populates="table", lazy=True)
-    games = db.relationship(
-        "Game", backref="table", lazy=True, cascade="all, delete-orphan"
-    )
+    table_players = db.relationship("TablePlayer", back_populates="table", lazy=True, cascade="all, delete-orphan")
+
+    games = db.relationship( "Game", backref="table", lazy=True)
 
     # ✅ ShareLinkリレーション（卓 → table_links に変更）
     table_links = db.relationship(

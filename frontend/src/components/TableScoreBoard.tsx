@@ -22,7 +22,7 @@ function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoar
   const displayPlayers = [...players];
   if (!isChipTable) {
     while (displayPlayers.length < 4) {
-      displayPlayers.push({ id: displayPlayers.length * -1, name: '', group_id: 0 });
+      displayPlayers.push({ id: (displayPlayers.length + 1) * -1, name: '', group_id: 0 });
     }
   }
 
@@ -110,7 +110,7 @@ function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoar
                 <td className={styles.cell}>{isChipTable ? 'チップ' : `第${index + 1}回`}</td>
                 {displayPlayers.map((player) => (
                   <td key={`${index}-${player.id}`} className={styles.cell}>
-                    {editingGameIndex === index ? (
+                    {editingGameIndex === index && player.id > 0 ? (
                       <input
                         type="number"
                         className={styles.input}
