@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from app import db
-from app.models import AccessLevel, Game, Table, Score,TablePlayer
+from app.models import AccessLevel, Game, Table, Score,TablePlayer,TableTypeEnum
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
@@ -78,9 +78,9 @@ def create_game(table_key: str, data: dict) -> Game:
 
     if not isinstance(scores, list) or not scores:
         raise ServiceValidationError("scores はリスト形式で必須です。")
-
+    table_type = table.type
     total = sum(s.get("score", 0) for s in scores)
-    if total != 0:
+    if total != 0 and table_type == TableTypeEnum.NORMAL:
         raise ServiceValidationError("スコアの合計は0である必要があります。")
     # ✅ 卓に登録されているプレイヤーID一覧を取得
     table_player_ids = {

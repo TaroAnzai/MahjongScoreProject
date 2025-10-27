@@ -19,11 +19,12 @@ def _create_tournament(client, group_key, name="Table Tournament"):
     return data, links
 
 
-def _create_table(client, tournament_key, name="Primary Table"):
+def _create_table(client, tournament_key, name="Primary Table", type ="NORMAL"):
     """新仕様：大会キーをURLに含めて作成"""
+
     return client.post(
         f"/api/tournaments/{tournament_key}/tables",
-        json={"name": name},
+        json={"name": name, "type": type},
     )
 def _add_table_player(client, table_key, players):
     print(players)
@@ -170,3 +171,16 @@ class TestTableEndpoints:
         assert res_404.status_code == 404
         json = res_404.get_json()
         assert "table_keyが無効です。" in json['errors']['json']["message"]
+    def test_create_table_with_type_CHIP(self, client, db_session):
+        group_data, group_links = _create_group(client)
+        tournament_data, tournament_links = _create_tournament(
+            client, group_links[AccessLevel.EDIT.value]
+        )
+
+        res = _create_table(client, tournament_links[AccessLevel.EDIT.value], "CHIP")
+        assert res.status_code == 201
+        table = res.get_json()
+
+        # ✅ table_links に変更
+        levels = {l["access_level"] for l in table["table_links"]}
+        assert levels == {AccessLevel.EDIT.value, AccessLevel.VIEW.value}
