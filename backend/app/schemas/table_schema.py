@@ -29,7 +29,7 @@ class TableSchema(ShareLinkMixin,Schema):
     id = fields.Int(required=True, dump_only=True, description="卓ID")
     tournament_id = fields.Int(required=True, dump_only=True, description="大会ID")
     name = fields.Str(required=True, description="卓名")
-    type = fields.Str(required=True, description="卓タイプ")
+    type = fields.Enum(TableTypeEnum, required=True, description="卓タイプ")
     created_by = fields.Str(dump_only=True, description="作成時のKey")
     created_at = fields.DateTime(dump_only=True, description="卓作成日時（ISO 8601形式）")
     parent_tournament_link = fields.Nested(

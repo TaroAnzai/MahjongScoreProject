@@ -58,6 +58,7 @@ export const useUpdateGame = () => {
     onError: (error: any) => {
       console.error('Error updating game:', error);
       const message =
+        error.body?.errors?.json?.scores?.[0] ??
         error.body?.errors?.json?.message?.[0] ??
         error.body?.message ??
         error.statusText ??

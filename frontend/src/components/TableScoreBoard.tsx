@@ -153,7 +153,7 @@ function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoar
                         <Button
                           onClick={handleConfirm}
                           className={`${styles.addButton} mahjong-button`}
-                          disabled={rowTotal !== 0}
+                          disabled={rowTotal !== 0 && table.type === 'NORMAL'}
                         >
                           確定
                         </Button>

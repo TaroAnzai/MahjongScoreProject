@@ -178,7 +178,7 @@ def update_game(table_key: str,game_id: int, data: dict) -> Game:
             raise ServiceValidationError("scores はリスト形式である必要があります。")
 
         total = sum(s.get("score", 0) for s in scores)
-        if total != 0:
+        if total != 0 and table.type == TableTypeEnum.NORMAL:
             raise ServiceValidationError("スコアの合計は0でなければなりません。")
 
         # 既存スコア削除
