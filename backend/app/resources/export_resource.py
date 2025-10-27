@@ -57,6 +57,7 @@ class TournamentScoreMapResource(MethodView):
     @export_bp.response(200, TournamentScoreMapSchema)
     @with_common_error_responses(export_bp)
     def get(self, tournament_key):
+        """大会キーから大会スコアマップを取得"""
         result = get_tournament_score_map(tournament_key)
         return result
 

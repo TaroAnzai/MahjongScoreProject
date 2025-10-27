@@ -7,13 +7,13 @@ from app.models import TableTypeEnum
 class TableCreateSchema(Schema):
     """卓作成リクエスト"""
     name = fields.Str(required=True, description="卓名")
-    type = fields.Enum(TableTypeEnum, load_default=TableTypeEnum.NORMAL, description="卓タイプ(NORMAL or CHIP)")
+    type = fields.Enum(TableTypeEnum, load_default=TableTypeEnum.NORMAL, description="卓タイプ")
 
 
 class TableUpdateSchema(Schema):
     """卓更新リクエスト"""
     name = fields.Str(description="卓名")
-    type = fields.Str(description="卓タイプ")
+    type = fields.Enum(TableTypeEnum, description="卓タイプ")
 
 
 class TournamentLinkSchema(ShareLinkMixin,Schema):

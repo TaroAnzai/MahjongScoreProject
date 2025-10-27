@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields
-
+from app.models import TableTypeEnum
 # =========================================================
 # 共通ベーススキーマ（dump_defaultを常に出力）
 # =========================================================
@@ -89,9 +89,9 @@ class TableInfoSchema(Schema):
         required=True,
         description="テーブル（卓）の名前"
     )
-    type = fields.Str(
+    type = fields.Enum(TableTypeEnum,
         required=True,
-        description="テーブル（卓）のタイプ。通常卓は'normal'、チップ卓は'chip'"
+        description="テーブル（卓）のタイプ"
     )
 
 class TournamentScoreMapSchema(BaseSchema):
