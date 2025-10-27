@@ -125,7 +125,7 @@ function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoar
 
                           const total = Object.values(newScores).reduce((acc: number, val) => {
                             const num = typeof val === 'string' ? parseFloat(val) : val;
-                            return acc + num;
+                            return acc + (isNaN(num) ? 0 : num);
                           }, 0);
                           setRowTotal(total);
                         }}

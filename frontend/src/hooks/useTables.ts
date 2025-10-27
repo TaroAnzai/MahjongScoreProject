@@ -1,6 +1,7 @@
 import {
   deleteApiTablesTableKey,
   deleteApiTablesTableKeyPlayersPlayerId,
+  getApiTablesTableKeyGames,
   getGetApiTablesTableKeyPlayersQueryKey,
   getGetApiTablesTableKeyPlayersQueryOptions,
   getGetApiTablesTableKeyQueryOptions,
@@ -16,6 +17,7 @@ import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { Mutation, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useDeleteGame } from './useGames';
 
 export const useGetTables = (tournamentKey: string) => {
   const {
@@ -102,7 +104,6 @@ export const useDeleteTable = () => {
     },
     onSuccess: (data, variables) => {
       toast.success('Table deleted successfully');
-      navigate(-1);
     },
     onError: (error: any) => {
       console.error('Error deleting table:', error);
@@ -184,6 +185,38 @@ export const useDeleteTablePlayer = () => {
         description: message,
         showCancelButton: false,
       });
+    },
+  });
+};
+
+export const usedDeleteChipTableWithScores = () => {
+  // チップテーブルのスコアデータとテーブル自体を削除する。
+  const { mutateAsync: deleteScores } = useDeleteGame();
+
+  return useMutation({
+    mutationFn: async (tableKey: string) => {
+      // 1. まず、該当テーブルの全ゲームを取得
+      const games = await getApiTablesTableKeyGames(tableKey);
+      // 2. 各ゲームを削除
+      for (const game of games) {
+        if (game.id) {
+          await deleteScores({ tableKey, gameId: game.id });
+        }
+      }
+      // 3. 最後にテーブル自体を削除
+      return deleteApiTablesTableKey(tableKey);
+    },
+    onSuccess: () => {
+      toast.success('Table deleted successfully');
+    },
+    onError: (error: any) => {
+      console.error('Error deleting table:', error);
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      toast.error(message);
     },
   });
 };

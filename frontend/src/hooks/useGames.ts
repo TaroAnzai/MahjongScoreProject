@@ -1,5 +1,6 @@
 import {
   deleteApiTablesTableKeyGamesGameId,
+  getApiTablesTableKeyGames,
   getGetApiTablesTableKeyGamesQueryKey,
   getGetApiTablesTableKeyGamesQueryOptions,
   postApiTablesTableKeyGames,
@@ -8,9 +9,10 @@ import {
   useGetApiTablesTableKeyGames,
 } from '@/api/generated/mahjongApi';
 import type { GameCreate, GameUpdate } from '@/api/generated/mahjongApi.schemas';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Mutation, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
+import { use } from 'react';
 
 export const useCreateGame = () => {
   const { alertDialog } = useAlertDialog();

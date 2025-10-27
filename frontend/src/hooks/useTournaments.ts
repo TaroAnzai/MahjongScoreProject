@@ -94,7 +94,6 @@ export const useDeleteTournament = () => {
     },
     onSuccess: (data) => {
       toast.success('Tournament deleted successfully');
-      navigate(-1);
     },
     onError: (error: any) => {
       console.error('Error deleting tournament:', error);

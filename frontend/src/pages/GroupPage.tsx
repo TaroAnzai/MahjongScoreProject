@@ -62,7 +62,7 @@ function GroupPage() {
 
   const handleSelectTournament = () => {
     if (!tournaments || tournaments.length === 0) {
-      alert('大会が存在しません');
+      alertDialog({ title: 'Error', description: '大会が存在しません', showCancelButton: false });
       return;
     }
     setShowTournamentModal(true);

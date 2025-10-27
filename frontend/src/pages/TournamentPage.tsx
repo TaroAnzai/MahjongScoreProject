@@ -22,16 +22,48 @@ import {
   useGetTournamentPlayers,
   useUpdateTournament,
 } from '@/hooks/useTournaments';
-import { useAddTablePlayer, useCreateTable, useGetTables } from '@/hooks/useTables';
+import {
+  useAddTablePlayer,
+  useCreateTable,
+  usedDeleteChipTableWithScores,
+  useDeleteTable,
+  useGetTables,
+} from '@/hooks/useTables';
 import { useGetTournamentScore, useGetTournamentScoreMap } from '@/hooks/useScore';
 import { useGetPlayer } from '@/hooks/usePlayers';
-import type {
-  Player,
-  TablePlayerItem,
-  Tournament,
-  TournamentUpdate,
+import {
+  TableType,
+  type Player,
+  type TablePlayerItem,
+  type Tournament,
+  type TournamentScoreMap,
+  type TournamentUpdate,
 } from '@/api/generated/mahjongApi.schemas';
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
+import { useDeleteApiTournamentsTournamentKey } from '@/api/generated/mahjongApi';
+import { useDeleteGame } from '@/hooks/useGames';
+
+const isChipTableNonZero = (scoreMap: TournamentScoreMap | undefined) => {
+  const chipTableIds =
+    scoreMap?.tables?.filter((t) => t.type === TableType.CHIP).map((t) => t.id) ?? [];
+  return chipTableIds.some((tableId) => {
+    const tableTotal = scoreMap?.players.reduce((sum, player) => {
+      return sum + (player.scores?.[tableId] ?? 0);
+    }, 0);
+    return tableTotal !== 0;
+  });
+};
+//CHPテーブルにスコアデータが入っているか確認
+const hasChipTableScore = (scoreMap: TournamentScoreMap | undefined) => {
+  const chipTableIds =
+    scoreMap?.tables?.filter((t) => t.type === TableType.CHIP).map((t) => t.id) ?? [];
+  return chipTableIds.some((tableId) => {
+    return scoreMap?.players.some((player) => {
+      const score = player.scores?.[tableId] ?? 0;
+      return score !== 0;
+    });
+  });
+};
 
 function TournamentPage() {
   const navigate = useNavigate();
@@ -50,11 +82,13 @@ function TournamentPage() {
   const { players: groupPlayers, isLoadingPlayers: isLoadingGroupPlayers } = useGetPlayer(groupKey);
   //Mutation系フック
   const { mutateAsync: addTournamentPlayer } = useAddTournamentPlayer();
-  const { mutate: deleteTournamentPlayer } = useDeleteTounamentsPlayer();
+  const { mutateAsync: deleteTournamentPlayer } = useDeleteTounamentsPlayer();
   const { mutate: createTable } = useCreateTable();
   const { mutate: updateTournament } = useUpdateTournament();
   const { mutate: deleteTournament } = useDeleteTournament();
   const { mutate: addTablePlayer } = useAddTablePlayer();
+  const { mutateAsync: deleteTable } = useDeleteTable();
+  const { mutateAsync: deleteChipTable } = usedDeleteChipTableWithScores();
 
   //ローカルステート
 
@@ -184,12 +218,43 @@ function TournamentPage() {
     </div>
   );
   const handleDeleteTournament = async () => {
+    //テーブルがあればエラーにする。
+    const nomalTables = tables?.filter((t) => t.type === TableType.NORMAL);
+    if (nomalTables && nomalTables.length > 0) {
+      alertDialog({
+        title: 'Error deleting tournament',
+        description: '記録表が存在するため、大会を削除できません。記録表を先に削除してください。',
+        showCancelButton: false,
+      });
+      return;
+    }
+    //CHIPテーブルにデータが入っていたら確認後に削除する。
+    const chipTables = tables?.filter((t) => t.type === TableType.CHIP);
+    if (hasChipTableScore(scoreMap)) {
+      const chipTableConfirmed = await alertDialog({
+        title: 'Delete Tournament',
+        description:
+          'チップ記録表にスコアデータが存在します。大会を削除するとチップ記録表とそのスコアデータも削除されます。本当に削除してよいですか？',
+      });
+      if (!chipTableConfirmed) return;
+    }
     const confirmed = await alertDialog({
       title: 'Delete Tournament',
       description: 'Are you sure you want to delete this tournament?',
     });
     if (!confirmed) return;
-    deleteTournament({ tournamentKey: tournamentKey! });
+
+    //CHIPテーブルのスコアデータとテーブル自体を削除
+    if (chipTables && chipTables.length > 0) {
+      for (const table of chipTables) {
+        const tableKey = table.edit_link;
+        if (tableKey) {
+          await deleteChipTable(tableKey);
+        }
+      }
+    }
+    await deleteTournament({ tournamentKey: tournamentKey! });
+    navigate(`/group/${groupKey}`);
   };
   if (!tournament) return <div className="mahjong-container">読み込み中...</div>;
 
@@ -243,7 +308,10 @@ function TournamentPage() {
       </ButtonGridSection>
 
       <div className="mahjong-section">
-        <h3 className="mahjong-subtitle">大会成績</h3>
+        <h3>大会成績</h3>
+        {isChipTableNonZero(scoreMap) && (
+          <p className="text-sm text-red-500">チップの合計が０になっていません。</p>
+        )}
         <ScoreTable scoreMap={scoreMap} onClick={handleTableClick} />
       </div>
 
