@@ -5,7 +5,7 @@ services:
     ports:
       - '6080:5000' # ホスト6080 → コンテナ5000
     command: >
-      gunicorn -b 0.0.0.0:5000 app:app
+      gunicorn -b 0.0.0.0:5000 "app:create_app()"
     volumes:
       - ./backend:/app
     environment:
