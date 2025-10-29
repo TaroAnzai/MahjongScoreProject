@@ -123,7 +123,7 @@ function GroupPage() {
         <button className="mahjong-button" onClick={() => setIsCreateTournamentModalOpen(true)}>
           大会を新規作成
         </button>
-        <button className="mahjong-button" onClick={handleSelectTournament}>
+        <button className="mahjong-button" onClick={() => setShowTournamentModal(true)}>
           大会を選択
         </button>
         <button className="mahjong-button" onClick={handleAddGroup}>
@@ -181,6 +181,7 @@ function GroupPage() {
             setShowTournamentModal(false);
           }}
           onClose={() => setShowTournamentModal(false)}
+          emptyMessage="大会が存在しません。大会を作成してください。"
         />
       )}
       <TextInputModal

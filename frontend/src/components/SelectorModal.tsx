@@ -19,6 +19,7 @@ interface SelectorModalProps {
   onSelect: (item: any) => void;
   onClose: () => void;
   plusDisplayItem?: string | null;
+  emptyMessage?: string;
 }
 function SelectorModal({
   title,
@@ -27,6 +28,7 @@ function SelectorModal({
   onSelect,
   onClose,
   plusDisplayItem = null,
+  emptyMessage = '項目がありません',
 }: SelectorModalProps) {
   return (
     <Dialog open={open}>
@@ -35,14 +37,18 @@ function SelectorModal({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>選択してください</DialogDescription>
         </DialogHeader>
-        <ul className={styles.list}>
-          {items?.map((item) => (
-            <li key={item.id} className={styles.listItem} onClick={() => onSelect(item)}>
-              <div>{item.name}</div>
-              {plusDisplayItem && <div>{item[plusDisplayItem]}</div>}
-            </li>
-          ))}
-        </ul>
+        {items === undefined || items.length === 0 ? (
+          <div className={styles.emptyMessage}>{emptyMessage}</div>
+        ) : (
+          <ul className={styles.list}>
+            {items?.map((item) => (
+              <li key={item.id} className={styles.listItem} onClick={() => onSelect(item)}>
+                <div>{item.name}</div>
+                {plusDisplayItem && <div>{item[plusDisplayItem]}</div>}
+              </li>
+            ))}
+          </ul>
+        )}
         <DialogFooter>
           <Button onClick={onClose}> 閉じる</Button>
         </DialogFooter>
