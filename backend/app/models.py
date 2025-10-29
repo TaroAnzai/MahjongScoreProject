@@ -239,7 +239,18 @@ class ShareLink(db.Model):
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
 
+# =========================================================
+# グループ作成用トークン
+# =========================================================
+class GroupCreationToken(db.Model):
+    __tablename__ = "tbl_group_creation_tokens"
 
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), nullable=False)
+    token = db.Column(db.String(64), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
+    is_used = db.Column(db.Boolean, default=False)
 # =========================================================
 # Groupの最終更新日時を自動更新するイベントリスナー
 # =========================================================
