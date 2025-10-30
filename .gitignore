@@ -51,3 +51,4 @@ Thumbs.db
 .idea/
 *.swp
 frontend/src/api/generated/*
+backend/celerybeat-schedule
