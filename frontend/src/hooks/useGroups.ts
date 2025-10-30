@@ -1,6 +1,17 @@
 // src/hooks/useGroupQueries.ts
-import { postApiGroups, putApiGroupsGroupKey, usePostApiGroups } from '@/api/generated/mahjongApi';
-import type { Group, GroupCreate, GroupUpdate } from '@/api/generated/mahjongApi.schemas';
+import {
+  postApiGroups,
+  postApiGroupsRequestLink,
+  putApiGroupsGroupKey,
+  usePostApiGroups,
+} from '@/api/generated/mahjongApi';
+import type {
+  Group,
+  GroupCreate,
+  GroupRequest,
+  GroupResponse,
+  GroupUpdate,
+} from '@/api/generated/mahjongApi.schemas';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
@@ -21,6 +32,32 @@ import { toast } from 'sonner';
  * const createGroupData = { name: 'My Group', description: 'This is my group.' };
  * createGroup(createGroupData).then((data) => console.log(data)).catch((error) => console.error(error));
  */
+export const useCreateGroupRequest = () => {
+  const { alertDialog } = useAlertDialog();
+  return useMutation({
+    mutationFn: (data: GroupRequest) => {
+      return postApiGroupsRequestLink(data);
+    },
+    onSuccess: (data: GroupResponse) => {
+      console.log('Group created successfully:', data);
+      toast.success('Group created successfully');
+    },
+    onError: (error: any) => {
+      console.error('Error creating group:', error);
+      const message =
+        error.body?.errors?.json?.message?.[0] ??
+        error.body?.message ??
+        error.statusText ??
+        'Unknown error';
+      alertDialog({
+        title: 'Error creating group',
+        description: message,
+        showCancelButton: false,
+      });
+    },
+  });
+};
+
 export const useCreateGroup = (onAfterCreate?: () => void) => {
   const { alertDialog } = useAlertDialog();
   return useMutation({

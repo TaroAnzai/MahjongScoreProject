@@ -5,20 +5,19 @@ import { useNavigate } from 'react-router-dom'; // ← 追加
 import ButtonGridSection from '../components/ButtonGridSection';
 
 import type { Group } from '@/api/generated/mahjongApi.schemas';
-import { useCreateGroup, useGroupQueries } from '@/hooks/useGroups';
+import { useCreateGroup, useCreateGroupRequest, useGroupQueries } from '@/hooks/useGroups';
 import { Button } from '@/components/ui/button';
 import { TextInputModal } from '@/components/TextInputModal';
 
 function WelcomePage() {
   const navigate = useNavigate(); // ← フックの呼び出し
   const { groups, isLoading, refetch } = useGroupQueries();
-  const createGroup = useCreateGroup(refetch);
+  const createGroup = useCreateGroupRequest();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleCreateGroup = (name: string) => {
-    console.log(name);
-    if (!name) return;
-    createGroup.mutate({ name: name });
+  const handleCreateGroup = (groupName: string, email: string) => {
+    if (!groupName || !email) return;
+    createGroup.mutate({ name: groupName, email: email });
   };
 
   const handleEnterGroup = (group: Group) => {
@@ -66,11 +65,14 @@ function WelcomePage() {
         open={isModalOpen}
         title="新しいグループを作成"
         discription="グループ名を入力してください"
-        onComfirm={(inputText) => {
-          handleCreateGroup(inputText);
+        InputLabel="グループ名"
+        onComfirm={(inputText, inputText2) => {
+          handleCreateGroup(inputText, inputText2 ?? '');
           setIsModalOpen(false);
         }}
         onClose={() => setIsModalOpen(false)}
+        twoInput={true}
+        twoInputLabel="メールアドレス"
       />
     </div>
   );
