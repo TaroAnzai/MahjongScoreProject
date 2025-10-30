@@ -3,7 +3,7 @@ from celery import Celery
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
-
+load_dotenv()
 def make_celery():
     """Flaskに依存しないCeleryインスタンスを作成"""
     celery = Celery(__name__)
@@ -15,7 +15,13 @@ def make_celery():
     celery.conf.accept_content = ["json"]
     celery.conf.timezone = os.getenv("CELERY_TIMEZONE", "Asia/Tokyo")
     celery.conf.enable_utc = False
+    celery.conf.broker_connection_retry_on_startup = True
 
+    # ---- 明示的にインポート（確実に登録させる） ----
+    celery.conf.imports = (
+        "app.tasks.email_tasks",
+        "app.tasks.maintenance_task",
+    )
     # 🔸 Celery Beat スケジュール定義
     celery.conf.beat_schedule = {
         "delete-expired-group-tokens-every-5-mins": {
@@ -28,7 +34,8 @@ def make_celery():
             "options": {"expires": 30},  # 古いジョブの無効化時間
         },
     }
-    celery.autodiscover_tasks(["app.tasks"])
+
+
 
     return celery
 

@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, timedelta
+from flask import current_app
 import secrets
 from app import db
 from app.models import AccessLevel, Group, GroupCreationToken
@@ -76,7 +77,10 @@ def create_group_creation_token(data: GroupRequestSchema) -> GroupCreationToken:
     db.session.commit()
 
     # メール送信をCeleryで実行
-    send_group_creation_email_task.delay(new_token.email, new_token.token)
+    frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:5173/")
+    url = f"{frontend_url}/group/create?token={new_token.token}"
+
+    send_group_creation_email_task.delay(new_token.email, url)
 
     return new_token
 # =========================================================

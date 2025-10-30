@@ -63,3 +63,6 @@ class Config:
     CELERY_TASK_SERIALIZER = "json"
     CELERY_RESULT_SERIALIZER = "json"
     CELERY_TIMEZONE = "Asia/Tokyo"
+
+    # Frontend URL
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173/")
