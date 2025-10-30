@@ -6,6 +6,7 @@ import TablePage from './pages/TablePage';
 import TournamentPage from './pages/TournamentPage';
 import './App.css';
 import { Toaster } from 'sonner';
+import GroupCreatePage from './pages/GroupCreatePage';
 
 function NotFoundPage() {
   const location = useLocation();
@@ -29,6 +30,7 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<WelcomePage />} />
+        <Route path="/group/create" element={<GroupCreatePage />} />
         <Route path="/group/:groupKey" element={<GroupPage />} />
         <Route path="/tournament/:tournamentKey" element={<TournamentPage />} />
         <Route path="/table/:tableKey" element={<TablePage />} />
