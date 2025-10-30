@@ -247,6 +247,7 @@ class GroupCreationToken(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), nullable=False)
+    group_name = db.Column(db.String(255), nullable=False)
     token = db.Column(db.String(64), unique=True, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)

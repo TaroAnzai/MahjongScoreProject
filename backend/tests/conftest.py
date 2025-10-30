@@ -4,6 +4,7 @@ import pytest
 from app import create_app, db
 from app.models import Group, Tournament, Table, Game, Player, ShareLink, AccessLevel
 from sqlalchemy.orm import scoped_session, sessionmaker
+from unittest.mock import patch
 
 pytest_plugins = ["tests.utils.test_data_factory"]
 @pytest.fixture(scope="session")
@@ -59,7 +60,14 @@ def db_session(app_context):
     db.session.rollback()
     db.session.close()
 
-
+@pytest.fixture(autouse=True)
+def mock_celery_delay():
+    """
+    全テストで Celery の delay() をモック化し、実行を抑止。
+    autouse=True により自動的に全テストに適用される。
+    """
+    with patch("app.services.group_service.send_group_creation_email_task.delay") as mock_delay:
+        yield mock_delay
 # =========================================================
 # テストデータ生成用ユーティリティ
 # =========================================================

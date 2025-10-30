@@ -1,14 +1,38 @@
+# backend/app/celery_app.py
 from celery import Celery
+from dotenv import load_dotenv
 import os
+from datetime import timedelta
 
-broker_url = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/1")
-backend_url = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/1")
+def make_celery():
+    """Flaskに依存しないCeleryインスタンスを作成"""
+    celery = Celery(__name__)
+    # .envから直接取得
+    celery.conf.broker_url = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
+    celery.conf.result_backend = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+    celery.conf.task_serializer = "json"
+    celery.conf.result_serializer = "json"
+    celery.conf.accept_content = ["json"]
+    celery.conf.timezone = os.getenv("CELERY_TIMEZONE", "Asia/Tokyo")
+    celery.conf.enable_utc = False
 
-celery = Celery("mahjongscore", broker=broker_url, backend=backend_url)
-celery.conf.task_default_queue = "mahjong_tasks"
+    # 🔸 Celery Beat スケジュール定義
+    celery.conf.beat_schedule = {
+        "delete-expired-group-tokens-every-5-mins": {
+            "task": "app.tasks.maintenance_task.delete_expired_group_tokens",
+            "schedule": timedelta(minutes=5),
+        },
+        "nightly-summary-at-midnight": {
+            "task": "app.tasks.maintenance_task.generate_daily_summary",
+            "schedule": timedelta(hours=24),
+            "options": {"expires": 30},  # 古いジョブの無効化時間
+        },
+    }
+    celery.autodiscover_tasks(["app.tasks"])
 
-@celery.task
-def send_group_mail(email, url):
-    print(f"Sending mail to {email} with link: {url}")
-    # 実際のメール送信ロジックは MailService で実装
-    return True
+    return celery
+
+
+# Celeryインスタンス作成
+celery = make_celery()
+

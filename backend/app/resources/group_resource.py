@@ -7,6 +7,8 @@ from app.schemas.group_schema import (
     GroupCreateSchema,
     GroupUpdateSchema,
     GroupSchema,
+    GroupRequestSchema,
+    GroupResponseSchema
 )
 from app.schemas.tournament_schema import TournamentSchema, TournamentCreateSchema
 from app.service_errors import ServiceError
@@ -18,6 +20,7 @@ from app.services.group_service import (
     get_group_by_key,
     update_group,
     delete_group,
+    create_group_creation_token,
 )
 from app.services.tournament_service import create_tournament, get_tournaments_by_group
 
@@ -45,6 +48,24 @@ class GroupsResource(MethodView):
     def post(self, new_data):
         """グループ新規作成"""
         return create_group(new_data)
+# =========================================================
+# グループ作成　リクエスト
+# =========================================================
+@group_bp.route("/request-link", methods=["POST"])
+@group_bp.arguments(GroupRequestSchema)
+@group_bp.response(200, GroupResponseSchema)
+@with_common_error_responses(group_bp)
+def request_group_creation(args):
+    """グループ作成リンクをリクエストする"""
+    # サービス層へ委譲
+    token_record = create_group_creation_token(args)
+    print("token_record", token_record.expires_at)
+    return {
+        "message": "グループ作成リンク送信を開始しました。",
+        "expires_at": token_record.expires_at,
+    }, 200
+
+
 
 
 

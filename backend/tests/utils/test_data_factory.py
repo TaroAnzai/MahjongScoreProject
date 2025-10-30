@@ -13,7 +13,7 @@
 
 
 import pytest
-from app.models import AccessLevel
+from app.models import AccessLevel,GroupCreationToken
 
 
 # ---------------------------------------------
@@ -21,8 +21,26 @@ from app.models import AccessLevel
 # ---------------------------------------------
 @pytest.fixture(scope="function")
 def create_group(client):
-    def _create_group(name="Export Group"):
-        res = client.post("/api/groups", json={"name": name})
+    def _create_group(name="Export Group", email="user@example.com"):
+        # ------------------------------------------------------------
+        # 1️⃣ メール送信リクエスト
+        # ------------------------------------------------------------
+        res1 = client.post("/api/groups/request-link", json={"name": name, "email": email})
+        assert res1.status_code == 200
+        res1_json = res1.get_json()
+        assert "expires_at" in res1_json
+
+        # ------------------------------------------------------------
+        # 2️⃣ トークンをDBから取得（実際にはメールで届く想定）
+        # ------------------------------------------------------------
+        token_record = GroupCreationToken.query.filter_by(email=email).order_by(GroupCreationToken.id.desc()).first()
+        assert token_record is not None
+        token = token_record.token
+
+        # ------------------------------------------------------------
+        # 3️⃣ トークンを使ってグループを作成
+        # ------------------------------------------------------------
+        res = client.post("/api/groups", json={"token": token})
         assert res.status_code == 201
         data = res.get_json()
         links = {l["access_level"]: l["short_key"] for l in data["group_links"]}

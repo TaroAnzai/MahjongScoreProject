@@ -4,14 +4,6 @@ from app.models import TournamentPlayer, AccessLevel
 
 # ---------- ヘルパー関数群 ----------
 
-def _create_group(client, name="Tournament Group"):
-    res = client.post("/api/groups", json={"name": name})
-    assert res.status_code == 201
-    data = res.get_json()
-    links = {l["access_level"]: l["short_key"] for l in data["group_links"]}
-    return data, links
-
-
 def _create_tournament(client, group_key, name="Main Tournament"):
     res = client.post(
         f"/api/groups/{group_key}/tournaments",
@@ -33,9 +25,9 @@ def _create_player(client, group_key, name="Alice"):
 
 
 @pytest.fixture
-def setup_group_with_tournament(client):
+def setup_group_with_tournament(client, create_group):
     """グループ・大会・プレイヤーを作成"""
-    group, group_links = _create_group(client)
+    group, group_links = create_group("Test Group")
     g_edit_key = group_links[AccessLevel.EDIT.value]
 
     # Tournament作成

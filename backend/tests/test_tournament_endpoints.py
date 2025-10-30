@@ -3,13 +3,6 @@ import pytest
 from app.models import AccessLevel, Tournament
 
 
-def _create_group(client, name="Parent Group"):
-    response = client.post("/api/groups", json={"name": name})
-    data = response.get_json()
-    links = {link["access_level"]: link["short_key"] for link in data["group_links"]}
-    return data, links
-
-
 def _create_tournament(client, group_key, name="Main Tournament"):
     """新仕様：グループ共有キーをURLに含める"""
     return client.post(
@@ -25,8 +18,8 @@ def _create_table(client, tournament_key, name="Primary Table"):
     )
 @pytest.mark.api
 class TestTournamentEndpoints:
-    def test_create_tournament_requires_group_edit(self, client, db_session):
-        group_data, links = _create_group(client)
+    def test_create_tournament_requires_group_edit(self, client, db_session, create_group):
+        group_data, links = create_group()
 
         # ✅ group_keyをURLに利用（edit権限）
         res = _create_tournament(client, links[AccessLevel.EDIT.value])
@@ -41,15 +34,15 @@ class TestTournamentEndpoints:
         assert "view_link" in tournament
         assert "edit_link" in tournament
 
-    def test_create_tournament_with_view_link_forbidden(self, client, db_session):
-        group_data, links = _create_group(client)
+    def test_create_tournament_with_view_link_forbidden(self, client, db_session, create_group):
+        group_data, links = create_group()
         # VIEW権限では作成不可
         res = _create_tournament(client, links[AccessLevel.VIEW.value])
         assert res.status_code == 403
 
-    def test_get_tournament_requires_view(self, client, db_session):
+    def test_get_tournament_requires_view(self, client, db_session, create_group):
         # グループとリンクを作成
-        group_data, links = _create_group(client)
+        group_data, links = create_group()
 
         # EDIT権限のリンクで大会を作成
         res = _create_tournament(client, links[AccessLevel.EDIT.value])
@@ -96,8 +89,8 @@ class TestTournamentEndpoints:
         assert forbidden.status_code == 403
 
 
-    def test_update_tournament_requires_edit(self, client, db_session):
-        group_data, links = _create_group(client)
+    def test_update_tournament_requires_edit(self, client, db_session, create_group):
+        group_data, links = create_group()
         res = _create_tournament(client, links[AccessLevel.EDIT.value])
         tournament = res.get_json()
         t_links = {
@@ -120,8 +113,8 @@ class TestTournamentEndpoints:
         updated = db_session.get(Tournament, tournament["id"])
         assert updated.name == "Updated"
 
-    def test_delete_tournament_requires_group_edit(self, client, db_session):
-        group_data, links = _create_group(client)
+    def test_delete_tournament_requires_group_edit(self, client, db_session, create_group):
+        group_data, links = create_group()
         res = _create_tournament(client, links[AccessLevel.EDIT.value])
         tournament = res.get_json()
         t_links = {
@@ -138,9 +131,9 @@ class TestTournamentEndpoints:
         #assert allowed.get_json()["message"] == "Tournament deleted"
         assert db_session.get(Tournament, tournament["id"]) is None
 
-    def test_get_tournaments_by_group(self, client):
+    def test_get_tournaments_by_group(self, client, db_session, create_group):
         """GET: /api/groups/<group_key>/tournaments - グループ内大会一覧取得"""
-        group_data, links = _create_group(client)
+        group_data, links = create_group()
 
         # まずグループ内に大会を2件作成
         res1 = _create_tournament(client, links[AccessLevel.EDIT.value], name="Autumn Cup")
@@ -172,10 +165,10 @@ class TestTournamentEndpoints:
         assert res_404.status_code == 404
         assert any("group_key" in m for m in res_404.get_json()['errors']['json']["message"])
 
-    def test_get_tables_by_tournament(self, client, db_session):
+    def test_get_tables_by_tournament(self, client, db_session, create_group):
         """GET: /api/tournaments/<tournament_key>/tables - 大会内卓一覧取得"""
         # --- 前提：グループ・大会を作成 ---
-        group_data, group_links = _create_group(client)
+        group_data, group_links = create_group()
         tournament_data = _create_tournament(
             client, group_links[AccessLevel.EDIT.value]
         )

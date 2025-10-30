@@ -3,12 +3,10 @@ from app.models import TablePlayer
 
 
 @pytest.fixture
-def setup_table_with_participants(client):
+def setup_table_with_participants(client, create_group):
     """グループ→大会→卓→プレイヤー→大会参加者までを登録"""
     # --- グループ作成 ---
-    group_res = client.post("/api/groups", json={"name": "GroupA"})
-    assert group_res.status_code == 201
-    group = group_res.get_json()
+    group, links = create_group("GroupA")
     group_key = next(
         l["short_key"]
         for l in group["group_links"]

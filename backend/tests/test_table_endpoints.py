@@ -2,12 +2,6 @@ import pytest
 from app.models import AccessLevel, Table
 
 
-def _create_group(client):
-    res = client.post("/api/groups", json={"name": "Table Group"})
-    data = res.get_json()
-    links = {l["access_level"]: l["short_key"] for l in data["group_links"]}
-    return data, links
-
 
 def _create_tournament(client, group_key, name="Table Tournament"):
     res = client.post(
@@ -38,8 +32,8 @@ def _add_table_player(client, table_key, players):
 
 @pytest.mark.api
 class TestTableEndpoints:
-    def test_create_table_requires_tournament_edit(self, client, db_session):
-        group_data, group_links = _create_group(client)
+    def test_create_table_requires_tournament_edit(self, client, db_session, create_group):
+        group_data, group_links = create_group()
         tournament_data, tournament_links = _create_tournament(
             client, group_links[AccessLevel.EDIT.value]
         )
@@ -52,8 +46,8 @@ class TestTableEndpoints:
         levels = {l["access_level"] for l in table["table_links"]}
         assert levels == {AccessLevel.EDIT.value, AccessLevel.VIEW.value}
 
-    def test_create_table_with_view_link_forbidden(self, client, db_session):
-        group_data, group_links = _create_group(client)
+    def test_create_table_with_view_link_forbidden(self, client, db_session, create_group):
+        group_data, group_links = create_group()
         tournament_data, tournament_links = _create_tournament(
             client, group_links[AccessLevel.EDIT.value]
         )
@@ -61,8 +55,8 @@ class TestTableEndpoints:
         res = _create_table(client, tournament_links[AccessLevel.VIEW.value])
         assert res.status_code == 403
 
-    def test_get_table_requires_view(self, client, db_session):
-        group_data, group_links = _create_group(client)
+    def test_get_table_requires_view(self, client, db_session, create_group):
+        group_data, group_links = create_group()
         tournament_data, tournament_links = _create_tournament(
             client, group_links[AccessLevel.EDIT.value]
         )
@@ -80,8 +74,8 @@ class TestTableEndpoints:
         forbidden = client.get(f"/api/tables/{tournament_links[AccessLevel.VIEW.value]}")
         assert forbidden.status_code == 403
 
-    def test_update_table_requires_edit(self, client, db_session):
-        group_data, group_links = _create_group(client)
+    def test_update_table_requires_edit(self, client, db_session, create_group):
+        group_data, group_links = create_group()
         tournament_data, tournament_links = _create_tournament(
             client, group_links[AccessLevel.EDIT.value]
         )
@@ -103,8 +97,8 @@ class TestTableEndpoints:
         updated = db_session.get(Table, table["id"])
         assert updated.name == "Updated Table"
 
-    def test_delete_table_requires_tournament_edit(self, client, db_session):
-        group_data, group_links = _create_group(client)
+    def test_delete_table_requires_tournament_edit(self, client, db_session, create_group):
+        group_data, group_links = create_group()
         tournament_data, tournament_links = _create_tournament(
             client, group_links[AccessLevel.EDIT.value]
         )
@@ -119,10 +113,10 @@ class TestTableEndpoints:
         assert allowed.status_code == 200
         assert allowed.get_json()["message"] == "Table deleted"
         assert db_session.get(Table, table["id"]) is None
-    def test_get_games_by_table(self, client, db_session,create_players,register_tournament_participants):
+    def test_get_games_by_table(self, client, db_session,create_players,register_tournament_participants,create_group):
         """GET: /api/tables/<table_key>/games - 卓内対局一覧取得"""
         # --- 前提：グループ・大会・卓を作成 ---
-        group_data, group_links = _create_group(client)
+        group_data, group_links = create_group()
         players = create_players(group_links[AccessLevel.EDIT.value])
         tournament_data, tournament_links = _create_tournament(
             client, group_links[AccessLevel.EDIT.value]
@@ -171,8 +165,8 @@ class TestTableEndpoints:
         assert res_404.status_code == 404
         json = res_404.get_json()
         assert "table_keyが無効です。" in json['errors']['json']["message"]
-    def test_create_table_with_type_CHIP(self, client, db_session):
-        group_data, group_links = _create_group(client)
+    def test_create_table_with_type_CHIP(self, client, db_session, create_group):
+        group_data, group_links = create_group()
         tournament_data, tournament_links = _create_tournament(
             client, group_links[AccessLevel.EDIT.value]
         )

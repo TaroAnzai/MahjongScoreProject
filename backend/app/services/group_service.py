@@ -1,7 +1,8 @@
-from datetime import datetime, timezone
-
+from datetime import datetime, timezone, timedelta
+import secrets
 from app import db
-from app.models import AccessLevel, Group
+from app.models import AccessLevel, Group, GroupCreationToken
+from app.schemas.group_schema import GroupRequestSchema, GroupCreateSchema
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
@@ -15,10 +16,14 @@ _ACCESS_PRIORITY = {
     AccessLevel.OWNER: 3,
 }
 
+from app.tasks.email_tasks import send_group_creation_email_task
+
 
 # =========================================================
 # 内部ユーティリティ
 # =========================================================
+
+
 def _require_group(short_key: str):
     """共有リンクからGroupを特定"""
     link = get_share_link_by_key(short_key)
@@ -40,14 +45,62 @@ def _ensure_access(link, group, required: AccessLevel, message: str):
     if _ACCESS_PRIORITY[link.access_level] < _ACCESS_PRIORITY[required]:
         raise ServicePermissionError(message)
 
+# =========================================================
+# グループ作成メール送信
+# =========================================================
+def create_group_creation_token(data: GroupRequestSchema) -> GroupCreationToken:
+    email = data.get('email')
+    group_name = data.get('name')
+    """グループ作成トークンを発行し、メール送信（30分有効）"""
+    if not email:
+        raise ServiceValidationError("メールアドレスは必須です。")
 
+    if not group_name:
+        raise ServiceValidationError("グループ名は必須です。")
+
+    # 既存の未使用トークンを無効化
+    existing_tokens = GroupCreationToken.query.filter_by(email=email, is_used=False).all()
+    for token in existing_tokens:
+        token.is_used = True
+
+    # トークン生成
+    new_token = GroupCreationToken(
+        email=email,
+        group_name=group_name,
+        token=secrets.token_urlsafe(32),
+        expires_at=datetime.now(timezone.utc) + timedelta(minutes=30),
+        is_used=False,
+    )
+
+    db.session.add(new_token)
+    db.session.commit()
+
+    # メール送信をCeleryで実行
+    send_group_creation_email_task.delay(new_token.email, new_token.token)
+
+    return new_token
 # =========================================================
 # グループ作成
 # =========================================================
-def create_group(data: dict) -> Group:
-    name = data.get("name")
-    if not name:
-        raise ServiceValidationError("グループ名は必須です。")
+def create_group(data: GroupCreateSchema) -> Group:
+    token = data.get("token")
+    """トークン検証"""
+    record = GroupCreationToken.query.filter_by(token=token).first()
+
+    if not record:
+        raise ServiceNotFoundError("トークンが無効です。")
+
+    if record.is_used:
+        raise ServiceValidationError("このトークンはすでに使用されています。")
+
+    if record.expires_at.tzinfo is None:
+        record.expires_at = record.expires_at.replace(tzinfo=timezone.utc)
+    if record.expires_at < datetime.now(timezone.utc):
+        raise ServiceValidationError("このトークンは有効期限が切れています。")
+
+    record.is_used = True
+    db.session.commit()
+    name = record.group_name
 
     group = Group(
         name=name,

@@ -3,11 +3,19 @@ from marshmallow import Schema, fields
 from app.schemas.common_schemas import ShareLinkSchema
 from app.schemas.mixins.share_link_mixin import ShareLinkMixin
 
+class GroupRequestSchema(Schema):
+    """グループリクエスト"""
+    name = fields.Str(required=True, description="グループ名")
+    email = fields.Str(required=True, description="メールアドレス一覧")
+
+class GroupResponseSchema(Schema):
+    """グループリクエストレスポンス"""
+    message = fields.Str(required=True, description="メッセージ")
+    expires_at = fields.DateTime(required=True, description="有効期限")
+
 class GroupCreateSchema(Schema):
     """グループ作成用リクエスト"""
-    name = fields.Str(required=True, description="グループ名")
-    description = fields.Str(allow_none=True, description="説明")
-
+    token = fields.Str(required=True, description="作成用トークン")
 
 class GroupUpdateSchema(Schema):
     """グループ更新用リクエスト"""
