@@ -20,6 +20,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { getGetApiGroupsGroupKeyQueryOptions } from '@/api/generated/mahjongApi';
 import { toast } from 'sonner';
+import { formatLocalDateTime, toLocalDate } from '@/utils/date_utils';
 
 /**
  * Hook to create a new group.
@@ -40,7 +41,22 @@ export const useCreateGroupRequest = () => {
     },
     onSuccess: (data: GroupResponse) => {
       console.log('Group created successfully:', data);
-      toast.success('Group created successfully');
+      const expire_at = formatLocalDateTime(toLocalDate(data.expires_at));
+      alertDialog({
+        title: 'グループ作成用メールを送信しました',
+        description: `ご入力いただいたメールアドレス宛に、グループ作成用のリンクをお送りしました。`,
+        body: (
+          <div>
+            <p>メール内のリンクをクリックして、グループの登録を完了してください。</p>
+            <p>⚠️ このリンクは発行から30分間有効です。({expire_at}まで)</p>
+            <p>期限を過ぎると無効になりますので、お早めに手続きをお願いします。</p>
+          </div>
+        ),
+        showCancelButton: false,
+      });
+      //
+
+      //
     },
     onError: (error: any) => {
       console.error('Error creating group:', error);

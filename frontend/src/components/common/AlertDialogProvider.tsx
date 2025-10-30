@@ -16,6 +16,7 @@ import {
 type AlertDialogOptions = {
   title?: string;
   description?: string;
+  body?: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
   showCancelButton?: boolean;
@@ -59,6 +60,7 @@ export const AlertDialogProvider: React.FC<{ children: React.ReactNode }> = ({ c
             <AlertDialogTitle>{options.title ?? '確認'}</AlertDialogTitle>
             <AlertDialogDescription>{options.description ?? ''}</AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="mt-2">{options?.body}</div>
           <AlertDialogFooter>
             {options.showCancelButton !== false && (
               <AlertDialogCancel onClick={handleCancel}>

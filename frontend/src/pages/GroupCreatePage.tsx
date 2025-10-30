@@ -1,15 +1,18 @@
 import type { Group } from '@/api/generated/mahjongApi.schemas';
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { useCreateGroup } from '@/hooks/useGroups';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function GroupCreatePage() {
   const { alertDialog } = useAlertDialog();
   const navigate = useNavigate();
   const { mutateAsync: createGroupFromToken } = useCreateGroup();
+  const hasRun = useRef(false);
 
   useEffect(() => {
+    if (hasRun.current) return; // ← 2回目はスキップ
+    hasRun.current = true;
     const token = new URLSearchParams(window.location.search).get('token');
 
     const createGroup = async () => {
@@ -19,14 +22,12 @@ function GroupCreatePage() {
           description: '無効なトークンです',
           showCancelButton: false,
         });
-        console.error('Invalid token');
         navigate('/');
         return null;
       }
-      console.log('Creating group with token:', token);
       try {
         const result = await createGroupFromToken({ token: token });
-        navigate(`/groups/${result.owner_link}`);
+        navigate(`/group/${result.owner_link}`);
       } catch (error) {
         navigate('/');
       }

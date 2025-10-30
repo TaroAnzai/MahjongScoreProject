@@ -12,12 +12,16 @@ import { TextInputModal } from '@/components/TextInputModal';
 function WelcomePage() {
   const navigate = useNavigate(); // ← フックの呼び出し
   const { groups, isLoading, refetch } = useGroupQueries();
-  const createGroup = useCreateGroupRequest();
+  const { mutate: createGroup } = useCreateGroupRequest();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCreateGroup = (groupName: string, email: string) => {
     if (!groupName || !email) return;
-    createGroup.mutate({ name: groupName, email: email });
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    setIsModalOpen(false);
+    createGroup({ name: groupName, email: email });
   };
 
   const handleEnterGroup = (group: Group) => {
@@ -73,6 +77,7 @@ function WelcomePage() {
         onClose={() => setIsModalOpen(false)}
         twoInput={true}
         twoInputLabel="メールアドレス"
+        twoInputType="email"
       />
     </div>
   );
