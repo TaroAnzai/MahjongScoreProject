@@ -1,9 +1,9 @@
 // src/components/PageTitleBar.jsx
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './PageTitleBar.module.css';
 import EditableTitle from './EditableTitle';
-import { ChevronsLeft, ChevronsRight, Share2 } from 'lucide-react';
+import { ChevronsLeft, ChevronsRight, ChevronsUp, Share2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import type { ShareLink } from '@/api/generated/mahjongApi.schemas';
-
+import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 interface PageTitleBarProps {
   title: string;
   shareLinks?: readonly ShareLink[];
@@ -20,6 +20,7 @@ interface PageTitleBarProps {
   onTitleChange?: (newTitle: string) => void;
   showBack?: boolean;
   showForward?: boolean;
+  pearentUrl: string;
 }
 function PageTitleBar({
   title,
@@ -29,8 +30,10 @@ function PageTitleBar({
   onTitleChange,
   showBack = true,
   showForward = true,
+  pearentUrl,
 }: PageTitleBarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const type = pathSegments[0] as keyof typeof typeNameMap;
   const typeNameMap = {
@@ -38,13 +41,15 @@ function PageTitleBar({
     tournament: '大会',
     table: '記録表',
   };
-
   const typeName = typeNameMap[type] ?? '未定義';
+  const accessLevel = getAccessLevelstring(shareLinks);
+
   const handleShareUrl = async (accessType: string) => {
     const shortKey = shareLinks.find((l) => l.access_level === accessType)?.short_key;
     if (!shortKey) return alert(`${accessType}リンクが存在しません`);
+    const basePath = '/mahjong';
+    const shareUrl = `${window.location.origin}${basePath}/${type}/${shortKey}`;
 
-    const shareUrl = `${window.location.origin}/${type}/${shortKey}`;
     const titleText = `${typeName}への招待（${accessType}）`;
     if (navigator.share) {
       try {
@@ -68,13 +73,18 @@ function PageTitleBar({
 
   return (
     <div className={styles.title}>
-      {showBack && <ChevronsLeft className="cursor-pointer" onClick={() => history.back()} />}
+      <div className="flex">
+        {showBack && <ChevronsLeft className="cursor-pointer" onClick={() => history.back()} />}
+        <ChevronsUp className="cursor-pointer" onClick={() => navigate(pearentUrl)} />
+      </div>
+
       <div className={styles.center}>
         {TitleComponent ? (
           <TitleComponent onClick={onTitleClick} />
         ) : (
           <EditableTitle value={title} onChange={onTitleChange} className={styles.editable} />
         )}
+        <p>{accessLevel} </p>
       </div>
 
       <div className="absolute right-12">

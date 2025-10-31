@@ -7,8 +7,7 @@
   background: linear-gradient(145deg, rgba(34, 139, 34, 0.15), rgba(0, 100, 0, 0.1));
   border: 2px solid rgba(144, 238, 144, 0.3);
   border-radius: 24px;
-  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   text-align: center;
   max-width: 500px;
@@ -64,9 +63,17 @@
   font-size: 1rem;
   /* インタラクション */
   cursor: pointer;
-  box-sizing: border-box
+  box-sizing: border-box;
 }
-
+.mahjong-button:disabled {
+  opacity: 0.6; /* 半透明に */
+  cursor: not-allowed; /* 禁止マーク */
+  background: linear-gradient(135deg, #6b8e23, #556b2f); /* 落ち着いた色調に */
+  box-shadow: none; /* 影を消す */
+  border-color: rgba(255, 255, 255, 0.2); /* 少し淡く */
+  color: #ccc; /* テキストもグレーに */
+  transition: none; /* アニメーション停止 */
+}
 .mahjong-list {
   margin: 0;
   padding: 0;
@@ -76,9 +83,9 @@
 .mahjong-list-item {
   font-size: 1.2em;
   color: white;
-  white-space: nowrap;         /* 折り返さない */
-  overflow: hidden;            /* はみ出した部分を隠す */
-  text-overflow: ellipsis;     /* はみ出した部分を「...」で表示 */
+  white-space: nowrap; /* 折り返さない */
+  overflow: hidden; /* はみ出した部分を隠す */
+  text-overflow: ellipsis; /* はみ出した部分を「...」で表示 */
 }
 
 .mahjong-rate-display {
@@ -95,64 +102,64 @@
   /* 横方向中央揃え */
   gap: 0.5rem;
   /* テキストと input の間に間隔をつけたい場合 */
-            background: linear-gradient(145deg, rgba(34, 139, 34, 0.2), rgba(0, 100, 0, 0.15));
+  background: linear-gradient(145deg, rgba(34, 139, 34, 0.2), rgba(0, 100, 0, 0.15));
 }
 
 .table {
-    width: 100%;
-    min-width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
+  width: 100%;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .table th {
-    background: linear-gradient(135deg, rgba(34, 139, 34, 0.3), rgba(0, 100, 0, 0.2));
-    color: #90ee90;
-    padding: 12px 8px;
-    font-weight: 600;
-    text-align: center;
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(144, 238, 144, 0.2);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, rgba(34, 139, 34, 0.3), rgba(0, 100, 0, 0.2));
+  color: #90ee90;
+  padding: 12px 8px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(144, 238, 144, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .table th:first-child {
-    border-radius: 12px 8px 8px 12px;
+  border-radius: 12px 8px 8px 12px;
 }
 
 .table th:last-child {
-    border-radius: 8px 12px 12px 8px;
+  border-radius: 8px 12px 12px 8px;
 }
 
 .table tbody tr {
-    transition: all 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .table tbody tr:hover {
-    transform: scale(1.02);
+  transform: scale(1.02);
 }
 
 .table td {
-    background: linear-gradient(145deg, rgba(34, 139, 34, 0.1), rgba(0, 100, 0, 0.05));
-    color: #e0ffe0;
-    padding: 14px 8px;
-    text-align: center;
-    font-weight: 500;
-    border: 1px solid rgba(144, 238, 144, 0.1);
-    backdrop-filter: blur(5px);
-    transition: all 0.2s ease;
+  background: linear-gradient(145deg, rgba(34, 139, 34, 0.1), rgba(0, 100, 0, 0.05));
+  color: #e0ffe0;
+  padding: 14px 8px;
+  text-align: center;
+  font-weight: 500;
+  border: 1px solid rgba(144, 238, 144, 0.1);
+  backdrop-filter: blur(5px);
+  transition: all 0.2s ease;
 }
 
 .table td:first-child {
-    border-radius: 12px 0 0 12px;
-    font-weight: 600;
-    background: linear-gradient(135deg, rgba(34, 139, 34, 0.25), rgba(0, 100, 0, 0.2));
-    color: #98fb98;
+  border-radius: 12px 0 0 12px;
+  font-weight: 600;
+  background: linear-gradient(135deg, rgba(34, 139, 34, 0.25), rgba(0, 100, 0, 0.2));
+  color: #98fb98;
 }
 
 .table td:last-child {
-    border-radius: 0 12px 12px 0;
+  border-radius: 0 12px 12px 0;
 }
 
 textarea,
@@ -160,16 +167,14 @@ input {
   font-size: inherit;
   color: white;
   background: linear-gradient(145deg, rgba(34, 139, 34, 0.1), rgba(0, 100, 0, 0.05));
-   border: 2px solid rgba(144, 238, 144, 0.2);
+  border: 2px solid rgba(144, 238, 144, 0.2);
   box-sizing: border-box;
-  padding: 2px;          /* ← 小さく */
-  height: 100%;          /* ← 高さ揃え */
-  margin: 0;             /* ← 念のためリセット */
-  overflow: hidden; 
+  padding: 2px; /* ← 小さく */
+  height: 100%; /* ← 高さ揃え */
+  margin: 0; /* ← 念のためリセット */
+  overflow: hidden;
   text-overflow: ellipsis;
 }
-
-
 
 input:disabled {
   background-color: transparent;
@@ -179,7 +184,7 @@ input:disabled {
 }
 
 input:focus {
-  border: 1px solid #4CAF50;
+  border: 1px solid #4caf50;
   box-shadow: 0 0 3px rgba(76, 175, 80, 0.5);
 }
 

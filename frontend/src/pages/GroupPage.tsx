@@ -1,5 +1,5 @@
 // src/pages/GroupPage.jsx
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 // API
@@ -16,6 +16,7 @@ import type { Player } from '@/api/generated/mahjongApi.schemas';
 import { TextInputModal } from '@/components/TextInputModal';
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { useCreateTable } from '@/hooks/useTables';
+import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 
 function GroupPage() {
   const navigate = useNavigate();
@@ -36,6 +37,10 @@ function GroupPage() {
   const { mutateAsync: createTournament } = useCreateTournament();
   const { mutateAsync: createChipTable } = useCreateTable();
   const { tournaments } = useGetTournaments(groupKey);
+  const [accessLevel, setAccessLevel] = useState('');
+  useEffect(() => {
+    setAccessLevel(getAccessLevelstring(group?.group_links));
+  }, [group?.group_links]);
 
   const handleAddPlayer = (name: string) => {
     if (!name) return;
@@ -58,14 +63,6 @@ function GroupPage() {
       tableCreate: { name: 'チップ', type: 'CHIP' },
     });
     navigate(`/tournament/${data.edit_link}`);
-  };
-
-  const handleSelectTournament = () => {
-    if (!tournaments || tournaments.length === 0) {
-      alertDialog({ title: 'Error', description: '大会が存在しません', showCancelButton: false });
-      return;
-    }
-    setShowTournamentModal(true);
   };
 
   const handleTitleChange = (newTitle: string) => {
@@ -111,16 +108,29 @@ function GroupPage() {
         onTitleChange={handleTitleChange}
         showBack={true}
         showForward={true}
+        pearentUrl="/"
       />
 
       <ButtonGridSection>
-        <button className="mahjong-button" onClick={() => setIsCreatePlayerModalOpen(true)}>
+        <button
+          className="mahjong-button"
+          disabled={accessLevel === 'VIEW'}
+          onClick={() => setIsCreatePlayerModalOpen(true)}
+        >
           メンバーを追加
         </button>
-        <button className="mahjong-button" onClick={() => setShowDeleteModal(true)}>
+        <button
+          className="mahjong-button"
+          disabled={accessLevel === 'VIEW'}
+          onClick={() => setShowDeleteModal(true)}
+        >
           メンバーを削除
         </button>
-        <button className="mahjong-button" onClick={() => setIsCreateTournamentModalOpen(true)}>
+        <button
+          className="mahjong-button"
+          disabled={accessLevel === 'VIEW'}
+          onClick={() => setIsCreateTournamentModalOpen(true)}
+        >
           大会を新規作成
         </button>
         <button className="mahjong-button" onClick={() => setShowTournamentModal(true)}>

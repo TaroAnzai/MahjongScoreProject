@@ -48,11 +48,11 @@ export default function TablePage() {
   const { games, isLoadingGames } = useGetTableGames(tableKey ?? '', { enabled: !!tableKey });
 
   const isChipTable = table?.type === 'CHIP';
-  const tournament_key =
+  const tournamentKey =
     table?.parent_tournament_link.edit_link ?? table?.parent_tournament_link.view_link ?? undefined;
   const { players: tournamentPlayers, isLoadingPlayers } = useGetTournamentPlayers(
-    tournament_key ?? '',
-    { enabled: !!tournament_key }
+    tournamentKey ?? '',
+    { enabled: !!tournamentKey }
   );
   const remainingPlayers = tournamentPlayers?.filter(
     (p) => !tablePlayers?.find((t) => t.id === p.id)
@@ -123,7 +123,8 @@ export default function TablePage() {
         title={table.name}
         onTitleChange={handleTableNameChange}
         showBack={true}
-        showForward={false} // ❌ > を表示しない
+        showForward={false}
+        pearentUrl={`/tournament/${tournamentKey}`}
       />
 
       {!isChipTable && (

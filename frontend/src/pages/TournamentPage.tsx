@@ -268,6 +268,7 @@ function TournamentPage() {
         TitleComponent={TitleWithModal}
         showBack={true}
         showForward={true}
+        pearentUrl={`/group/${groupKey}`}
       />
       <div
         id="rate-display"

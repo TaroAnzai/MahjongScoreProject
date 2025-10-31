@@ -111,6 +111,7 @@ def create_group(data: GroupCreateSchema) -> Group:
         description=data.get("description"),
         created_by=data.get("created_by", "anonymous"),
         created_at=datetime.now(timezone.utc),
+        email = record.email
     )
     db.session.add(group)
     db.session.flush()

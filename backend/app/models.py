@@ -38,7 +38,7 @@ class Group(db.Model):
         nullable=False,
         server_default=db.func.now(),
     )
-
+    email = db.Column(db.String(255), nullable=True, index=True)
     # リレーション
     tournaments = db.relationship("Tournament", back_populates="group")
     players = db.relationship(
