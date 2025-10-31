@@ -7,7 +7,7 @@ const levelPriority: Record<string, number> = {
 };
 
 export const getAccessLevelstring = (shereLinks: readonly ShareLink[] | undefined) => {
-  if (!shereLinks) return 'VIEW';
+  if (!shereLinks || !shereLinks.length) return 'VIEW';
   const accessLevel = shereLinks.reduce((highest, current) => {
     return levelPriority[current.access_level] > levelPriority[highest.access_level]
       ? current

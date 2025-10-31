@@ -42,6 +42,7 @@ import {
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { useDeleteApiTournamentsTournamentKey } from '@/api/generated/mahjongApi';
 import { useDeleteGame } from '@/hooks/useGames';
+import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 
 const isChipTableNonZero = (scoreMap: TournamentScoreMap | undefined) => {
   const chipTableIds =
@@ -98,7 +99,10 @@ function TournamentPage() {
   const [editedRate, setEditedRate] = useState<number | ''>(tournament?.rate || 1);
   const [showDeletePlayerModal, setShowDeletePlayerModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-
+  const [accessLevel, setAccessLevel] = useState('');
+  useEffect(() => {
+    setAccessLevel(getAccessLevelstring(tournament?.tournament_links));
+  }, [tournament?.tournament_links]);
   const handleOpenAddPlayerModal = async () => {
     if (!groupPlayers || groupPlayers.length === 0) {
       alert('追加可能な参加者がいません');
@@ -181,7 +185,7 @@ function TournamentPage() {
   };
   const handleOpenDeletePlayerModal = () => {
     if (!players?.length) {
-      alert('削除対象の参加者がいません');
+      alertDialog({ title: 'Error Delete Player', description: '削除対象の参加者がいません' });
       return;
     }
     setShowDeletePlayerModal(true);
@@ -294,16 +298,32 @@ function TournamentPage() {
       </div>
 
       <ButtonGridSection>
-        <button className="mahjong-button" onClick={handleOpenAddPlayerModal}>
+        <button
+          className="mahjong-button"
+          disabled={accessLevel == 'VIEW'}
+          onClick={handleOpenAddPlayerModal}
+        >
           参加者を追加
         </button>
-        <button className="mahjong-button" onClick={handleOpenDeletePlayerModal}>
+        <button
+          className="mahjong-button"
+          disabled={accessLevel == 'VIEW'}
+          onClick={handleOpenDeletePlayerModal}
+        >
           参加者を削除
         </button>
-        <button className="mahjong-button" onClick={handleCreateTable}>
+        <button
+          className="mahjong-button"
+          disabled={accessLevel == 'VIEW'}
+          onClick={handleCreateTable}
+        >
           記録用紙を新規作成
         </button>
-        <button className="mahjong-button" onClick={handleDeleteTournament}>
+        <button
+          className="mahjong-button"
+          disabled={accessLevel == 'VIEW'}
+          onClick={handleDeleteTournament}
+        >
           大会を削除
         </button>
       </ButtonGridSection>

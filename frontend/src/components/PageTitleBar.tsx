@@ -1,5 +1,5 @@
 // src/components/PageTitleBar.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styles from './PageTitleBar.module.css';
 import EditableTitle from './EditableTitle';
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { ShareLink } from '@/api/generated/mahjongApi.schemas';
 import { getAccessLevelstring } from '@/utils/accessLevel_utils';
+import { useAlertDialog } from './common/AlertDialogProvider';
 interface PageTitleBarProps {
   title: string;
   shareLinks?: readonly ShareLink[];
@@ -34,6 +35,13 @@ function PageTitleBar({
 }: PageTitleBarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { alertDialog } = useAlertDialog();
+
+  const [accessLevel, setAccessLevel] = useState('');
+  useEffect(() => {
+    console.log('shareLinks changed:', shareLinks);
+    setAccessLevel(getAccessLevelstring(shareLinks));
+  }, [shareLinks]);
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const type = pathSegments[0] as keyof typeof typeNameMap;
   const typeNameMap = {
@@ -42,7 +50,6 @@ function PageTitleBar({
     table: '記録表',
   };
   const typeName = typeNameMap[type] ?? '未定義';
-  const accessLevel = getAccessLevelstring(shareLinks);
 
   const handleShareUrl = async (accessType: string) => {
     const shortKey = shareLinks.find((l) => l.access_level === accessType)?.short_key;
@@ -59,14 +66,25 @@ function PageTitleBar({
           url: shareUrl,
         });
       } catch (err: any) {
-        alert('共有に失敗しました: ' + err.message);
+        alertDialog({
+          title: '共有に失敗しました',
+          description: err.message,
+          showCancelButton: false,
+        });
       }
     } else {
       try {
-        await navigator.clipboard.writeText(shareUrl);
-        alert(`${typeName}のURLをコピーしました:\n` + shareUrl);
+        alertDialog({
+          title: 'URLをコピーしました',
+          description: `${typeName}のURLをクリップボードにコピーしました:\n` + shareUrl,
+          showCancelButton: false,
+        });
       } catch (err: any) {
-        alert('コピーに失敗しました: ' + err.message);
+        alertDialog({
+          title: 'コピーに失敗しました',
+          description: 'クリップボードへのコピーに失敗しました: ' + err.message,
+          showCancelButton: false,
+        });
       }
     }
   };
@@ -84,7 +102,6 @@ function PageTitleBar({
         ) : (
           <EditableTitle value={title} onChange={onTitleChange} className={styles.editable} />
         )}
-        <p>{accessLevel} </p>
       </div>
 
       <div className="absolute right-12">
@@ -96,9 +113,11 @@ function PageTitleBar({
             <DropdownMenuItem onClick={() => handleShareUrl('VIEW')}>
               閲覧リンクを共有
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleShareUrl('EDIT')}>
-              編集リンクを共有
-            </DropdownMenuItem>
+            {accessLevel !== 'VIEW' && (
+              <DropdownMenuItem onClick={() => handleShareUrl('EDIT')}>
+                編集リンクを共有
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

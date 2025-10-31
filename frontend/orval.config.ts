@@ -9,7 +9,6 @@ export default {
       client: 'react-query',
       clean: true, // generated フォルダをクリーンアップしてから生成
       prettier: true,
-      format: 'esm', // ← 追加！ import.meta対応
       override: {
         mutator: {
           path: 'src/api/customFetch.ts', // これは消えない（generated 外だから）

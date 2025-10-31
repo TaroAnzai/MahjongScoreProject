@@ -9,8 +9,15 @@ interface TableScoreBoardProps {
   players: readonly Player[];
   games: Game[];
   onUpdateGame: (gameId: number | null, scres: ScoreInput[]) => void;
+  disabled?: boolean;
 }
-function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoardProps) {
+function TableScoreBoard({
+  table,
+  players,
+  games,
+  onUpdateGame,
+  disabled = false,
+}: TableScoreBoardProps) {
   if (!table || !players || !games) return null;
   const [editingGameIndex, setEditingGameIndex] = useState<number | null>(null);
   const [editingScores, setEditingScores] = useState<Record<number, number | string>>({});
@@ -46,6 +53,7 @@ function TableScoreBoard({ table, players, games, onUpdateGame }: TableScoreBoar
   }
   const handleRowClick = (index: number) => {
     if (editingGameIndex === index) return; // ← 編集中なら無視
+    if (disabled) return; // ← 編集不可なら無視
 
     const game = displayGames[index];
     const initialScores: Record<number, number> = {};

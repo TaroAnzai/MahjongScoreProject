@@ -8,6 +8,7 @@ import type { Group } from '@/api/generated/mahjongApi.schemas';
 import { useCreateGroup, useCreateGroupRequest, useGroupQueries } from '@/hooks/useGroups';
 import { Button } from '@/components/ui/button';
 import { TextInputModal } from '@/components/TextInputModal';
+import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 
 function WelcomePage() {
   const navigate = useNavigate(); // ← フックの呼び出し
@@ -58,7 +59,7 @@ function WelcomePage() {
                       cursor: 'pointer',
                     }}
                   >
-                    {group?.name}（{group.owner_link ?? group.edit_link ?? group.view_link ?? ''}）
+                    {group?.name}（{getAccessLevelstring(group.group_links)}）
                   </li>
                 )
             )}

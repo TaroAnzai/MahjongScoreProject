@@ -22,6 +22,7 @@ import { useGetTournamentPlayers } from '@/hooks/useTournaments';
 import type { Game, Player, ScoreInput, TablePlayerItem } from '@/api/generated/mahjongApi.schemas';
 import { useCreateGame, useDeleteGame, useGetTableGames, useUpdateGame } from '@/hooks/useGames';
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
+import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 
 export default function TablePage() {
   const { alertDialog } = useAlertDialog();
@@ -57,6 +58,11 @@ export default function TablePage() {
   const remainingPlayers = tournamentPlayers?.filter(
     (p) => !tablePlayers?.find((t) => t.id === p.id)
   );
+
+  const [accessLevel, setAccessLevel] = useState('');
+  useEffect(() => {
+    setAccessLevel(getAccessLevelstring(table?.table_links));
+  }, [table?.table_links]);
   // Early retrurn
   // --- ① 不正URL対応 ---
   if (!tableKey) {
@@ -122,6 +128,7 @@ export default function TablePage() {
       <PageTitleBar
         title={table.name}
         onTitleChange={handleTableNameChange}
+        shareLinks={table.table_links}
         showBack={true}
         showForward={false}
         pearentUrl={`/tournament/${tournamentKey}`}
@@ -131,19 +138,32 @@ export default function TablePage() {
         <ButtonGridSection>
           <button
             className="mahjong-button"
+            disabled={accessLevel == 'VIEW'}
             onClick={() => {
               setShowAddPlayerModal(true);
             }}
           >
             参加者を追加
           </button>
-          <button className="mahjong-button" onClick={() => setShowDeletePlayerModal(true)}>
+          <button
+            className="mahjong-button"
+            disabled={accessLevel == 'VIEW'}
+            onClick={() => setShowDeletePlayerModal(true)}
+          >
             参加者を削除
           </button>
-          <button className="mahjong-button" onClick={handleDeleteGameClick}>
+          <button
+            className="mahjong-button"
+            disabled={accessLevel == 'VIEW'}
+            onClick={handleDeleteGameClick}
+          >
             データを削除
           </button>
-          <button className="mahjong-button" onClick={handleDeleteTable}>
+          <button
+            className="mahjong-button"
+            disabled={accessLevel == 'VIEW'}
+            onClick={handleDeleteTable}
+          >
             記録表削除
           </button>
         </ButtonGridSection>
@@ -154,6 +174,7 @@ export default function TablePage() {
         players={tablePlayers ?? []}
         games={games ?? []}
         onUpdateGame={handleUpdateGame}
+        disabled={accessLevel == 'VIEW'}
       />
 
       {showAddPlayerModal && (
