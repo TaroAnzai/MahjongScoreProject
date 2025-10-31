@@ -7,6 +7,7 @@ import secrets
 
 # FLASK_ENV の値に応じて .env を読み込む
 env_name = os.getenv("FLASK_ENV", "development")
+print(os.getenv("FLASK_ENV"))
 print("env_name:", env_name)
 
 if env_name == "production":

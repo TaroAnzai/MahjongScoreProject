@@ -42,6 +42,8 @@ pnpm-debug.log*
 # ==============================
 
 .env.production
+backend/.env
+backend/.env.production
 
 # ==============================
 # OS / Editor
@@ -52,3 +54,4 @@ Thumbs.db
 *.swp
 frontend/src/api/generated/*
 backend/celerybeat-schedule
+backend/.env.development
