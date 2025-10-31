@@ -2,7 +2,17 @@
 import argparse
 from .send_mail import MailMessage, send_email, MailSendError
 from dotenv import load_dotenv
-load_dotenv()
+import os
+
+load_dotenv()# FLASK_ENV の値に応じて .env を読み込む
+env_name = os.getenv("FLASK_ENV", "development")
+print("FLASK_ENV:", env_name)
+if env_name == "production":
+    load_dotenv(".env.production")
+elif env_name == "test":
+    load_dotenv(".env.test")
+else:
+    load_dotenv(".env") #開発用
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--to", required=True, help="カンマ区切り: a@x,b@y")
