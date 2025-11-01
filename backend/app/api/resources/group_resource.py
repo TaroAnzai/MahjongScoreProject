@@ -2,27 +2,27 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 
 from app.decorators import with_common_error_responses
-from app.schemas.common_schemas import MessageSchema
-from app.schemas.group_schema import (
+from app.api.schemas.common_schemas import MessageSchema
+from app.api.schemas.group_schema import (
     GroupCreateSchema,
     GroupUpdateSchema,
     GroupSchema,
     GroupRequestSchema,
     GroupResponseSchema
 )
-from app.schemas.tournament_schema import TournamentSchema, TournamentCreateSchema
+from app.api.schemas.tournament_schema import TournamentSchema, TournamentCreateSchema
 from app.service_errors import ServiceError
 from flask import jsonify
 from app.service_errors import format_error_response
 
-from app.services.group_service import (
+from app.api.services.group_service import (
     create_group,
     get_group_by_key,
     update_group,
     delete_group,
     create_group_creation_token,
 )
-from app.services.tournament_service import create_tournament, get_tournaments_by_group
+from app.api.services.tournament_service import create_tournament, get_tournaments_by_group
 
 
 # ✅ Blueprint設定（命名を仕様準拠に統一）

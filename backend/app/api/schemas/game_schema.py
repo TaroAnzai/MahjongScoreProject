@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields,validates, ValidationError
-from app.schemas.common_schemas import ShareLinkSchema
-from app.schemas.mixins.share_link_mixin import ShareLinkMixin
+from app.api.schemas.common_schemas import ShareLinkSchema
+from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
 
 
 

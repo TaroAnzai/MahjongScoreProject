@@ -66,7 +66,7 @@ def mock_celery_delay():
     全テストで Celery の delay() をモック化し、実行を抑止。
     autouse=True により自動的に全テストに適用される。
     """
-    with patch("app.services.group_service.send_group_creation_email_task.delay") as mock_delay:
+    with patch("app.api.services.group_service.send_group_creation_email_task.delay") as mock_delay:
         yield mock_delay
 # =========================================================
 # テストデータ生成用ユーティリティ

@@ -2,21 +2,21 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 
 from app.decorators import with_common_error_responses
-from app.schemas.common_schemas import MessageSchema
-from app.schemas.table_schema import (
+from app.api.schemas.common_schemas import MessageSchema
+from app.api.schemas.table_schema import (
     TableUpdateSchema,
     TableSchema,
 )
-from app.schemas.game_schema import GameSchema, GameCreateSchema
+from app.api.schemas.game_schema import GameSchema, GameCreateSchema
 from app.service_errors import ServiceError
 from flask import jsonify
 from app.service_errors import format_error_response
-from app.services.table_service import (
+from app.api.services.table_service import (
     get_table_by_key,
     update_table,
     delete_table,
 )
-from app.services.game_service import create_game, get_games_by_table
+from app.api.services.game_service import create_game, get_games_by_table
 
 # ✅ Blueprint設定
 table_bp = Blueprint(

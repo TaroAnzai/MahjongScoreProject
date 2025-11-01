@@ -2,12 +2,12 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 
 from app.decorators import with_common_error_responses
-from app.schemas.common_schemas import MessageSchema
-from app.schemas.game_schema import GameCreateSchema, GameUpdateSchema, GameSchema
+from app.api.schemas.common_schemas import MessageSchema
+from app.api.schemas.game_schema import GameCreateSchema, GameUpdateSchema, GameSchema
 from app.service_errors import ServiceError
 from flask import jsonify
 from app.service_errors import format_error_response
-from app.services.game_service import (
+from app.api.services.game_service import (
     create_game,
     get_game_by_key,
     update_game,

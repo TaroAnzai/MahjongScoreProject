@@ -1,8 +1,8 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from app.decorators import with_common_error_responses
-from app.schemas.common_schemas import MessageSchema
-from app.schemas.player_schema import (
+from app.api.schemas.common_schemas import MessageSchema
+from app.api.schemas.player_schema import (
     PlayerCreateSchema,
     PlayerUpdateSchema,
     PlayerSchema,
@@ -11,7 +11,7 @@ from app.service_errors import ServiceError
 from flask import jsonify
 from app.service_errors import format_error_response
 
-from app.services.player_service import (
+from app.api.services.player_service import (
     create_player,
     list_players_by_group_key,
     get_player_by_key,

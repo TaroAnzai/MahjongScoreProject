@@ -3,12 +3,12 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from app.decorators import with_common_error_responses
-from app.schemas.common_schemas import MessageSchema
-from app.schemas.table_player_schema import TablePlayerCreateSchema, TablePlayersSchema
+from app.api.schemas.common_schemas import MessageSchema
+from app.api.schemas.table_player_schema import TablePlayerCreateSchema, TablePlayersSchema
 from app.service_errors import ServiceError
 from flask import jsonify
 from app.service_errors import format_error_response
-from app.services.table_player_service import (
+from app.api.services.table_player_service import (
     list_table_players_by_key,
     create_table_player,
     delete_table_player,

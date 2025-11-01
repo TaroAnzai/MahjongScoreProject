@@ -1,10 +1,10 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from app.decorators import with_common_error_responses
-from app.schemas.common_schemas import MessageSchema
-from app.schemas.export_schema import TournamentExportSchema, GroupSummarySchema,TournamentScoreMapSchema
+from app.api.schemas.common_schemas import MessageSchema
+from app.api.schemas.export_schema import TournamentExportSchema, GroupSummarySchema,TournamentScoreMapSchema
 from app.service_errors import ServiceError
-from app.services.export_service import get_tournament_export, get_group_summary, get_tournament_score_map
+from app.api.services.export_service import get_tournament_export, get_group_summary, get_tournament_score_map
 from flask import jsonify
 from app.service_errors import format_error_response
 # Blueprint

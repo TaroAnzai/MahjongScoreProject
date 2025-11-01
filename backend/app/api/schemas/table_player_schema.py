@@ -1,7 +1,7 @@
 # app/schemas/table_player_schema.py
 
 from marshmallow import Schema, fields, validate
-from app.schemas.player_schema import PlayerSchema
+from app.api.schemas.player_schema import PlayerSchema
 
 class TablePlayerItemSchema(Schema):
     """卓への1人分の参加情報"""

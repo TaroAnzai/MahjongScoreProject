@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_dump
-from app.schemas.common_schemas import ShareLinkSchema
-from app.schemas.mixins.share_link_mixin import ShareLinkMixin
-from app.schemas.tournament_schema import TournamentSchema
+from app.api.schemas.common_schemas import ShareLinkSchema
+from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
+from app.api.schemas.tournament_schema import TournamentSchema
 from app.models import TableTypeEnum
 
 class TableCreateSchema(Schema):

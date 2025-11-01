@@ -2,22 +2,22 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 
 from app.decorators import with_common_error_responses
-from app.schemas.common_schemas import MessageSchema
-from app.schemas.tournament_schema import (
+from app.api.schemas.common_schemas import MessageSchema
+from app.api.schemas.tournament_schema import (
     TournamentCreateSchema,
     TournamentUpdateSchema,
     TournamentSchema,
 )
-from app.schemas.table_schema import TableSchema, TableCreateSchema
+from app.api.schemas.table_schema import TableSchema, TableCreateSchema
 from app.service_errors import ServiceError
 from flask import jsonify
 from app.service_errors import format_error_response
-from app.services.tournament_service import (
+from app.api.services.tournament_service import (
     get_tournament_by_key,
     update_tournament,
     delete_tournament,
 )
-from app.services.table_service import create_table, get_table_by_tournament
+from app.api.services.table_service import create_table, get_table_by_tournament
 
 # ✅ Blueprint設定を仕様書V2に準拠
 tournament_bp = Blueprint(

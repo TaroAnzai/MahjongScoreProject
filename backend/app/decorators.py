@@ -1,5 +1,5 @@
 from functools import wraps
-from app.schemas.common_schemas import ErrorResponseSchema
+from app.api.schemas.common_schemas import ErrorResponseSchema
 
 def with_common_error_responses(bp):
     """共通のエラーレスポンス（400,401,403）を追加する簡素版デコレーター"""

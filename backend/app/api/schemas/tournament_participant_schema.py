@@ -1,7 +1,7 @@
 # app/schemas/tournament_participant_schema.py
 
 from marshmallow import Schema, fields
-from app.schemas.player_schema import PlayerSchema
+from app.api.schemas.player_schema import PlayerSchema
 
 class TournamentParticipantSchema(Schema):
     """大会参加者"""

@@ -3,7 +3,7 @@ from flask import current_app
 import secrets
 from app import db
 from app.models import AccessLevel, Group, GroupCreationToken
-from app.schemas.group_schema import GroupRequestSchema, GroupCreateSchema
+from app.api.schemas.group_schema import GroupRequestSchema, GroupCreateSchema
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
