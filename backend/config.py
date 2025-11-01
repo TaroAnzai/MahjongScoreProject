@@ -7,7 +7,6 @@ import secrets
 
 # FLASK_ENV の値に応じて .env を読み込む
 env_name = os.getenv("FLASK_ENV", "development")
-print(os.getenv("FLASK_ENV"))
 print("env_name:", env_name)
 
 if env_name == "production":
@@ -15,7 +14,7 @@ if env_name == "production":
 elif env_name == "test":
     load_dotenv(".env.test")
 else:
-    load_dotenv(".env") #開発用
+    load_dotenv(".env.development") #開発用
 
 print("CORS_ORIGINS:", os.getenv("CORS_ORIGINS"))
 print("SESSION_COOKIE_NAME:", os.getenv("SESSION_COOKIE_NAME"))

@@ -9,6 +9,7 @@ from app.extensions import db, login_manager, migrate, api
 def create_app(config_name=None, config_override=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object('config.Config')
+    print(f"Loading config OPENAPI_URL_PREFIX: {app.config.get('OPENAPI_URL_PREFIX')}")
 
     # ✅ テストなどでconfig_nameが指定された場合に対応
     if config_name == "testing":

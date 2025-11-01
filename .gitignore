@@ -57,3 +57,4 @@ backend/celerybeat-schedule
 backend/.env.development
 
 frontend/ssl/*
+frontend/.htaccess

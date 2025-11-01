@@ -53,7 +53,7 @@ function WelcomePage() {
                 group && (
                   <li
                     className="mahjong-list-item"
-                    key={group.id}
+                    key={group.id + getAccessLevelstring(group.group_links)}
                     onClick={() => handleEnterGroup(group)}
                     style={{
                       cursor: 'pointer',

@@ -12,7 +12,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AlertDialogProvider>
-        <BrowserRouter basename="/mahjong/">
+        <BrowserRouter basename="/">
           <App />
         </BrowserRouter>
       </AlertDialogProvider>
