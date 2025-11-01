@@ -10,6 +10,7 @@ from app.service_errors import (
     ServiceValidationError,
 )
 from app.utils.share_link_utils import create_default_share_links, get_share_link_by_key
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 _ACCESS_PRIORITY = {
     AccessLevel.VIEW: 1,
@@ -52,6 +53,13 @@ def _ensure_access(link, group, required: AccessLevel, message: str):
 def create_group_creation_token(data: GroupRequestSchema) -> GroupCreationToken:
     email = data.get('email')
     group_name = data.get('name')
+    tz_str = data.get('timezone',"Asia/Tokyo")
+
+    try:
+        tz = ZoneInfo(tz_str)
+    except ZoneInfoNotFoundError:
+        raise ServiceValidationError("タイムゾーンが正しくありません。")
+
     """グループ作成トークンを発行し、メール送信（30分有効）"""
     if not email:
         raise ServiceValidationError("メールアドレスは必須です。")
@@ -80,7 +88,10 @@ def create_group_creation_token(data: GroupRequestSchema) -> GroupCreationToken:
     frontend_url = current_app.config.get("FRONTEND_URL", "http://localhost:5173/")
     url = f"{frontend_url}/group/create?token={new_token.token}"
 
-    send_group_creation_email_task.delay(new_token.email, url)
+    expires_at = new_token.expires_at.astimezone(tz)
+    expires_at_str = expires_at.strftime("%Y-%m-%d %H:%M")
+
+    send_group_creation_email_task.delay(new_token.email, url, new_token.group_name,expires_at_str)
 
     return new_token
 # =========================================================

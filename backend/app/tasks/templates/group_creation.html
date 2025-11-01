@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>グループ作成のご案内</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+        background-color: #f9f9f9;
+        color: #333333;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+      }
+      .header {
+        border-bottom: 3px solid #32cd32;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        text-align: center;
+      }
+      .group-name {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #228b22;
+        margin-bottom: 10px;
+      }
+      .button {
+        display: inline-block;
+        background-color: #32cd32;
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: bold;
+        padding: 12px 24px;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+      .footer {
+        font-size: 0.85rem;
+        color: #777;
+        margin-top: 30px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>Mahjong Score System</h2>
+      </div>
+
+      <p>{{ email }} 様</p>
+
+      <p class="group-name">グループ名：{{ group_name }}</p>
+
+      <p>
+        グループ作成リクエストを受け付けました。<br />
+        以下のリンクからグループの作成を完了してください。
+      </p>
+
+      <p style="text-align: center">
+        <a href="{{ url }}" class="button">グループを作成する</a>
+      </p>
+
+      <p>
+        このリンクは <strong>{{ expires_at }}</strong> まで有効です。<br />
+        有効期限を過ぎると無効になりますのでご注意ください。
+      </p>
+
+      <div class="footer">
+        ──────────────<br />
+        Mahjong Score System<br />
+        © 2025 Anzai Project
+      </div>
+    </div>
+  </body>
+</html>

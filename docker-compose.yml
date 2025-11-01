@@ -3,7 +3,7 @@ services:
     build: ./backend
     container_name: mahjongscore-api
     ports:
-      - "6080:5000" # ホスト6080 → コンテナ5000
+      - '6080:5000' # ホスト6080 → コンテナ5000
     command: >
       gunicorn -b 0.0.0.0:5000 "app:create_app()"
     volumes:
@@ -22,7 +22,7 @@ services:
     container_name: mahjongscore-db
     restart: always
     ports:
-      - "3307:3306" # ホスト3307 → コンテナ3306
+      - '3307:3306' # ホスト3307 → コンテナ3306
     environment:
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=mahjongscore
@@ -42,6 +42,7 @@ services:
     volumes:
       - ./backend:/app
     environment:
+      - FLASK_ENV=development
       - DATABASE_URL=mysql+pymysql://root:secret@db:3306/mahjongscore
       - CELERY_BROKER_URL=redis://redis:6379/1
       - CELERY_RESULT_BACKEND=redis://redis:6379/1
@@ -67,7 +68,7 @@ services:
     image: mailhog/mailhog
     container_name: mailhog
     ports:
-      - "8025:8025" # Web UI
-      - "1025:1025" # SMTP port
+      - '8025:8025' # Web UI
+      - '1025:1025' # SMTP port
 volumes:
   db_data:

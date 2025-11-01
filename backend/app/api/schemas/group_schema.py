@@ -7,7 +7,7 @@ class GroupRequestSchema(Schema):
     """グループリクエスト"""
     name = fields.Str(required=True, description="グループ名")
     email = fields.Str(required=True, description="メールアドレス一覧")
-
+    timezone = fields.Str(required=False, description="ユーザーのタイムゾーン（例: 'Asia/Tokyo'）")
 class GroupResponseSchema(Schema):
     """グループリクエストレスポンス"""
     message = fields.Str(required=True, description="メッセージ")
