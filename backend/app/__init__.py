@@ -1,9 +1,9 @@
 # app/__init__.py
 
 from flask import Flask, jsonify
-
+from flask_smorest import Api 
 from flask_cors import CORS
-from app.extensions import db, login_manager, migrate, api
+from app.extensions import db, login_manager, migrate
 
 
 def create_app(config_name=None, config_override=None):
@@ -28,18 +28,10 @@ def create_app(config_name=None, config_override=None):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
-    api.init_app(app)
 
-    # モデルと認証ユーザーの読み込み
-    from app import models
-    from app.auth import PseudoUser
-
-    @login_manager.user_loader
-    def load_user(user_id):
-        return PseudoUser(user_id, edit_key=None)
-
+    api=Api(app)
     from app.api import register_blueprints
-    register_blueprints(app)
+    register_blueprints(api)
 
     return app
 

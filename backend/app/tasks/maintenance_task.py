@@ -8,6 +8,7 @@ from sqlalchemy import and_, func
 from app import create_app
 from app.extensions import db
 from app.models import GroupCreationToken
+import os
 
 
 @shared_task(

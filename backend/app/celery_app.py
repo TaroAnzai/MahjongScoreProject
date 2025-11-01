@@ -26,7 +26,7 @@ def make_celery():
     celery.conf.beat_schedule = {
         "delete-expired-group-tokens-every-5-mins": {
             "task": "app.tasks.maintenance_task.delete_expired_group_tokens",
-            "schedule": timedelta(minutes=5),
+            "schedule": timedelta(minutes=1),
         },
         "nightly-summary-at-midnight": {
             "task": "app.tasks.maintenance_task.generate_daily_summary",

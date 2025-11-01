@@ -16,9 +16,6 @@ elif env_name == "test":
 else:
     load_dotenv(".env.development") #開発用
 
-print("CORS_ORIGINS:", os.getenv("CORS_ORIGINS"))
-print("SESSION_COOKIE_NAME:", os.getenv("SESSION_COOKIE_NAME"))
-
 class Config:
     # Database
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
