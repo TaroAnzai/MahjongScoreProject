@@ -12,4 +12,9 @@ def send_group_creation_email_task(email: str, url: str):
 
     to_list = [email]
     mail_message =MailMessage(to=to_list, subject=subject, text=body, html=html)
-    send_email(mail_message)
+    try:
+        mid = send_email(mail_message)
+        print("OK:", mid)
+    except MailSendError as e:
+        print("ERROR:", e)
+        raise SystemExit(1)
