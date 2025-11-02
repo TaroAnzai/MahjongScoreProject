@@ -1,10 +1,10 @@
 # app/__init__.py
 
 from flask import Flask, jsonify
-from flask_smorest import Api 
+from flask_smorest import Api
 from flask_cors import CORS
 from app.extensions import db, login_manager, migrate
-
+from app.api import register_blueprints
 
 def create_app(config_name=None, config_override=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -27,14 +27,9 @@ def create_app(config_name=None, config_override=None):
 
     db.init_app(app)
     migrate.init_app(app, db)
-    login_manager.init_app(app)
 
     api=Api(app)
-    from app.api import register_blueprints
+
     register_blueprints(api)
 
     return app
-
-@login_manager.unauthorized_handler
-def unauthorized_callback():
-    return jsonify({'error': 'Unauthorized'}), 401
