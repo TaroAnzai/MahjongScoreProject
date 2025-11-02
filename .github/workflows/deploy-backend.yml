@@ -1,0 +1,50 @@
+name: Deploy Backend to VPS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_API_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.DEPLOY_API_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy via SSH
+        run: |
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.DEPLOY_API_USER }}@${{ secrets.DEPLOY_API_HOST }} << 'EOF'
+          set -e
+          cd ~/mahjongscore-api/backend
+
+          echo ">>> Pulling latest code"
+          git fetch origin main
+          git reset --hard origin/main
+
+          echo ">>> Activating virtual environment"
+          source venv/bin/activate
+
+          echo ">>> Installing dependencies"
+          pip install -r requirements.txt
+
+          echo ">>> Running migrations"
+          flask db upgrade
+
+          echo ">>> Restarting services"
+          sudo systemctl restart mahjong_backend.service
+          sudo systemctl restart celery-worker-mahjong.service
+          sudo systemctl restart celery-beat-mahjong.service
+
+          echo ">>> Deployment completed successfully."
+          EOF
