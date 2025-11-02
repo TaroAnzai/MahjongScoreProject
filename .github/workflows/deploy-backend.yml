@@ -64,7 +64,7 @@ jobs:
 
       - name: Deploy via SSH
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p 1022 ${{ secrets.DEPLOY_API_USER }}@${{ secrets.DEPLOY_API_HOST }} << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 -p 10022 ${{ secrets.DEPLOY_API_USER }}@${{ secrets.DEPLOY_API_HOST }} << 'EOF'
           set -e
           cd ~/mahjongscore-api/backend
 
