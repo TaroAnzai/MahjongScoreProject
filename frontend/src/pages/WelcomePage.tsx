@@ -22,7 +22,8 @@ function WelcomePage() {
       document.activeElement.blur();
     }
     setIsModalOpen(false);
-    createGroup({ name: groupName, email: email });
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    createGroup({ name: groupName, email: email, timezone: timezone });
   };
 
   const handleEnterGroup = (group: Group) => {

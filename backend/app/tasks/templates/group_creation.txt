@@ -1,9 +1,8 @@
 {{ email }} 様
 
-グループ作成リクエストを受け付けました。
-
 グループ名：{{ group_name }}
 
+グループ作成リクエストを受け付けました。
 以下のリンクからグループの作成を完了してください。
 
 {{ url }}
@@ -11,6 +10,20 @@
 このリンクは {{ expires_at }} まで有効です。
 有効期限を過ぎると無効になりますのでご注意ください。
 
-────────────────────
+-------------------------------------------
+
+Dear {{ email }},
+
+Group Name: {{ group_name }}
+
+We have received your group creation request.
+Please complete the creation process using the link below:
+
+{{ url }}
+
+This link is valid until {{ expires_at }}.
+After that time, the link will expire and cannot be used.
+
+-------------------------------------------
 Mahjong Score System
 © 2025 Anzai Project

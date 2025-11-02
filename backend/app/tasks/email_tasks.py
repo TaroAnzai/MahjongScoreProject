@@ -12,7 +12,7 @@ def send_group_creation_email_task(email: str, url: str, group_name: str,expires
         "group_name": group_name,
         "expires_at": expires_at,
     }
-    subject = "グループ作成リンク"
+    subject = f"Group Creation Link / グループ作成リンク({group_name})"
     text_body, html_body = render_mail_template("group_creation", **context)
 
     to_list = [email]

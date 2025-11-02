@@ -2,7 +2,7 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <title>グループ作成のご案内</title>
+    <title>グループ作成のご案内 / Group Creation Notice</title>
     <style>
       body {
         font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
@@ -12,7 +12,7 @@
         padding: 20px;
       }
       .container {
-        max-width: 600px;
+        max-width: 620px;
         margin: 0 auto;
         background-color: #ffffff;
         border-radius: 10px;
@@ -25,11 +25,13 @@
         padding-bottom: 10px;
         text-align: center;
       }
+      .section {
+        margin-bottom: 25px;
+      }
       .group-name {
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: bold;
         color: #228b22;
-        margin-bottom: 10px;
       }
       .button {
         display: inline-block;
@@ -39,13 +41,18 @@
         font-weight: bold;
         padding: 12px 24px;
         border-radius: 8px;
-        margin-top: 20px;
+        margin-top: 15px;
       }
       .footer {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         color: #777;
-        margin-top: 30px;
+        margin-top: 25px;
         text-align: center;
+      }
+      hr {
+        border: none;
+        border-top: 2px solid #ddd;
+        margin: 30px 0;
       }
     </style>
   </head>
@@ -55,23 +62,47 @@
         <h2>Mahjong Score System</h2>
       </div>
 
-      <p>{{ email }} 様</p>
+      <!-- 日本語版 -->
+      <div class="section">
+        <p>{{ email }} 様</p>
+        <p class="group-name">グループ名：{{ group_name }}</p>
 
-      <p class="group-name">グループ名：{{ group_name }}</p>
+        <p>
+          グループ作成リクエストを受け付けました。<br />
+          以下のリンクからグループの作成を完了してください。
+        </p>
 
-      <p>
-        グループ作成リクエストを受け付けました。<br />
-        以下のリンクからグループの作成を完了してください。
-      </p>
+        <p style="text-align: center">
+          <a href="{{ url }}" class="button">グループを作成する</a>
+        </p>
 
-      <p style="text-align: center">
-        <a href="{{ url }}" class="button">グループを作成する</a>
-      </p>
+        <p>
+          このリンクは <strong>{{ expires_at }}</strong> まで有効です。<br />
+          有効期限を過ぎると無効になりますのでご注意ください。
+        </p>
+      </div>
 
-      <p>
-        このリンクは <strong>{{ expires_at }}</strong> まで有効です。<br />
-        有効期限を過ぎると無効になりますのでご注意ください。
-      </p>
+      <hr />
+
+      <!-- 英語版 -->
+      <div class="section">
+        <p>Dear {{ email }},</p>
+        <p class="group-name">Group Name: {{ group_name }}</p>
+
+        <p>
+          We have received your group creation request.<br />
+          Please complete the creation process using the link below:
+        </p>
+
+        <p style="text-align: center">
+          <a href="{{ url }}" class="button">Create Group</a>
+        </p>
+
+        <p>
+          This link is valid until <strong>{{ expires_at }}</strong>.<br />
+          After that time, the link will expire and cannot be used.
+        </p>
+      </div>
 
       <div class="footer">
         ──────────────<br />
