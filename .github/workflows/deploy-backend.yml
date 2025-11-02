@@ -1,4 +1,4 @@
-name: Deploy Backend to VPS
+name: Backend CI/CD
 
 on:
   push:
@@ -8,8 +8,47 @@ on:
       - 'backend/**'
 
 jobs:
-  deploy:
+  # --- ✅ テストジョブ ---
+  test:
+    name: Run Pytest
     runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -U pip wheel
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Set environment variables for testing
+        working-directory: backend
+        run: |
+          echo "FLASK_ENV=test" >> $GITHUB_ENV
+          echo "FLASK_APP=app" >> $GITHUB_ENV
+          echo "DATABASE_URL=sqlite:///test_database.db" >> $GITHUB_ENV
+
+      - name: Run pytest
+        working-directory: backend
+        run: |
+          source venv/bin/activate
+          pytest -v --maxfail=3 --disable-warnings --cov=app --cov-report=term-missing
+
+  # --- 🚀 デプロイジョブ（テスト成功時のみ） ---
+  deploy:
+    name: Deploy Backend to VPS
+    runs-on: ubuntu-latest
+    needs: test # ← これがポイント（test成功時のみ実行）
 
     steps:
       - name: Checkout repository
@@ -39,7 +78,7 @@ jobs:
           pip install -r requirements.txt
 
           echo ">>> Running migrations"
-          flask db upgrade
+          FLASK_APP=app FLASK_ENV=production flask db upgrade
 
           echo ">>> Restarting services"
           sudo systemctl restart mahjong_backend.service
