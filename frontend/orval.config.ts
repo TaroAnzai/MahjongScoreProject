@@ -1,11 +1,11 @@
 export default {
   mahjongApi: {
     input: {
-      target: 'http://localhost:6080/doc/openapi.json',
+      target: process.env.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json',
     },
     output: {
       mode: 'split',
-      target: process.env.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json',
+      target: 'src/api/generated/mahjongApi.ts', // 生成先を generated に変更
       client: 'react-query',
       clean: true, // generated フォルダをクリーンアップしてから生成
       prettier: true,
