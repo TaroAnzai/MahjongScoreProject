@@ -38,10 +38,10 @@ jobs:
       - name: Generate API client with Orval
         env:
           ORVAL_API_URL: ${{ secrets.ORVAL_API_URL }}
-          ORVAL_OUTPUT_PATH: ${{ secrets.ORVAL_OUTPUT_PATH }}
+
         run: |
           echo "Running Orval with API: $ORVAL_API_URL"
-          npx orval --input $ORVAL_API_URL --output $ORVAL_OUTPUT_PATH
+          orval --config orval.config.ts
 
       - name: Run Lint
         run: npm run lint --if-present
