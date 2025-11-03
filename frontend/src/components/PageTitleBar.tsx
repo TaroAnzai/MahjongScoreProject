@@ -21,7 +21,7 @@ interface PageTitleBarProps {
   onTitleChange?: (newTitle: string) => void;
   showBack?: boolean;
   showForward?: boolean;
-  pearentUrl: string;
+  parentUrl?: string | null;
 }
 function PageTitleBar({
   title,
@@ -31,7 +31,7 @@ function PageTitleBar({
   onTitleChange,
   showBack = true,
   showForward = true,
-  pearentUrl,
+  parentUrl,
 }: PageTitleBarProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -54,10 +54,11 @@ function PageTitleBar({
   const handleShareUrl = async (accessType: string) => {
     const shortKey = shareLinks.find((l) => l.access_level === accessType)?.short_key;
     if (!shortKey) return alert(`${accessType}リンクが存在しません`);
-    const basePath = '/mahjong';
-    const shareUrl = `${window.location.origin}${basePath}/${type}/${shortKey}`;
-
-    const titleText = `${typeName}への招待（${accessType}）`;
+    const basePath = import.meta.env.BASE_URL;
+    const shareUrl = `${window.location.origin}${basePath}/${type}/${shortKey}`.replace(
+      /([^:]\/)\/+/g,
+      '$1'
+    );
     if (navigator.share) {
       try {
         await navigator.share({
@@ -74,6 +75,7 @@ function PageTitleBar({
       }
     } else {
       try {
+        navigator.clipboard.writeText(shareUrl);
         alertDialog({
           title: 'URLをコピーしました',
           description: `${typeName}のURLをクリップボードにコピーしました:\n` + shareUrl,
@@ -92,7 +94,9 @@ function PageTitleBar({
   return (
     <div className={styles.title}>
       <div className="flex">
-        <ChevronsUp className="cursor-pointer" onClick={() => navigate(pearentUrl)} />
+        {parentUrl !== null && parentUrl !== undefined && (
+          <ChevronsUp className="cursor-pointer" onClick={() => navigate(parentUrl)} />
+        )}
       </div>
 
       <div className={styles.center}>

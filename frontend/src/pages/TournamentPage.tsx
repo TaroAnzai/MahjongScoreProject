@@ -1,7 +1,7 @@
 // src/pages/TournamentPage.jsx
 // React 関連
 import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 
 // API 関連
 
@@ -68,6 +68,7 @@ const hasChipTableScore = (scoreMap: TournamentScoreMap | undefined) => {
 
 function TournamentPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { alertDialog } = useAlertDialog();
   const { tournamentKey } = useParams();
   if (!tournamentKey) {
@@ -103,6 +104,10 @@ function TournamentPage() {
   useEffect(() => {
     setAccessLevel(getAccessLevelstring(tournament?.tournament_links));
   }, [tournament?.tournament_links]);
+  useEffect(() => {
+    sessionStorage.setItem('tournamentPage', location.pathname);
+    console.log('tournamentPage', location.pathname);
+  }, [location.pathname]);
   const handleOpenAddPlayerModal = async () => {
     if (!groupPlayers || groupPlayers.length === 0) {
       alert('追加可能な参加者がいません');
@@ -272,7 +277,7 @@ function TournamentPage() {
         TitleComponent={TitleWithModal}
         showBack={true}
         showForward={true}
-        pearentUrl={`/group/${groupKey}`}
+        parentUrl={sessionStorage.getItem('groupPage')}
       />
       <div
         id="rate-display"

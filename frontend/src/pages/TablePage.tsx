@@ -131,7 +131,7 @@ export default function TablePage() {
         shareLinks={table.table_links}
         showBack={true}
         showForward={false}
-        pearentUrl={`/tournament/${tournamentKey}`}
+        parentUrl={sessionStorage.getItem('tournamentPage')}
       />
 
       {!isChipTable && (

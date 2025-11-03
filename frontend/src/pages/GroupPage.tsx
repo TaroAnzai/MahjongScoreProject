@@ -1,6 +1,6 @@
 // src/pages/GroupPage.jsx
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 
 // API
 
@@ -21,6 +21,7 @@ import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 function GroupPage() {
   const navigate = useNavigate();
   const { alertDialog } = useAlertDialog();
+  const location = useLocation();
   const { groupKey } = useParams();
   if (!groupKey) return <div className="mahjong-container">グループキーが不明です</div>;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -41,6 +42,9 @@ function GroupPage() {
   useEffect(() => {
     setAccessLevel(getAccessLevelstring(group?.group_links));
   }, [group?.group_links]);
+  useEffect(() => {
+    sessionStorage.setItem('groupPage', location.pathname);
+  }, [location.pathname]);
 
   const handleAddPlayer = (name: string) => {
     if (!name) return;
@@ -108,7 +112,7 @@ function GroupPage() {
         onTitleChange={handleTitleChange}
         showBack={true}
         showForward={true}
-        pearentUrl="/"
+        parentUrl="/"
       />
 
       <ButtonGridSection>
