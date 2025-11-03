@@ -69,7 +69,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-dist
-          path: .
+          path: dist
 
       - name: Deploy via SSH (scp)
         uses: appleboy/scp-action@v0.1.7
@@ -80,3 +80,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: 'dist/*'
           target: '/home/r6441231/public_html/anzai-home.com/mahjong/'
+          strip_components: 1
