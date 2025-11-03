@@ -78,5 +78,5 @@ jobs:
           username: ${{ secrets.VPS_FRONT_USER }}
           port: ${{ secrets.VPS_FRONT_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: 'dist/*'
+          source: 'dist/'
           target: '/home/r6441231/public_html/anzai-home.com/mahjong/'
