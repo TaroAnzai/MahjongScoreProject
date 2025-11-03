@@ -57,7 +57,7 @@ class TournamentByKeyResource(MethodView):
     def delete(self, tournament_key):
         """大会削除"""
         delete_tournament(tournament_key)
-        return {"message": "Tournament deleed"}
+        return {"message": "Tournament deleted"}
 
 # =========================================================
 # 卓作成

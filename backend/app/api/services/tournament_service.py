@@ -80,7 +80,7 @@ def create_tournament(data: dict, group_key: str) -> Tournament:
     db.session.flush()
     create_default_share_links("tournament", tournament.id, tournament.created_by)
     db.session.refresh(tournament)
-    tournament.current_user_access =  "OWNER"
+    tournament.current_user_access =  AccessLevel.OWNER
     return tournament
 
 def get_tournaments_by_group(group_key: str):

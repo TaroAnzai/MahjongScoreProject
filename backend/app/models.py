@@ -13,7 +13,7 @@ class AccessLevel(StrEnum):
     OWNER = "OWNER"
 
 class TableTypeEnum(StrEnum):
-    NORMAL = "NOMAL"
+    NORMAL = "NORMAL"
     CHIP = "CHIP"
 
 
