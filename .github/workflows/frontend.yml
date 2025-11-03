@@ -41,7 +41,7 @@ jobs:
 
         run: |
           echo "Running Orval with API: $ORVAL_API_URL"
-          orval --config orval.config.ts
+          npm run orval
 
       - name: Run Lint
         run: npm run lint --if-present
