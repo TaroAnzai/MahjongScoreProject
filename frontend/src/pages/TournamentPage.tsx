@@ -106,7 +106,6 @@ function TournamentPage() {
   }, [tournament?.tournament_links]);
   useEffect(() => {
     sessionStorage.setItem('tournamentPage', location.pathname);
-    console.log('tournamentPage', location.pathname);
   }, [location.pathname]);
   const handleOpenAddPlayerModal = async () => {
     if (!groupPlayers || groupPlayers.length === 0) {

@@ -182,7 +182,7 @@ function GroupPage() {
             ...t,
             plusDisplayItem:
               t.created_at &&
-              new Date(t.created_at).toLocaleDateString('ja-JP', {
+              new Date(t.started_at ?? t.created_at).toLocaleDateString('ja-JP', {
                 timeZone: 'Asia/Tokyo',
               }),
           }))}

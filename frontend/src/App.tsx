@@ -37,7 +37,7 @@ function App() {
         {/* 404対策 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      <Toaster richColors position="top-center" />
+      <Toaster richColors position="bottom-center" />
     </>
   );
 }

@@ -39,7 +39,6 @@ function PageTitleBar({
 
   const [accessLevel, setAccessLevel] = useState('');
   useEffect(() => {
-    console.log('shareLinks changed:', shareLinks);
     setAccessLevel(getAccessLevelstring(shareLinks));
   }, [shareLinks]);
   const pathSegments = location.pathname.split('/').filter(Boolean);
