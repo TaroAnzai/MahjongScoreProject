@@ -92,7 +92,6 @@ function PageTitleBar({
   return (
     <div className={styles.title}>
       <div className="flex">
-        {showBack && <ChevronsLeft className="cursor-pointer" onClick={() => history.back()} />}
         <ChevronsUp className="cursor-pointer" onClick={() => navigate(pearentUrl)} />
       </div>
 
@@ -104,7 +103,7 @@ function PageTitleBar({
         )}
       </div>
 
-      <div className="absolute right-12">
+      <div className="absolute right-5">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Share2 className="cursor-pointer" />
@@ -121,9 +120,6 @@ function PageTitleBar({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      {showForward && (
-        <ChevronsRight className="cursor-pointer" onClick={() => history.forward()} />
-      )}
     </div>
   );
 }
