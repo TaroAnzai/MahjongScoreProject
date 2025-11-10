@@ -119,3 +119,45 @@ class TournamentScoreMapSchema(BaseSchema):
     )
 
 
+# =========================================================
+# GroupPlayerStatSchema
+# =========================================================
+class GroupPlayerStatSchema(BaseSchema):
+    """グループ内のプレイヤー統計"""
+    player_id = fields.Int(required=True, description="プレイヤーID")
+    player_name = fields.Str(required=True, description="プレイヤー名")
+    tournament_count = fields.Int(dump_default=0, description="大会参加回数")
+    game_count = fields.Int(dump_default=0, description="対局数")
+    rank1_count = fields.Int(dump_default=0, description="1位回数")
+    rank2_count = fields.Int(dump_default=0, description="2位回数")
+    rank3_count = fields.Int(dump_default=0, description="3位回数")
+    rank4_or_lower_count = fields.Int(dump_default=0, description="4位以下回数")
+    average_rank = fields.Float(dump_default=0.0, description="平均順位")
+    total_score = fields.Float(dump_default=0.0, description="得点合計（チップ・換算含まない）")
+    total_balance = fields.Float(dump_default=0.0, description="収支（チップ・換算含む）")
+
+class GroupPlayerStatsSchema(BaseSchema):
+    """グループ全体のプレイヤー統計リスト"""
+    group = fields.Dict(required=True, description="グループ情報（id, nameなど）")
+    period = fields.Dict(
+        keys=fields.Str(),
+        values=fields.Str(),
+        description="集計期間",
+        dump_default={}
+    )
+    players = fields.List(fields.Nested(GroupPlayerStatSchema), dump_default=[])
+
+class GroupPlayerStatsQuerySchema(BaseSchema):
+    """クエリで受け取る期間指定（大会開始日ベース）"""
+    start_date = fields.Date(
+        required=False,
+        allow_none=True,
+        description="集計開始日（Tournament.started_at基準、省略時は全期間）",
+        example="2025-01-01"
+    )
+    end_date = fields.Date(
+        required=False,
+        allow_none=True,
+        description="集計終了日（Tournament.started_at基準、省略時は全期間）",
+        example="2025-12-31"
+    )

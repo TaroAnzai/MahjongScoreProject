@@ -4,7 +4,8 @@ from app.service_errors import ServiceNotFoundError
 from app.utils.share_link_utils import get_share_link_by_key
 from app.service_errors import ServiceNotFoundError
 from sqlalchemy.orm import joinedload
-
+from sqlalchemy import func, case
+from datetime import datetime
 # =========================================================
 # 内部ユーティリティ
 # =========================================================
@@ -139,4 +140,80 @@ def get_tournament_score_map(tournament_key: str):
         "tables": tables,
         "players": list(player_map.values()),
         "rate": rate,
+    }
+
+
+
+# =========================================================
+# グループ内プレイヤーごとの成績出力
+# =========================================================
+def get_group_player_stats(group_key: str, start_date: str | None = None, end_date: str | None = None):
+    """期間指定でグループ内プレイヤーごとの統計を取得（Tournament.started_at基準）"""
+    group = _require_group(group_key)
+
+    # --- 期間変換 ---
+    start_dt = None
+    end_dt = None
+    if start_date:
+        try:
+            start_dt = datetime.fromisoformat(start_date)
+        except Exception:
+            raise ServiceNotFoundError("start_dateの形式が不正です（YYYY-MM-DD）")
+    if end_date:
+        try:
+            end_dt = datetime.fromisoformat(end_date)
+        except Exception:
+            raise ServiceNotFoundError("end_dateの形式が不正です（YYYY-MM-DD）")
+
+    # --- ベースクエリ ---
+    query = (
+        db.session.query(
+            Player.id.label("player_id"),
+            Player.name.label("player_name"),
+            func.count(func.distinct(TournamentPlayer.tournament_id)).label("tournament_count"),
+            func.count(Score.id).label("game_count"),
+            func.sum(case((Score.rank == 1, 1), else_=0)).label("rank1_count"),
+            func.sum(case((Score.rank == 2, 1), else_=0)).label("rank2_count"),
+            func.sum(case((Score.rank == 3, 1), else_=0)).label("rank3_count"),
+            func.sum(case((Score.rank >= 4, 1), else_=0)).label("rank4_or_lower_count"),
+            func.avg(Score.rank).label("average_rank"),
+            func.coalesce(func.sum(Score.score), 0).label("total_score"),
+            func.coalesce(func.sum(Score.total_score), 0).label("total_balance"),
+        )
+        .join(Score, Score.player_id == Player.id)
+        .join(Game, Game.id == Score.game_id)
+        .join(Table, Table.id == Game.table_id)
+        .join(Tournament, Tournament.id == Table.tournament_id)
+        .join(TournamentPlayer, TournamentPlayer.player_id == Player.id)
+        .filter(Player.group_id == group.id)
+    )
+
+    # --- 期間フィルタ（Tournament.started_atベース）---
+    if start_dt:
+        query = query.filter(Tournament.started_at >= start_dt)
+    if end_dt:
+        query = query.filter(Tournament.started_at <= end_dt)
+
+    query = query.group_by(Player.id)
+
+    players = []
+    for r in query.all():
+        players.append({
+            "player_id": r.player_id,
+            "player_name": r.player_name,
+            "tournament_count": r.tournament_count or 0,
+            "game_count": r.game_count or 0,
+            "rank1_count": r.rank1_count or 0,
+            "rank2_count": r.rank2_count or 0,
+            "rank3_count": r.rank3_count or 0,
+            "rank4_or_lower_count": r.rank4_or_lower_count or 0,
+            "average_rank": round(r.average_rank or 0, 2),
+            "total_score": round(r.total_score or 0, 1),
+            "total_balance": round(r.total_balance or 0, 1),
+        })
+
+    return {
+        "group": {"id": group.id, "name": group.name},
+        "period": {"start": start_date or None, "end": end_date or None},
+        "players": players,
     }
