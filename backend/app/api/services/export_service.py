@@ -2,10 +2,10 @@ from app import db
 from app.models import Group, Tournament, Table, Game, Player, Score, TournamentPlayer
 from app.service_errors import ServiceNotFoundError
 from app.utils.share_link_utils import get_share_link_by_key
-from app.service_errors import ServiceNotFoundError
+from app.service_errors import ServiceNotFoundError, ServiceValidationError
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func, case
-from datetime import datetime
+from datetime import datetime,date
 # =========================================================
 # 内部ユーティリティ
 # =========================================================
@@ -152,18 +152,8 @@ def get_group_player_stats(group_key: str, start_date: str | None = None, end_da
     group = _require_group(group_key)
 
     # --- 期間変換 ---
-    start_dt = None
-    end_dt = None
-    if start_date:
-        try:
-            start_dt = datetime.fromisoformat(start_date)
-        except Exception:
-            raise ServiceNotFoundError("start_dateの形式が不正です（YYYY-MM-DD）")
-    if end_date:
-        try:
-            end_dt = datetime.fromisoformat(end_date)
-        except Exception:
-            raise ServiceNotFoundError("end_dateの形式が不正です（YYYY-MM-DD）")
+    start_dt = datetime.combine(start_date, datetime.min.time()) if isinstance(start_date, date) else None
+    end_dt = datetime.combine(end_date, datetime.max.time()) if isinstance(end_date, date) else None
 
     # --- ベースクエリ ---
     query = (

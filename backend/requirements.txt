@@ -29,6 +29,7 @@ gunicorn>=23.0,<24.0
 
 # --- Testing (開発用のみ) ---
 pytest>=8.0,<9.0
+pytest-cov>=7.0,<8.0
 
 # --- その他（旧freezeから必須だったもの） ---
 greenlet>=3.0,<4.0
