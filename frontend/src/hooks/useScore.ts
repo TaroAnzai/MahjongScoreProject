@@ -1,4 +1,5 @@
 import {
+  useGetApiGroupsGroupKeyPlayerStats,
   useGetApiTournamentsTournamentKey,
   useGetApiTournamentsTournamentKeyExport,
   useGetApiTournamentsTournamentKeyScoreMap,
@@ -20,4 +21,13 @@ export const useGetTournamentScoreMap = (tournamentKey: string) => {
     refetch: loadScoreMap,
   } = useGetApiTournamentsTournamentKeyScoreMap(tournamentKey);
   return { scoreMap, isLoadingScoreMap, loadScoreMap };
+};
+
+export const useGetPlayerStats = (groupKey: string) => {
+  const {
+    data: playerStats,
+    isLoading: isLoadingPlayerStats,
+    refetch: loadPlayerStats,
+  } = useGetApiGroupsGroupKeyPlayerStats(groupKey);
+  return { playerStats, isLoadingPlayerStats, loadPlayerStats };
 };

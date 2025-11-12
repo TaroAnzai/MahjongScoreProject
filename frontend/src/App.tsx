@@ -7,6 +7,7 @@ import TournamentPage from './pages/TournamentPage';
 import './App.css';
 import { Toaster } from 'sonner';
 import GroupCreatePage from './pages/GroupCreatePage';
+import GroupPlayerStatsPage from './pages/GroupPlayerStats';
 
 function NotFoundPage() {
   const location = useLocation();
@@ -30,10 +31,12 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<WelcomePage />} />
+        <Route path="/group/stats/:groupKey" element={<GroupPlayerStatsPage />} />
         <Route path="/group/create" element={<GroupCreatePage />} />
         <Route path="/group/:groupKey" element={<GroupPage />} />
         <Route path="/tournament/:tournamentKey" element={<TournamentPage />} />
         <Route path="/table/:tableKey" element={<TablePage />} />
+
         {/* 404対策 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

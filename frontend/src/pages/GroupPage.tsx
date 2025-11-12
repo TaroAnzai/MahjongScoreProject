@@ -121,30 +121,33 @@ function GroupPage() {
           disabled={accessLevel === 'VIEW'}
           onClick={() => setIsCreatePlayerModalOpen(true)}
         >
-          メンバーを追加
+          メンバー追加
         </button>
         <button
           className="mahjong-button"
           disabled={accessLevel === 'VIEW'}
           onClick={() => setShowDeleteModal(true)}
         >
-          メンバーを削除
+          メンバー削除
         </button>
         <button
           className="mahjong-button"
           disabled={accessLevel === 'VIEW'}
           onClick={() => setIsCreateTournamentModalOpen(true)}
         >
-          大会を新規作成
+          大会新規作成
         </button>
         <button className="mahjong-button" onClick={() => setShowTournamentModal(true)}>
-          大会を選択
+          大会選択
         </button>
         <button className="mahjong-button" onClick={handleAddGroup}>
-          グループを追加
+          グループ追加
         </button>
         <button className="mahjong-button" onClick={handleRemoveGroup}>
-          グループを削除
+          グループ削除
+        </button>
+        <button className="mahjong-button" onClick={() => navigate(`/group/stats/${groupKey}`)}>
+          成績
         </button>
       </ButtonGridSection>
 

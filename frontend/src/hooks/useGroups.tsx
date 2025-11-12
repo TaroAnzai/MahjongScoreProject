@@ -168,7 +168,6 @@ export const useGroupQueries = () => {
   useEffect(() => {
     groupQueries.forEach((query, index) => {
       const key = groupKeys[index];
-
       if (query.isError) {
         console.error(`Error fetching group ${key}:`, query.error);
 

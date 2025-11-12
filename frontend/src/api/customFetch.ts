@@ -14,7 +14,7 @@ interface CustomFetchConfig {
   url: string;
   method: string;
   data?: any;
-  params?: Record<string, string | number>;
+  params?: Record<string, string | number | null>;
   headers?: Record<string, string>;
   signal?: AbortSignal;
 }
