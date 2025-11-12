@@ -274,8 +274,6 @@ function TournamentPage() {
         onTitleClick={() => setShowEditModal(true)}
         onTitleChange={handleTitleChange}
         TitleComponent={TitleWithModal}
-        showBack={true}
-        showForward={true}
         parentUrl={sessionStorage.getItem('groupPage')}
       />
       <div
