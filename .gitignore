@@ -41,7 +41,6 @@ pnpm-debug.log*
 # Environment / Secrets
 # ==============================
 
-.env.production
 backend/.env
 backend/.env.production
 
@@ -54,7 +53,6 @@ Thumbs.db
 *.swp
 frontend/src/api/generated/*
 backend/celerybeat-schedule
-backend/.env.development
 
 frontend/ssl/*
 frontend/.htaccess
