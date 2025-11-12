@@ -19,8 +19,6 @@ interface PageTitleBarProps {
   TitleComponent?: React.ComponentType<{ onClick?: () => void }> | null;
   onTitleClick?: () => void;
   onTitleChange?: (newTitle: string) => void;
-  showBack?: boolean;
-  showForward?: boolean;
   parentUrl?: string | null;
 }
 function PageTitleBar({
@@ -29,8 +27,6 @@ function PageTitleBar({
   TitleComponent = null,
   onTitleClick,
   onTitleChange,
-  showBack = true,
-  showForward = true,
   parentUrl,
 }: PageTitleBarProps) {
   const location = useLocation();
@@ -105,24 +101,25 @@ function PageTitleBar({
           <EditableTitle value={title} onChange={onTitleChange} className={styles.editable} />
         )}
       </div>
-
-      <div className="absolute right-5">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Share2 className="cursor-pointer" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleShareUrl('VIEW')}>
-              閲覧リンクを共有
-            </DropdownMenuItem>
-            {accessLevel !== 'VIEW' && (
-              <DropdownMenuItem onClick={() => handleShareUrl('EDIT')}>
-                編集リンクを共有
+      {shareLinks.length > 0 && (
+        <div className="absolute right-5">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Share2 className="cursor-pointer" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleShareUrl('VIEW')}>
+                閲覧リンクを共有
               </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+              {accessLevel !== 'VIEW' && (
+                <DropdownMenuItem onClick={() => handleShareUrl('EDIT')}>
+                  編集リンクを共有
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,5 @@
-import { useGetApiGroupsGroupKeyPlayerStats } from '@/api/generated/mahjongApi';
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import PageTitleBar from '@/components/PageTitleBar';
-import { Card } from '@/components/ui/card';
 import { useGetPlayerStats } from '@/hooks/useScore';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
@@ -14,7 +12,7 @@ function GroupPlayerStatsPage() {
   const { playerStats, isLoadingPlayerStats } = useGetPlayerStats(groupKey);
   return (
     <div className="mahjong-container">
-      <PageTitleBar title="プレイヤー統計" shareLinks={[]}></PageTitleBar>
+      <PageTitleBar title="プレイヤー統計" parentUrl={`/group/${groupKey}`}></PageTitleBar>
     </div>
   );
 }
