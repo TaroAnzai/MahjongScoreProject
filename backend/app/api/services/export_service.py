@@ -1,5 +1,5 @@
 from app import db
-from app.models import Group, Tournament, Table, Game, Player, Score, TournamentPlayer
+from app.models import Group, Tournament, Table, Game, Player, Score, TournamentPlayer,TableTypeEnum
 from app.service_errors import ServiceNotFoundError
 from app.utils.share_link_utils import get_share_link_by_key
 from app.service_errors import ServiceNotFoundError, ServiceValidationError
@@ -176,6 +176,7 @@ def get_group_player_stats(group_key: str, start_date: str | None = None, end_da
         .join(Tournament, Tournament.id == Table.tournament_id)
         .join(TournamentPlayer, and_(TournamentPlayer.player_id == Player.id, TournamentPlayer.tournament_id == Tournament.id))
         .filter(Player.group_id == group.id)
+        .filter(Table.type != TableTypeEnum.CHIP)
     )
 
     # --- 期間フィルタ（Tournament.started_atベース）---
@@ -193,6 +194,7 @@ def get_group_player_stats(group_key: str, start_date: str | None = None, end_da
             "player_name": r.player_name,
             "tournament_count": r.tournament_count or 0,
             "game_count": r.game_count or 0,
+            "rank1_rate": round((r.rank1_count or 0) / (r.game_count or 1) * 100, 2),
             "rank1_count": r.rank1_count or 0,
             "rank2_count": r.rank2_count or 0,
             "rank3_count": r.rank3_count or 0,

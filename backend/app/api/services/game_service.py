@@ -102,16 +102,23 @@ def create_game(table_key: str, data: dict) -> Game:
     )
     db.session.add(game)
     db.session.flush()  # game.idを確定
+    # --- rank自動計算 ---
+    scores = sorted(scores, key=lambda s: s.get("score", 0), reverse=True)
+    rank = 1
 
-    for s in scores:
+    for i,s in enumerate(scores):
         pid = s.get("player_id")
         val = s.get("score")
         if pid is None or val is None:
             raise ServiceValidationError("player_id と score は必須です。")
-
         if pid not in table_player_ids:
             raise ServiceValidationError(f"player_id {pid} はこの卓に登録されていません。")
-        db.session.add(Score(game_id=game.id, player_id=pid, score=val))
+        if i>0 and val == scores[i-1].get("score"):
+            s["rank"] = scores[i-1]["rank"]
+        else:
+            s["rank"] = rank
+        rank += 1
+        db.session.add(Score(game_id=game.id, player_id=pid, score=val, rank=s["rank"]))
 
     db.session.commit()
     return game
@@ -174,6 +181,9 @@ def update_game(table_key: str,game_id: int, data: dict) -> Game:
     # --- スコア更新処理 ---
     scores = data.get("scores")
     if scores is not None:
+        table_player_ids = {
+            tp.player_id for tp in TablePlayer.query.filter_by(table_id=table.id).all()
+        }
         if not isinstance(scores, list):
             raise ServiceValidationError("scores はリスト形式である必要があります。")
 
@@ -183,14 +193,23 @@ def update_game(table_key: str,game_id: int, data: dict) -> Game:
 
         # 既存スコア削除
         Score.query.filter_by(game_id=game.id).delete()
-
+        db.session.flush()
         # 新しいスコアを追加
-        for s in scores:
-            player_id = s.get("player_id")
-            score_val = s.get("score")
-            if player_id is None or score_val is None:
-                continue
-            db.session.add(Score(game_id=game.id, player_id=player_id, score=score_val))
+        scores = sorted(scores, key=lambda s: s.get("score", 0), reverse=True)
+        rank = 1
+        for i,s in enumerate(scores):
+            pid = s.get("player_id")
+            val = s.get("score")
+            if pid is None or val is None:
+                raise ServiceValidationError("player_id と score は必須です。")
+            if pid not in table_player_ids:
+                raise ServiceValidationError(f"player_id {pid} はこの卓に登録されていません。")
+            if i>0 and val == scores[i-1].get("score"):
+                s["rank"] = scores[i-1]["rank"]
+            else:
+                s["rank"] = rank
+            rank += 1
+            db.session.add(Score(game_id=game.id, player_id=pid, score=val, rank=s["rank"]))
 
     db.session.commit()
     db.session.refresh(game)

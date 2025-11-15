@@ -128,6 +128,7 @@ class GroupPlayerStatSchema(BaseSchema):
     player_name = fields.Str(required=True, description="プレイヤー名")
     tournament_count = fields.Int(dump_default=0, description="大会参加回数")
     game_count = fields.Int(dump_default=0, description="対局数")
+    rank1_rate = fields.Float(dump_default=0.0, description="1位率")
     rank1_count = fields.Int(dump_default=0, description="1位回数")
     rank2_count = fields.Int(dump_default=0, description="2位回数")
     rank3_count = fields.Int(dump_default=0, description="3位回数")
