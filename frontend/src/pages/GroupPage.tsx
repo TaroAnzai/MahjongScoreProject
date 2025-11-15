@@ -110,8 +110,6 @@ function GroupPage() {
         title={group.name}
         shareLinks={group.group_links}
         onTitleChange={handleTitleChange}
-        showBack={true}
-        showForward={true}
         parentUrl="/"
       />
 

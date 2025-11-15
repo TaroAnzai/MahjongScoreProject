@@ -129,8 +129,6 @@ export default function TablePage() {
         title={table.name}
         onTitleChange={handleTableNameChange}
         shareLinks={table.table_links}
-        showBack={true}
-        showForward={false}
         parentUrl={sessionStorage.getItem('tournamentPage')}
       />
 
