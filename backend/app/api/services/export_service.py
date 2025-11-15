@@ -4,7 +4,7 @@ from app.service_errors import ServiceNotFoundError
 from app.utils.share_link_utils import get_share_link_by_key
 from app.service_errors import ServiceNotFoundError, ServiceValidationError
 from sqlalchemy.orm import joinedload
-from sqlalchemy import func, case
+from sqlalchemy import func, case, and_
 from datetime import datetime,date
 # =========================================================
 # 内部ユーティリティ
@@ -168,13 +168,13 @@ def get_group_player_stats(group_key: str, start_date: str | None = None, end_da
             func.sum(case((Score.rank >= 4, 1), else_=0)).label("rank4_or_lower_count"),
             func.avg(Score.rank).label("average_rank"),
             func.coalesce(func.sum(Score.score), 0).label("total_score"),
-            func.coalesce(func.sum(Score.total_score), 0).label("total_balance"),
+            func.coalesce(func.sum(Score.score * Tournament.rate), 0).label("total_balance"),
         )
         .join(Score, Score.player_id == Player.id)
         .join(Game, Game.id == Score.game_id)
         .join(Table, Table.id == Game.table_id)
         .join(Tournament, Tournament.id == Table.tournament_id)
-        .join(TournamentPlayer, TournamentPlayer.player_id == Player.id)
+        .join(TournamentPlayer, and_(TournamentPlayer.player_id == Player.id, TournamentPlayer.tournament_id == Tournament.id))
         .filter(Player.group_id == group.id)
     )
 
