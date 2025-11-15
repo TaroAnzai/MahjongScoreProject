@@ -20,10 +20,9 @@ function TableScoreBoard({
 }: TableScoreBoardProps) {
   if (!table || !players || !games) return null;
   const [editingGameIndex, setEditingGameIndex] = useState<number | null>(null);
-  const [editingScores, setEditingScores] = useState<Record<number, number | string>>({});
+  const [editingScores, setEditingScores] = useState<Record<number, string>>({});
   const [rowTotal, setRowTotal] = useState(0);
   const extraEmptyRows = 1;
-
   const isChipTable = table.type === 'CHIP';
   // プレイヤー列の準備 4名以下の場合はダミーを追加
   const displayPlayers = [...players];
@@ -56,28 +55,32 @@ function TableScoreBoard({
     if (disabled) return; // ← 編集不可なら無視
 
     const game = displayGames[index];
-    const initialScores: Record<number, number> = {};
+    const initialScores: Record<number, string> = {};
     displayPlayers.forEach((player) => {
       const scoreEntry = game?.scores?.find((s) => s.player_id === player.id);
-      initialScores[player.id] = scoreEntry?.score ?? 0;
+      initialScores[player.id] = scoreEntry?.score ? String(scoreEntry.score) : '';
     });
     setEditingGameIndex(index);
     setEditingScores(initialScores);
 
     const initialTotal = Object.values(initialScores).reduce((acc, val) => {
-      return acc + val;
+      const num = parseFloat(val);
+      return acc + (isNaN(num) ? 0 : num);
     }, 0);
-    setRowTotal(initialTotal);
+    setRowTotal(initialTotal ?? 0);
   };
 
   const handleConfirm = () => {
     if (editingGameIndex === null) return;
     const game = displayGames[editingGameIndex];
-    const formatted = Object.entries(editingScores).map(([playerId, score]) => ({
-      player_id: parseInt(playerId),
-      score: Number(score),
-    }));
+    const formatted = Object.entries(editingScores)
+      .filter(([, score]) => score !== '')
+      .map(([playerId, score]) => ({
+        player_id: parseInt(playerId),
+        score: Number(score),
+      }));
     const gameId = game?.id ?? null;
+    if (formatted.length === 0) return;
     onUpdateGame(gameId, formatted);
     setEditingGameIndex(null);
     setEditingScores({});
@@ -102,6 +105,23 @@ function TableScoreBoard({
       });
     }
   });
+  const handleScoreChange = (playerId: number, value: string) => {
+    // 数値・マイナス・小数点・空欄以外は無視
+    if (value !== '' && !/^-?\d*\.?\d*$/.test(value)) return;
+
+    setEditingScores((prev) => {
+      const newScores = { ...prev, [playerId]: value };
+
+      // 有効な数値だけ合計に含める
+      const total = Object.values(newScores).reduce((acc: number, val) => {
+        const num = parseFloat(val);
+        return acc + (isNaN(num) ? 0 : num);
+      }, 0);
+
+      setRowTotal(total);
+      return newScores;
+    });
+  };
   return (
     <div className={styles.scoreWrapper}>
       <table className={`${styles.scoreTable} table`}>
@@ -124,18 +144,12 @@ function TableScoreBoard({
                   <td key={`${index}-${player.id}`} className={styles.cell}>
                     {editingGameIndex === index && player.id > 0 ? (
                       <input
-                        type="number"
+                        type="text"
+                        inputMode="numeric"
                         className={styles.input}
                         value={editingScores[player.id] ?? ''}
                         onChange={(e) => {
-                          const newScores = { ...editingScores, [player.id]: e.target.value };
-                          setEditingScores(newScores);
-
-                          const total = Object.values(newScores).reduce((acc: number, val) => {
-                            const num = typeof val === 'string' ? parseFloat(val) : val;
-                            return acc + (isNaN(num) ? 0 : num);
-                          }, 0);
-                          setRowTotal(total);
+                          handleScoreChange(player.id, e.target.value);
                         }}
                       />
                     ) : (
