@@ -198,6 +198,9 @@ def setup_full_tournament(
             "table_links": table_links,
             "players": players,
             "game": game_data,
+            "group_data": group_data,
+            "tournament_data": tournament_data,
+            "table_data": table_data,
         }
 
     return _setup_full_tournament
