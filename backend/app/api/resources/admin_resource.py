@@ -1,7 +1,7 @@
 from flask_smorest import Blueprint
 from flask import jsonify
 from app.service_errors import ServiceError,format_error_response
-from app.utils.auth import require_admin_key
+from app.utils.auth import require_admin_user
 from app.decorators import with_common_error_responses
 from app.api.services.admin_service import get_all_groups_service, delete_group_service
 from app.api.schemas.admin_schemas import AdminGroupSchema
@@ -15,7 +15,7 @@ def handle_service_error(e: ServiceError):
 # 1. すべてのグループを取得
 # -------------------------------------------------
 @admin_group_bp.get("")
-@require_admin_key
+@require_admin_user
 @admin_group_bp.response(200, AdminGroupSchema (many=True))
 @with_common_error_responses(admin_group_bp)
 def get_all_groups():
@@ -27,7 +27,7 @@ def get_all_groups():
 # 2. 指定したグループを削除
 # -------------------------------------------------
 @admin_group_bp.delete("/<string:group_key>")
-@require_admin_key
+@require_admin_user
 @with_common_error_responses(admin_group_bp)
 def delete_group(group_key):
     """指定したグループを削除"""

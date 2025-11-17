@@ -11,7 +11,7 @@ print("env_name:", env_name)
 
 if env_name == "production":
     load_dotenv(".env.production")
-elif env_name == "test":
+elif env_name == "testing":
     load_dotenv(".env.test")
 else:
     load_dotenv(".env.development") #開発用
