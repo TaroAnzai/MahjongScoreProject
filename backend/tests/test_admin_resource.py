@@ -15,15 +15,9 @@ def admin_logged_in(client, monkeypatch):
     """
     管理者ログインを行い、Cookie セッション付きの client を返す。
     """
-
-    # --- テスト用の環境変数設定 ---
-    monkeypatch.setenv("ADMIN_USER", ADMIN_TEST_USER)
-    monkeypatch.setenv("ADMIN_PASSWORD_HASH", generate_password_hash(ADMIN_TEST_PASSWORD))
-    monkeypatch.setenv("FLASK_SECRET_KEY", "test-secret")
-
     # --- ログイン ---
     res = client.post(
-        "/admin/login",
+        "/api/admin/login",
         json={"username": ADMIN_TEST_USER, "password": ADMIN_TEST_PASSWORD},
     )
 

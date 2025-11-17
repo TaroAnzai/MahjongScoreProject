@@ -10,7 +10,7 @@ def test_admin_login_success(client, monkeypatch):
 
     # --- 実行 ---
     response = client.post(
-        "/admin/login",
+        "/api/admin/login",
         json={"username": "admin", "password": TEST_PASSWORD},
     )
 
@@ -27,7 +27,7 @@ def test_admin_login_success(client, monkeypatch):
 def test_admin_login_wrong_password(client, monkeypatch):
 
     response = client.post(
-        "/admin/login",
+        "/api/admin/login",
         json={"username": "admin", "password": "wrong"},
     )
 
@@ -40,7 +40,7 @@ def test_admin_login_wrong_password(client, monkeypatch):
 def test_admin_login_wrong_username(client, monkeypatch):
 
     response = client.post(
-        "/admin/login",
+        "/api/admin/login",
         json={"username": "root", "password": TEST_PASSWORD},
     )
 
@@ -54,12 +54,12 @@ def test_admin_me_after_login(client, monkeypatch):
 
     # ログイン
     client.post(
-        "/admin/login",
+        "/api/admin/login",
         json={"username": "admin", "password": TEST_PASSWORD},
     )
 
     # me を確認
-    response = client.get("/admin/me")
+    response = client.get("/api/admin/me")
 
     assert response.status_code == 200
     assert response.json["is_admin"] is True
@@ -72,12 +72,12 @@ def test_admin_logout_success(client, monkeypatch):
 
     # ログイン
     client.post(
-        "/admin/login",
+        "/api/admin/login",
         json={"username": "admin", "password": TEST_PASSWORD},
     )
 
     # ログアウト
-    response = client.post("/admin/logout")
+    response = client.post("/api/admin/logout")
 
     assert response.status_code == 200
     assert response.json["message"] == "logged_out"
@@ -90,14 +90,14 @@ def test_admin_me_after_logout(client, monkeypatch):
 
     # ログイン
     client.post(
-        "/admin/login",
+        "/api/admin/login",
         json={"username": "admin", "password": TEST_PASSWORD},
     )
 
     # ログアウト
-    client.post("/admin/logout")
+    client.post("/api/admin/logout")
 
     # me が False を返す
-    response = client.get("/admin/me")
+    response = client.get("/api/admin/me")
     assert response.status_code == 200
     assert response.json["is_admin"] is False

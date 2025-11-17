@@ -7,7 +7,7 @@ from app.api.schemas.admin_auth_schema import AdminLoginSchema
 from app.api.services.admin_auth_service import admin_login, admin_logout, AdminAuthError
 from app.utils.auth import require_admin_user
 
-admin_auth_bp = Blueprint("admin_auth", __name__, url_prefix="/admin")
+admin_auth_bp = Blueprint("admin_auth", __name__, url_prefix="/api/admin")
 
 
 # --- 管理者ログイン ---
