@@ -2,6 +2,10 @@ export default {
   mahjongApi: {
     input: {
       target: process.env.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json',
+      filters: {
+        // 管理 API (/api/admin/*) を除外する
+        excludePaths: ['/api/admin/*'],
+      },
     },
     output: {
       mode: 'split',
@@ -13,6 +17,31 @@ export default {
         mutator: {
           path: 'src/api/customFetch.ts', // これは消えない（generated 外だから）
           name: 'customFetch',
+        },
+      },
+    },
+  },
+  // -------------------------------------------------
+  // 管理者専用 API
+  // -------------------------------------------------
+  adminApi: {
+    input: {
+      target: process.env.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json',
+      filters: {
+        // /api/admin/* のみ抽出する
+        paths: ['/api/admin/*'],
+      },
+    },
+    output: {
+      mode: 'split',
+      target: 'src/api/generated/adminApi.ts',
+      client: 'react-query',
+      clean: false,
+      prettier: true,
+      override: {
+        mutator: {
+          path: 'src/api/customFetchAdmin.ts',
+          name: 'customFetchAdmin',
         },
       },
     },
