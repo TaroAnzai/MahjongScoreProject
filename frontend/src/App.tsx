@@ -40,8 +40,8 @@ function App() {
         <Route path="/tournament/:tournamentKey" element={<TournamentPage />} />
         <Route path="/table/:tableKey" element={<TablePage />} />
         {/* 🔒 管理者保護ルート */}
+        <Route path="/admin/login" element={<AdminLogin />} />
         <Route element={<AdminProtected />}>
-          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/groups" element={<AdminGroups />} />
         </Route>
         {/* 404対策 */}
