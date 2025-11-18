@@ -8,6 +8,9 @@ import './App.css';
 import { Toaster } from 'sonner';
 import GroupCreatePage from './pages/GroupCreatePage';
 import GroupPlayerStatsPage from './pages/GroupPlayerStats';
+import { AdminProtected } from './pages/admin/AdminProtected';
+import { AdminLogin } from './pages/admin/AdminLogin';
+import { AdminGroups } from './pages/admin/AdminGroups';
 
 function NotFoundPage() {
   const location = useLocation();
@@ -36,7 +39,11 @@ function App() {
         <Route path="/group/:groupKey" element={<GroupPage />} />
         <Route path="/tournament/:tournamentKey" element={<TournamentPage />} />
         <Route path="/table/:tableKey" element={<TablePage />} />
-
+        {/* 🔒 管理者保護ルート */}
+        <Route element={<AdminProtected />}>
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/groups" element={<AdminGroups />} />
+        </Route>
         {/* 404対策 */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

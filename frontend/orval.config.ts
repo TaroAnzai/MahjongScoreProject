@@ -4,7 +4,8 @@ export default {
       target: process.env.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json',
       filters: {
         // 管理 API (/api/admin/*) を除外する
-        excludePaths: ['/api/admin/*'],
+        mode: 'exclude',
+        tags: ['admin_auth', 'admin_groups'],
       },
     },
     output: {
@@ -20,6 +21,7 @@ export default {
         },
       },
     },
+    tsconfig: './tsconfig.json',
   },
   // -------------------------------------------------
   // 管理者専用 API
@@ -29,7 +31,8 @@ export default {
       target: process.env.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json',
       filters: {
         // /api/admin/* のみ抽出する
-        paths: ['/api/admin/*'],
+
+        tags: ['admin_auth', 'admin_groups'],
       },
     },
     output: {

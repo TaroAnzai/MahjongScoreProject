@@ -2,14 +2,7 @@
  * customFetch.ts
  * Orvalのmutator用fetchラッパー
  */
-const API_BASE_URL =
-  // Vite 実行時（ブラウザ）はこちらを優先
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) ||
-  // Node 実行時（Orval生成など）はこちらを利用
-  (typeof process !== 'undefined' && process.env?.VITE_API_BASE_URL) ||
-  // fallback
-  'http://localhost:6080';
-
+import { API_BASE_URL } from '@/api/loadEnv';
 interface CustomFetchConfig {
   url: string;
   method: string;
@@ -43,6 +36,7 @@ export const customFetch = async <T>(
     headers: {
       'Content-Type': 'application/json',
       ...(config.headers || {}),
+      ...(options?.headers || {}),
     },
     body: config.data && config.method !== 'GET' ? JSON.stringify(config.data) : undefined,
     signal: config.signal,

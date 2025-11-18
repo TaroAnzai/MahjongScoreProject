@@ -1,51 +1,57 @@
 // src/api/customFetchAdmin.ts
+import { API_BASE_URL } from '@/api/loadEnv';
 
-export const customFetchAdmin = async <T>({
-  url,
-  method,
-  params,
-  data,
-  headers,
-  signal,
-}: {
+interface CustomFetchAdminConfig {
   url: string;
   method: string;
-  params?: Record<string, any>;
   data?: any;
+  params?: Record<string, string | number | null>;
   headers?: Record<string, string>;
   signal?: AbortSignal;
-}): Promise<T> => {
-  let finalUrl = url;
+}
+export const customFetchAdmin = async <T>(
+  config: CustomFetchAdminConfig,
+  options?: RequestInit
+): Promise<T> => {
+  // ✅ ベースURLを組み込む
+  const fullUrl = `${API_BASE_URL}${config.url}`;
 
-  // --- クエリパラメータを付与 ---
-  if (params && Object.keys(params).length > 0) {
-    const searchParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        searchParams.append(key, String(value));
-      }
-    });
-    finalUrl += `?${searchParams.toString()}`;
+  // クエリパラメータ処理
+  let urlWithParams = fullUrl;
+  if (config.params) {
+    const query = new URLSearchParams(
+      Object.entries(config.params).map(([k, v]) => [k, String(v)])
+    );
+    urlWithParams += `?${query}`;
   }
 
-  const response = await fetch(finalUrl, {
-    method,
-    body: data ? JSON.stringify(data) : undefined,
+  const response = await fetch(urlWithParams, {
+    method: config.method,
     headers: {
       'Content-Type': 'application/json',
-      ...(headers || {}),
+      ...(config.headers || {}),
+      ...(options?.headers || {}),
     },
-    credentials: 'include', // ← 管理者APIは Cookie 必須！
-    signal,
+    body: config.data && config.method !== 'GET' ? JSON.stringify(config.data) : undefined,
+    signal: config.signal,
+    credentials: 'include',
+    ...options,
   });
 
-  const contentType = response.headers.get('content-type') || '';
-  const isJson = contentType.includes('application/json');
-
   if (!response.ok) {
-    const error = isJson ? await response.json() : await response.text();
-    throw error;
+    const errorBody = await response.json().catch(() => ({}));
+    throw {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorBody,
+      url: urlWithParams,
+    };
   }
 
-  return isJson ? response.json() : ({} as T);
+  // JSON以外のレスポンスにも対応
+  const contentType = response.headers.get('content-type');
+  if (contentType?.includes('application/json')) {
+    return (await response.json()) as T;
+  }
+  return (await response.text()) as T;
 };

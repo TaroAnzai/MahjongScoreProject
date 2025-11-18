@@ -35,5 +35,4 @@ def logout():
 # --- 管理者ステータス確認（任意） ---
 @admin_auth_bp.route("/me", methods=["GET"])
 def me():
-    print("cookies:", request.cookies, "session:", request.cookies.get("mahjong_session"))
     return {"is_admin": bool(request.cookies.get("mahjong_session") and request.cookies)}, 200
