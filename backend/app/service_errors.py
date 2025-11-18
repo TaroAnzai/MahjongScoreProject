@@ -41,6 +41,10 @@ class ServiceConflictError(ServiceError):
     """Conflict with current state or duplicated resource."""
     status_code = 409
     error_name="Conflict with current state or duplicated resource"
+class AdminAuthError(ServiceError):
+    """Admin authentication error."""
+    status_code = 401
+    error_name = "Admin authentication error"
 
 
 

@@ -2,11 +2,7 @@
 import os
 from werkzeug.security import check_password_hash
 from flask import session
-
-class AdminAuthError(Exception):
-    """管理者認証エラー"""
-    pass
-
+from app.service_errors import AdminAuthError
 
 def admin_login(username: str, password: str):
     """管理者ログイン処理"""
