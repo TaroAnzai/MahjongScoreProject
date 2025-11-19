@@ -47,9 +47,9 @@ function WelcomePage() {
       <div className="mahjong-section">
         <h2>登録グループ一覧</h2>
         {isLoading ? (
-          <div>
+          <div className="flex items-center justify-center gap-2">
             <Spinner />
-            Loading...
+            <span>Loading...</span>
           </div>
         ) : (
           <ul className="mahjong-list">

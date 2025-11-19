@@ -337,9 +337,9 @@ function TournamentPage() {
         {scoreMap ? (
           <ScoreTable scoreMap={scoreMap} onClick={handleTableClick} />
         ) : (
-          <div>
+          <div className="flex items-center justify-center gap-2">
             <Spinner />
-            Loading...
+            <span>Loading...</span>
           </div>
         )}
       </div>

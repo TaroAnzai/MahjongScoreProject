@@ -23,6 +23,7 @@ import type { Game, Player, ScoreInput, TablePlayerItem } from '@/api/generated/
 import { useCreateGame, useDeleteGame, useGetTableGames, useUpdateGame } from '@/hooks/useGames';
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { getAccessLevelstring } from '@/utils/accessLevel_utils';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function TablePage() {
   const { alertDialog } = useAlertDialog();
@@ -71,12 +72,8 @@ export default function TablePage() {
   const handleTableNameChange = (newTitle: string) => {
     updateTable({ tableKey: tableKey!, tableUpdate: { name: newTitle } });
   };
-  // --- ③ ロード中 ---
-  if (isLoadingTable || isLoadingTablePlayers || isLoadingGames) {
-    return <div>読み込み中...</div>;
-  }
   // --- ④ データが存在しない ---
-  if (!table) {
+  if (!table && !isLoadingTable) {
     return <div>卓が見つかりませんでした。</div>;
   }
   const handleAddPlayer = (selectedPlayers: Player[]) => {
@@ -124,9 +121,9 @@ export default function TablePage() {
   return (
     <div className="mahjong-container">
       <PageTitleBar
-        title={table.name}
+        title={table ? table.name : 'Loading...'}
         onTitleChange={handleTableNameChange}
-        shareLinks={table.table_links}
+        shareLinks={table ? table.table_links : []}
         parentUrl={sessionStorage.getItem('tournamentPage')}
       />
 
@@ -164,14 +161,20 @@ export default function TablePage() {
           </button>
         </ButtonGridSection>
       )}
-
-      <TableScoreBoard
-        table={table}
-        players={tablePlayers ?? []}
-        games={games ?? []}
-        onUpdateGame={handleUpdateGame}
-        disabled={accessLevel == 'VIEW'}
-      />
+      {!table || isLoadingGames || isLoadingTablePlayers ? (
+        <div className="flex items-center justify-center gap-2">
+          <Spinner />
+          <span>Loading...</span>
+        </div>
+      ) : (
+        <TableScoreBoard
+          table={table}
+          players={tablePlayers ?? []}
+          games={games ?? []}
+          onUpdateGame={handleUpdateGame}
+          disabled={accessLevel == 'VIEW'}
+        />
+      )}
 
       {showAddPlayerModal && (
         <MultiSelectorModal

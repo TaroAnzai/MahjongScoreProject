@@ -150,9 +150,9 @@ function GroupPage() {
       <div className="mahjong-section">
         <h3 className="mahjong-subtitle">メンバー一覧</h3>
         {isLoadingPlayers ? (
-          <div>
+          <div className="flex items-center justify-center gap-2">
             <Spinner />
-            Loading...
+            <span>Loading...</span>
           </div>
         ) : (
           <ul className="mahjong-list">
