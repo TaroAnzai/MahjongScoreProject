@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAdminLogin } from '@/hooks/useAdmin';
 import { Eye, EyeOff } from 'lucide-react';
@@ -42,16 +43,15 @@ export function AdminLogin() {
             className="pr-10"
           />
 
-          <button
+          <Button
             type="button"
             onClick={() => setShow(!show)}
-            className="absolute right-2 top-1/2 -translate-y-1/2
-             p-0 m-0 bg-transparent border-none shadow-none
-             text-gray-500 hover:text-gray-700
-             focus:outline-none"
+            variant="ghost"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2"
           >
             {show ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
+          </Button>
         </div>
         <button className="mahjong-button" type="submit">
           ログイン
