@@ -121,8 +121,6 @@ export default function TablePage() {
     setShowDeleteGameModal(false);
   };
 
-  if (!table) return <div>読み込み中...</div>;
-
   return (
     <div className="mahjong-container">
       <PageTitleBar

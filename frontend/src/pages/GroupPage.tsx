@@ -17,6 +17,7 @@ import { TextInputModal } from '@/components/TextInputModal';
 import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { useCreateTable } from '@/hooks/useTables';
 import { getAccessLevelstring } from '@/utils/accessLevel_utils';
+import { Spinner } from '@/components/ui/spinner';
 
 function GroupPage() {
   const navigate = useNavigate();
@@ -101,14 +102,11 @@ function GroupPage() {
     navigate(`/`);
   };
 
-  if (!group) return <div className="mahjong-container">読み込み中...</div>;
-  if (tournaments === undefined) return <div className="mahjong-container">読み込み中...</div>;
-  if (players === undefined) return <div className="mahjong-container">読み込み中...</div>;
   return (
     <div className="mahjong-container">
       <PageTitleBar
-        title={group.name}
-        shareLinks={group.group_links}
+        title={group ? group.name : 'Loading...'}
+        shareLinks={group ? group.group_links : []}
         onTitleChange={handleTitleChange}
         parentUrl="/"
       />
@@ -152,7 +150,10 @@ function GroupPage() {
       <div className="mahjong-section">
         <h3 className="mahjong-subtitle">メンバー一覧</h3>
         {isLoadingPlayers ? (
-          <div>Loading...</div>
+          <div>
+            <Spinner />
+            Loading...
+          </div>
         ) : (
           <ul className="mahjong-list">
             {players?.map((player) => (
@@ -179,7 +180,7 @@ function GroupPage() {
         <SelectorModal
           title="大会を選択"
           open={showTournamentModal}
-          items={tournaments.map((t) => ({
+          items={tournaments?.map((t) => ({
             ...t,
             plusDisplayItem:
               t.created_at &&

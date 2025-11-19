@@ -43,6 +43,7 @@ import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { useDeleteApiTournamentsTournamentKey } from '@/api/generated/mahjongApi';
 import { useDeleteGame } from '@/hooks/useGames';
 import { getAccessLevelstring } from '@/utils/accessLevel_utils';
+import { Spinner } from '@/components/ui/spinner';
 
 const isChipTableNonZero = (scoreMap: TournamentScoreMap | undefined) => {
   const chipTableIds =
@@ -89,7 +90,6 @@ function TournamentPage() {
   const { mutate: updateTournament } = useUpdateTournament();
   const { mutate: deleteTournament } = useDeleteTournament();
   const { mutate: addTablePlayer } = useAddTablePlayer();
-  const { mutateAsync: deleteTable } = useDeleteTable();
   const { mutateAsync: deleteChipTable } = usedDeleteChipTableWithScores();
 
   //ローカルステート
@@ -264,13 +264,12 @@ function TournamentPage() {
     await deleteTournament({ tournamentKey: tournamentKey! });
     navigate(`/group/${groupKey}`);
   };
-  if (!tournament) return <div className="mahjong-container">読み込み中...</div>;
 
   return (
     <div className="mahjong-container">
       <PageTitleBar
-        title={tournament.name}
-        shareLinks={tournament.tournament_links}
+        title={tournament ? tournament.name : 'Loading...'}
+        shareLinks={tournament?.tournament_links}
         onTitleClick={() => setShowEditModal(true)}
         onTitleChange={handleTitleChange}
         TitleComponent={TitleWithModal}
@@ -295,7 +294,7 @@ function TournamentPage() {
             autoFocus
           />
         ) : (
-          <span id="rate-value">{tournament.rate.toFixed(1)}</span>
+          <span id="rate-value">{tournament?.rate.toFixed(1)}</span>
         )}
       </div>
 
@@ -335,7 +334,14 @@ function TournamentPage() {
         {isChipTableNonZero(scoreMap) && (
           <p className="text-sm text-red-500">チップの合計が０になっていません。</p>
         )}
-        <ScoreTable scoreMap={scoreMap} onClick={handleTableClick} />
+        {scoreMap ? (
+          <ScoreTable scoreMap={scoreMap} onClick={handleTableClick} />
+        ) : (
+          <div>
+            <Spinner />
+            Loading...
+          </div>
+        )}
       </div>
 
       {showAddPlayerModal && (
@@ -357,7 +363,7 @@ function TournamentPage() {
         />
       )}
 
-      {showEditModal && (
+      {showEditModal && tournament && (
         <EditTournamentModal
           tournament={tournament}
           onConfirm={handleUpdateTournament}

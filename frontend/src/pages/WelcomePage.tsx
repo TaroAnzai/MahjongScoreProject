@@ -9,6 +9,7 @@ import { useCreateGroup, useCreateGroupRequest, useGroupQueries } from '@/hooks/
 import { Button } from '@/components/ui/button';
 import { TextInputModal } from '@/components/TextInputModal';
 import { getAccessLevelstring } from '@/utils/accessLevel_utils';
+import { Spinner } from '@/components/ui/spinner';
 
 function WelcomePage() {
   const navigate = useNavigate(); // ← フックの呼び出し
@@ -46,7 +47,10 @@ function WelcomePage() {
       <div className="mahjong-section">
         <h2>登録グループ一覧</h2>
         {isLoading ? (
-          <div>Loading...</div>
+          <div>
+            <Spinner />
+            Loading...
+          </div>
         ) : (
           <ul className="mahjong-list">
             {groups.map(
