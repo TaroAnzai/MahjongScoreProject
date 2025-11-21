@@ -137,10 +137,10 @@ function GroupPage() {
           大会選択
         </button>
         <button className="mahjong-button" onClick={handleAddGroup}>
-          グループ追加
+          ブラウザに記録
         </button>
         <button className="mahjong-button" onClick={handleRemoveGroup}>
-          グループ削除
+          ブラウザから削除
         </button>
         <button className="mahjong-button" onClick={() => navigate(`/group/stats/${groupKey}`)}>
           成績
