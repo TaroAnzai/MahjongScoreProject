@@ -1,5 +1,6 @@
 // src/App.jsx
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { PageHeader } from './components/pageHeader';
 import WelcomePage from './pages/WelcomePage';
 import GroupPage from './pages/GroupPage';
 import TablePage from './pages/TablePage';
@@ -32,6 +33,7 @@ function NotFoundPage() {
 function App() {
   return (
     <>
+      <PageHeader />
       <Routes>
         <Route path="/" element={<WelcomePage />} />
         <Route path="/group/stats/:groupKey" element={<GroupPlayerStatsPage />} />
