@@ -8,13 +8,15 @@ import type {
   TournamentParticipant,
   TournamentScoreMap,
 } from '@/api/generated/mahjongApi.schemas';
+import { useTranslation } from 'react-i18next';
 interface ScoreTableProps {
   scoreMap: TournamentScoreMap | undefined;
   onClick: (table_id: number) => void;
 }
 const ScoreTable = ({ scoreMap, onClick }: ScoreTableProps) => {
+  const { t } = useTranslation();
   if (!scoreMap) {
-    return <div>成績データがありません</div>;
+    return <div>{t('Common.noScoreData')}</div>;
   }
   const normalTables = scoreMap.tables.filter((t) => t.type !== 'CHIP');
   const chipTables = scoreMap.tables.filter((t) => t.type === 'CHIP');
@@ -25,7 +27,9 @@ const ScoreTable = ({ scoreMap, onClick }: ScoreTableProps) => {
       <table className={`${styles.mahjongScoreTable} table`}>
         <thead>
           <tr>
-            <th className={`${styles.header} ${styles.stickyHeader}`}>参加者</th>
+            <th className={`${styles.header} ${styles.stickyHeader}`}>
+              {t('scoreTable.columnParticipant')}
+            </th>
             {sortedTables.map((table) => (
               <th
                 key={table.id}
@@ -36,8 +40,8 @@ const ScoreTable = ({ scoreMap, onClick }: ScoreTableProps) => {
                 {table.name}
               </th>
             ))}
-            <th className={styles.header}>合計</th>
-            <th className={styles.header}>換算点</th>
+            <th className={styles.header}>{t('scoreTable.columnTotal')}</th>
+            <th className={styles.header}>{t('scoreTable.columnConvertedTotal')}</th>
           </tr>
         </thead>
 

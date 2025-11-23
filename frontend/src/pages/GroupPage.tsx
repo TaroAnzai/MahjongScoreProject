@@ -18,13 +18,14 @@ import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { useCreateTable } from '@/hooks/useTables';
 import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 import { Spinner } from '@/components/ui/spinner';
-
+import { useTranslation } from 'react-i18next';
 function GroupPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { alertDialog } = useAlertDialog();
   const location = useLocation();
   const { groupKey } = useParams();
-  if (!groupKey) return <div className="mahjong-container">グループキーが不明です</div>;
+  if (!groupKey) return <div className="mahjong-container">{t('groupPage.groupKeyNotFound')}</div>;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showTournamentModal, setShowTournamentModal] = useState(false);
   const [isCreateTournamentModalOpen, setIsCreateTournamentModalOpen] = useState(false);
@@ -65,7 +66,7 @@ function GroupPage() {
     if (!data.edit_link) return;
     await createChipTable({
       tournamentKey: data.edit_link,
-      tableCreate: { name: 'チップ', type: 'CHIP' },
+      tableCreate: { name: t('groupPage.chip'), type: 'CHIP' },
     });
     navigate(`/tournament/${data.edit_link}`);
   };
@@ -79,10 +80,8 @@ function GroupPage() {
   const handleAddGroup = async () => {
     if (!groupKey || !group) return;
     const res = await alertDialog({
-      title: '登録グループ追加',
-      description: `登録グループに${group.name} を追加してよいですか？\n
-    ブラウザに登録されます。
-    機種変更やブラウザ変更した場合は、引き継がれません。引継ぎしたい場合はURLを保存しておいてください。`,
+      title: t('groupPage.dialogAddGroupTitle'),
+      description: t('groupPage.dialogAddGroupDescription', { groupName: group.name }),
       showCancelButton: true,
     });
 
@@ -93,8 +92,8 @@ function GroupPage() {
   const handleRemoveGroup = async () => {
     if (!groupKey || !group) return;
     const confirmed = await alertDialog({
-      title: '登録グループから削除',
-      description: `登録グループから${group.name} を削除してよいですか？\n(グループデータ自体は削除されません。)`,
+      title: t('groupPage.dialogRemoveGroupTitle'),
+      description: t('groupPage.dialogRemoveGroupDescription', { groupName: group.name }),
       showCancelButton: true,
     });
     if (!confirmed) return;
@@ -117,38 +116,38 @@ function GroupPage() {
           disabled={accessLevel === 'VIEW'}
           onClick={() => setIsCreatePlayerModalOpen(true)}
         >
-          メンバー追加
+          {t('groupPage.buttonAddPlayer')}
         </button>
         <button
           className="mahjong-button"
           disabled={accessLevel === 'VIEW'}
           onClick={() => setShowDeleteModal(true)}
         >
-          メンバー削除
+          {t('groupPage.buttonDeletePlayer')}
         </button>
         <button
           className="mahjong-button"
           disabled={accessLevel === 'VIEW'}
           onClick={() => setIsCreateTournamentModalOpen(true)}
         >
-          大会新規作成
+          {t('groupPage.buttonCreateTournament')}
         </button>
         <button className="mahjong-button" onClick={() => setShowTournamentModal(true)}>
-          大会選択
+          {t('groupPage.buttonSelectTournament')}
         </button>
         <button className="mahjong-button" onClick={handleAddGroup}>
-          ブラウザに記録
+          {t('groupPage.buttonSaveToBrowser')}
         </button>
         <button className="mahjong-button" onClick={handleRemoveGroup}>
-          ブラウザから削除
+          {t('groupPage.buttonRemoveFromBrowser')}
         </button>
         <button className="mahjong-button" onClick={() => navigate(`/group/stats/${groupKey}`)}>
-          成績
+          {t('groupPage.buttonStats')}
         </button>
       </ButtonGridSection>
 
       <div className="mahjong-section">
-        <h3 className="mahjong-subtitle">メンバー一覧</h3>
+        <h3 className="mahjong-subtitle">{t('groupPage.sectionMemberList')}</h3>
         {isLoadingPlayers ? (
           <div className="flex items-center justify-center gap-2">
             <Spinner />
@@ -167,7 +166,7 @@ function GroupPage() {
 
       {showDeleteModal && (
         <SelectorModal
-          title="削除するメンバーを選択"
+          title={t('groupPage.modalDeletePlayerTitle')}
           open={showDeleteModal}
           items={players}
           onSelect={(player: Player) => {
@@ -178,7 +177,7 @@ function GroupPage() {
       )}
       {showTournamentModal && (
         <SelectorModal
-          title="大会を選択"
+          title={t('groupPage.modalSelectTournamentTitle')}
           open={showTournamentModal}
           items={tournaments?.map((t) => ({
             ...t,
@@ -197,7 +196,7 @@ function GroupPage() {
             setShowTournamentModal(false);
           }}
           onClose={() => setShowTournamentModal(false)}
-          emptyMessage="大会が存在しません。大会を作成してください。"
+          emptyMessage={t('groupPage.modalSelectTournamentEmpty')}
         />
       )}
       <TextInputModal
@@ -205,15 +204,15 @@ function GroupPage() {
         onComfirm={handleAddPlayer}
         onClose={() => setIsCreatePlayerModalOpen(false)}
         value=""
-        title="グループメンバー追加"
-        discription="メンバー名を入力してください"
+        title={t('groupPage.modalCreatePlayerTitle')}
+        discription={t('groupPage.modalCreatePlayerDescription')}
       />
       <TextInputModal
         open={isCreateTournamentModalOpen}
         onComfirm={handleCreateTournament}
         onClose={() => setIsCreateTournamentModalOpen(false)}
-        title="大会新規作成"
-        discription="大会名を入力してください"
+        title={t('groupPage.modalCreateTournamentTitle')}
+        discription={t('groupPage.modalCreateTournamentDescription')}
       />
     </div>
   );

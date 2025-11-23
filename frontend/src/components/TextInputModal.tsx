@@ -10,6 +10,7 @@ import {
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
+import { useTranslation } from 'react-i18next';
 
 interface TextInputModalProps {
   open: boolean;
@@ -39,6 +40,7 @@ export const TextInputModal = ({
   twoValue = '',
   twoInputType = 'text',
 }: TextInputModalProps) => {
+  const { t } = useTranslation();
   const [inputText, setInputText] = useState(value || '');
   const [inputText2, setInputText2] = useState(twoValue || '');
   useEffect(() => {
@@ -72,7 +74,7 @@ export const TextInputModal = ({
           </>
         )}
         <DialogFooter>
-          <Button onClick={() => onClose()}>キャンセル</Button>
+          <Button onClick={() => onClose()}>{t('Common.Cancel')}</Button>
           <Button onClick={() => onComfirm(inputText, inputText2)}>OK</Button>
         </DialogFooter>
       </DialogContent>

@@ -1,0 +1,91 @@
+{
+  "Common": {
+    "Confirm": "確認",
+    "Cancel": "キャンセル",
+    "chip": "チップ",
+    "Select": "選択してください",
+    "close": "閉じる",
+    "emptyMessage": "表示する項目がありません"
+  },
+  "welcomPage": {
+    "pageTitle": "麻雀大会 集計",
+    "CreateGroup": "新しいグループを作成",
+    "RegisteredGroups": "登録グループ一覧",
+    "CreateNewGroup": "新しいグループを作成",
+    "EnterGroupName": "グループ名を入力してください",
+    "GroupName": "グループ名",
+    "Email": "メールアドレス"
+  },
+  "groupPage": {
+    "groupKeyNotFound": "グループキーが不明です",
+    "loading": "読み込み中...",
+
+    "buttonAddPlayer": "メンバー追加",
+    "buttonDeletePlayer": "メンバー削除",
+    "buttonCreateTournament": "大会新規作成",
+    "buttonSelectTournament": "大会選択",
+    "buttonSaveToBrowser": "ブラウザに登録",
+    "buttonRemoveFromBrowser": "ブラウザから削除",
+    "buttonStats": "成績",
+
+    "sectionMemberList": "メンバー一覧",
+
+    "dialogAddGroupTitle": "登録グループ追加",
+    "dialogAddGroupDescription": "登録グループに {{groupName}} を追加してよいですか？\n\nブラウザに登録されます。\n機種変更やブラウザ変更した場合は引き継がれません。引継ぎしたい場合はURLを保存してください。",
+
+    "dialogRemoveGroupTitle": "登録グループから削除",
+    "dialogRemoveGroupDescription": "登録グループから {{groupName}} を削除してよいですか？\n(グループデータ自体は削除されません。)",
+
+    "modalDeletePlayerTitle": "削除するメンバーを選択",
+
+    "modalSelectTournamentTitle": "大会を選択",
+    "modalSelectTournamentEmpty": "大会が存在しません。大会を作成してください。",
+
+    "modalCreatePlayerTitle": "グループメンバー追加",
+    "modalCreatePlayerDescription": "メンバー名を入力してください",
+
+    "modalCreateTournamentTitle": "大会新規作成",
+    "modalCreateTournamentDescription": "大会名を入力してください"
+  },
+  "tournamentPage": {
+    "tournamentKeyMissing": "大会キーが指定されていません",
+
+    "loading": "読み込み中...",
+
+    "rate": "レート",
+    "tableName": "卓{{index}}",
+
+    "buttonAddPlayer": "参加者を追加",
+    "buttonDeletePlayer": "参加者を削除",
+    "buttonCreateTable": "記録用紙を新規作成",
+    "buttonDeleteTournament": "大会を削除",
+
+    "sectionTournamentScore": "大会成績",
+    "chipNotZeroWarning": "チップの合計が０になっていません。",
+
+    "modalSelectPlayerTitle": "参加者を選択",
+    "modalDeletePlayerTitle": "削除する参加者を選択",
+
+    "alertNoPlayersToAdd": "追加可能な参加者がいません",
+    "alertNoPlayersToDelete": "削除対象の参加者がいません",
+
+    "alertDeletePlayerTitle": "Delete Player",
+    "alertDeletePlayerDescription": "{{playerName}} を削除してよいですか？",
+
+    "alertDeleteTournamentErrorTitle": "Error deleting tournament",
+    "alertDeleteTournamentErrorDescription": "記録表が存在するため、大会を削除できません。記録表を先に削除してください。",
+
+    "alertChipTableScoreTitle": "Delete Tournament",
+    "alertChipTableScoreDescription": "チップ記録表にスコアデータが存在します。大会を削除するとチップ記録表とそのスコアデータも削除されます。本当に削除してよいですか？",
+
+    "alertDeleteTournamentTitle": "Delete Tournament",
+    "alertDeleteTournamentDescription": "大会を削除してよいですか?"
+  },
+
+  "scoreTable": {
+    "noScoreData": "成績データがありません",
+    "columnParticipant": "参加者",
+    "columnTotal": "合計",
+    "columnConvertedTotal": "換算点"
+  }
+}

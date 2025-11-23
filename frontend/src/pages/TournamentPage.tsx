@@ -44,6 +44,7 @@ import { useDeleteApiTournamentsTournamentKey } from '@/api/generated/mahjongApi
 import { useDeleteGame } from '@/hooks/useGames';
 import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 import { Spinner } from '@/components/ui/spinner';
+import { useTranslation } from 'react-i18next';
 
 const isChipTableNonZero = (scoreMap: TournamentScoreMap | undefined) => {
   const chipTableIds =
@@ -70,10 +71,12 @@ const hasChipTableScore = (scoreMap: TournamentScoreMap | undefined) => {
 function TournamentPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const { alertDialog } = useAlertDialog();
   const { tournamentKey } = useParams();
+
   if (!tournamentKey) {
-    return <div className="mahjong-container">大会キーが指定されていません</div>;
+    return <div className="mahjong-container">{t('tournamentPage.tournamentKeyMissing')}</div>;
   }
   //Query系フック設定
   const { tournament, isLoadingTournament, loadTournament } = useGetTournament(tournamentKey);
@@ -109,7 +112,7 @@ function TournamentPage() {
   }, [location.pathname]);
   const handleOpenAddPlayerModal = async () => {
     if (!groupPlayers || groupPlayers.length === 0) {
-      alert('追加可能な参加者がいません');
+      alert(t('tournamentPage.alertNoPlayersToAdd'));
       return;
     }
     setShowAddPlayerModal(true);
@@ -136,10 +139,10 @@ function TournamentPage() {
     // 既存の卓名から使用済み番号を抽出
     const existingNames = tables?.map((t) => t.name);
     let index = 1;
-    let newName = `卓${index}`;
+    let newName = t('tournamentPage.tableName', { index: index });
     while (existingNames?.includes(newName)) {
       index++;
-      newName = `卓${index}`;
+      newName = t('tournamentPage.tableName', { index: index });
     }
 
     // 卓を作成
@@ -189,7 +192,10 @@ function TournamentPage() {
   };
   const handleOpenDeletePlayerModal = () => {
     if (!players?.length) {
-      alertDialog({ title: 'Error Delete Player', description: '削除対象の参加者がいません' });
+      alertDialog({
+        title: 'Error Delete Player',
+        description: t('tournamentPage.alertNoPlayersToDelete'),
+      });
       return;
     }
     setShowDeletePlayerModal(true);
@@ -197,7 +203,7 @@ function TournamentPage() {
   const handleDeletePlayer = async (player: Player) => {
     const confirmed = await alertDialog({
       title: 'Delete Player',
-      description: `${player.name} を削除してよいですか？`,
+      description: t('tournamentPage.alertDeletePlayerDescription', { playerName: player.name }),
     });
     //
     if (!confirmed) return;
@@ -231,7 +237,7 @@ function TournamentPage() {
     if (nomalTables && nomalTables.length > 0) {
       alertDialog({
         title: 'Error deleting tournament',
-        description: '記録表が存在するため、大会を削除できません。記録表を先に削除してください。',
+        description: t('tournamentPage.alertDeleteTournamentErrorDescription'),
         showCancelButton: false,
       });
       return;
@@ -240,15 +246,14 @@ function TournamentPage() {
     const chipTables = tables?.filter((t) => t.type === TableType.CHIP);
     if (hasChipTableScore(scoreMap)) {
       const chipTableConfirmed = await alertDialog({
-        title: 'Delete Tournament',
-        description:
-          'チップ記録表にスコアデータが存在します。大会を削除するとチップ記録表とそのスコアデータも削除されます。本当に削除してよいですか？',
+        title: t('tournamentPage.alertChipTableScoreTitle'),
+        description: t('tournamentPage.alertChipTableScoreDescription'),
       });
       if (!chipTableConfirmed) return;
     }
     const confirmed = await alertDialog({
-      title: 'Delete Tournament',
-      description: 'Are you sure you want to delete this tournament?',
+      title: t('tournamentPage.alertDeleteTournamentTitle'),
+      description: t('tournamentPage.alertDeleteTournamentDescription'),
     });
     if (!confirmed) return;
 
@@ -280,7 +285,7 @@ function TournamentPage() {
         className="mahjong-rate-display"
         onClick={() => setIsEditingRate(true)}
       >
-        レート:{' '}
+        {t('tournamentPage.rate')}:{' '}
         {isEditingRate ? (
           <input
             type="number"
@@ -304,35 +309,35 @@ function TournamentPage() {
           disabled={accessLevel == 'VIEW'}
           onClick={handleOpenAddPlayerModal}
         >
-          参加者を追加
+          {t('tournamentPage.buttonAddPlayer')}
         </button>
         <button
           className="mahjong-button"
           disabled={accessLevel == 'VIEW'}
           onClick={handleOpenDeletePlayerModal}
         >
-          参加者を削除
+          {t('tournamentPage.buttonDeletePlayer')}
         </button>
         <button
           className="mahjong-button"
           disabled={accessLevel == 'VIEW'}
           onClick={handleCreateTable}
         >
-          記録用紙を新規作成
+          {t('tournamentPage.buttonCreateTable')}
         </button>
         <button
           className="mahjong-button"
           disabled={accessLevel == 'VIEW'}
           onClick={handleDeleteTournament}
         >
-          大会を削除
+          {t('tournamentPage.buttonDeleteTournament')}
         </button>
       </ButtonGridSection>
 
       <div className="mahjong-section">
-        <h3>大会成績</h3>
+        <h3>{t('tournamentPage.sectionTournamentScore')}</h3>
         {isChipTableNonZero(scoreMap) && (
-          <p className="text-sm text-red-500">チップの合計が０になっていません。</p>
+          <p className="text-sm text-red-500">{t('tournamentPage.chipNotZeroWarning')}</p>
         )}
         {scoreMap ? (
           <ScoreTable scoreMap={scoreMap} onClick={handleTableClick} />
@@ -346,7 +351,7 @@ function TournamentPage() {
 
       {showAddPlayerModal && (
         <MultiSelectorModal
-          title="参加者を選択"
+          title={t('tournamentPage.modalSelectPlayerTitle')}
           items={groupPlayers ?? []}
           onConfirm={handleAddPlayer}
           onClose={() => setShowAddPlayerModal(false)}
@@ -355,7 +360,7 @@ function TournamentPage() {
 
       {showDeletePlayerModal && (
         <SelectorModal
-          title="削除する参加者を選択"
+          title={t('tournamentPage.modalDeletePlayerTitle')}
           open={showDeletePlayerModal}
           items={players ?? []}
           onSelect={handleDeletePlayer}

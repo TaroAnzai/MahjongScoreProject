@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button';
 import { TextInputModal } from '@/components/TextInputModal';
 import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 import { Spinner } from '@/components/ui/spinner';
+import { useTranslation } from 'react-i18next';
 
 function WelcomePage() {
   const navigate = useNavigate(); // ← フックの呼び出し
+  const { t } = useTranslation();
   const { groups, isLoading, refetch } = useGroupQueries();
   const { mutate: createGroup } = useCreateGroupRequest();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,16 +38,16 @@ function WelcomePage() {
 
   return (
     <div className="mahjong-container">
-      <h2 className="mahjong-title">麻雀大会 集計</h2>
+      <p className="mahjong-title">{t('welcomPage.pageTitle')}</p>
 
       <ButtonGridSection>
         <button className="mahjong-button" onClick={() => setIsModalOpen(true)}>
-          新しいグループを作成
+          {t('welcomPage.CreateGroup')}
         </button>
       </ButtonGridSection>
 
       <div className="mahjong-section">
-        <h2>登録グループ一覧</h2>
+        <h2>{t('welcomPage.RegisteredGroups')}</h2>
         {isLoading ? (
           <div className="flex items-center justify-center gap-2">
             <Spinner />
@@ -73,16 +75,16 @@ function WelcomePage() {
       </div>
       <TextInputModal
         open={isModalOpen}
-        title="新しいグループを作成"
-        discription="グループ名を入力してください"
-        InputLabel="グループ名"
+        title={t('welcomPage.CreateNewGroup')}
+        discription={t('welcomPage.EnterGroupName')}
+        InputLabel={t('welcomPage.GroupName')}
         onComfirm={(inputText, inputText2) => {
           handleCreateGroup(inputText, inputText2 ?? '');
           setIsModalOpen(false);
         }}
         onClose={() => setIsModalOpen(false)}
         twoInput={true}
-        twoInputLabel="メールアドレス"
+        twoInputLabel={t('welcomPage.Email')}
         twoInputType="email"
       />
     </div>

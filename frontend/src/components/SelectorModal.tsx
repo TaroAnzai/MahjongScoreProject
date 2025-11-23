@@ -11,6 +11,7 @@ import {
   DialogTitle,
 } from './ui/dialog';
 import { Button } from './ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface SelectorModalProps {
   title: string;
@@ -30,12 +31,13 @@ function SelectorModal({
   plusDisplayItem = null,
   emptyMessage = '項目がありません',
 }: SelectorModalProps) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>選択してください</DialogDescription>
+          <DialogDescription>{t('Common.Select')}</DialogDescription>
         </DialogHeader>
         {items === undefined || items.length === 0 ? (
           <div className={styles.emptyMessage}>{emptyMessage}</div>
@@ -50,7 +52,7 @@ function SelectorModal({
           </ul>
         )}
         <DialogFooter>
-          <Button onClick={onClose}> 閉じる</Button>
+          <Button onClick={onClose}> {t('Common.close')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

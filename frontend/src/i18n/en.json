@@ -1,0 +1,91 @@
+{
+  "Common": {
+    "Confirm": "Confirm",
+    "Cancel": "Cancel",
+    "chip": "Chip",
+    "Select": "Please select",
+    "close": "Close",
+    "emptyMessage": "No items found."
+  },
+  "welcomPage": {
+    "pageTitle": "Table Game Scoreboard",
+    "CreateGroup": "Create new group",
+    "RegisteredGroups": "Registered groups",
+    "CreateNewGroup": "Create new group",
+    "EnterGroupName": "Enter group name",
+    "GroupName": "Group name",
+    "Email": "Email"
+  },
+  "groupPage": {
+    "groupKeyNotFound": "Group key is missing",
+    "loading": "Loading...",
+
+    "buttonAddPlayer": "Add Member",
+    "buttonDeletePlayer": "Delete Member",
+    "buttonCreateTournament": "Create Tournament",
+    "buttonSelectTournament": "Select Tournament",
+    "buttonSaveToBrowser": "Save to Browser",
+    "buttonRemoveFromBrowser": "Remove from Browser",
+    "buttonStats": "Stats",
+
+    "sectionMemberList": "Member List",
+
+    "dialogAddGroupTitle": "Add Group to Browser",
+    "dialogAddGroupDescription": "Do you want to add {{groupName}} to your registered groups?\n\nIt will be saved in your browser.\nIf you change devices or browsers, it will not be transferred. Please save the URL if you want to keep access.",
+
+    "dialogRemoveGroupTitle": "Remove Group from Browser",
+    "dialogRemoveGroupDescription": "Do you want to remove {{groupName}} from your registered groups?\n(The group data itself will not be deleted.)",
+
+    "modalDeletePlayerTitle": "Select a Member to Delete",
+
+    "modalSelectTournamentTitle": "Select a Tournament",
+    "modalSelectTournamentEmpty": "No tournaments found. Please create one.",
+
+    "modalCreatePlayerTitle": "Add Group Member",
+    "modalCreatePlayerDescription": "Please enter the member name",
+
+    "modalCreateTournamentTitle": "Create Tournament",
+    "modalCreateTournamentDescription": "Please enter the tournament name"
+  },
+
+  "tournamentPage": {
+    "tournamentKeyMissing": "Tournament key is not specified",
+
+    "loading": "Loading...",
+
+    "rate": "Rate",
+    "tableName": "Table{{index}}",
+
+    "buttonAddPlayer": "Add Participant",
+    "buttonDeletePlayer": "Remove Participant",
+    "buttonCreateTable": "Create Table Score Sheet",
+    "buttonDeleteTournament": "Delete Tournament",
+
+    "sectionTournamentScore": "Tournament Results",
+    "chipNotZeroWarning": "The total chip score is not zero.",
+
+    "modalSelectPlayerTitle": "Select Participants",
+    "modalDeletePlayerTitle": "Select a Participant to Remove",
+
+    "alertNoPlayersToAdd": "No available participants to add",
+    "alertNoPlayersToDelete": "No participants available for deletion",
+
+    "alertDeletePlayerTitle": "Delete Participant",
+    "alertDeletePlayerDescription": "Are you sure you want to remove {{playerName}}?",
+
+    "alertDeleteTournamentErrorTitle": "Error Deleting Tournament",
+    "alertDeleteTournamentErrorDescription": "A score sheet exists and the tournament cannot be deleted. Please delete the score sheet first.",
+
+    "alertChipTableScoreTitle": "Delete Tournament",
+    "alertChipTableScoreDescription": "Chip score sheets contain data. Deleting the tournament will also delete the chip sheets and their scores. Are you sure you want to continue?",
+
+    "alertDeleteTournamentTitle": "Delete Tournament",
+    "alertDeleteTournamentDescription": "Are you sure you want to delete this tournament?"
+  },
+  "scoreTable": {
+    "noScoreData": "No score data available",
+    "columnParticipant": "Participant",
+    "columnTotal": "Total",
+    "columnConvertedTotal": "Converted"
+  }
+}

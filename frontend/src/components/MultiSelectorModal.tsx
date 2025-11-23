@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Modal from './Modal';
 import styles from './MultiSelectorModal.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface multiSelectorModalProps<T extends { id: number | string }> {
   title: string;
@@ -16,6 +17,7 @@ function MultiSelectorModal<T extends { id: number; name: string }>({
   onConfirm,
   onClose,
 }: multiSelectorModalProps<T>) {
+  const { t } = useTranslation();
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const toggleSelect = (id: number) => {
@@ -42,13 +44,13 @@ function MultiSelectorModal<T extends { id: number; name: string }>({
           </button>
           <button className="mahjong-button" onClick={onClose}>
             {' '}
-            閉じる
+            {t('Common.Cancel')}
           </button>
         </>
       }
     >
       <div className={styles.listContainer}>
-        {items.length === 0 && <p>表示する項目がありません</p>}
+        {items.length === 0 && <p>{t('Common.emptyMessage')}</p>}
         <ul className={styles.list}>
           {items.map((item) => (
             <li key={item.id} className={styles.listItem}>

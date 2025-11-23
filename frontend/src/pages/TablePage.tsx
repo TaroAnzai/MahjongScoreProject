@@ -1,5 +1,5 @@
 // React 関連
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, use } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 
 // API 関連
@@ -34,7 +34,7 @@ export default function TablePage() {
   const [showDeleteGameModal, setShowDeleteGameModal] = useState(false);
   //Mutation系フック
   const { mutate: updateTable } = useUpdateTable();
-  const { mutate: deleteTable } = useDeleteTable();
+  const { mutate: deleteTable, isSuccess: isTableDeleteSuccess } = useDeleteTable();
   const { mutate: addTablePlayer } = useAddTablePlayer();
   const { mutate: deleteTablePlayer } = useDeleteTablePlayer();
   const { mutate: createGame } = useCreateGame();
@@ -61,6 +61,11 @@ export default function TablePage() {
   );
 
   const [accessLevel, setAccessLevel] = useState('');
+  useEffect(() => {
+    if (isTableDeleteSuccess) {
+      navigate(`/tournament/${tournamentKey}`);
+    }
+  }, [isTableDeleteSuccess]);
   useEffect(() => {
     setAccessLevel(getAccessLevelstring(table?.table_links));
   }, [table?.table_links]);
