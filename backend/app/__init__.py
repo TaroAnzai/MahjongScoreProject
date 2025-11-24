@@ -3,8 +3,12 @@
 from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_cors import CORS
-from app.extensions import db, login_manager, migrate
+from app.extensions import db, migrate, limiter
 from app.api import register_blueprints
+
+from flask_limiter.errors import RateLimitExceeded
+from app.service_errors import format_error_response
+
 
 def create_app(config_name=None, config_override=None):
     app = Flask(__name__, instance_relative_config=True)
@@ -24,6 +28,20 @@ def create_app(config_name=None, config_override=None):
     CORS(app,
         supports_credentials=app.config.get("CORS_SUPPORTS_CREDENTIALS", True),
         origins=app.config.get("CORS_ORIGINS", []))
+
+    limiter.init_app(app)
+    # --- RateLimitExceeded エラーハンドラ（アプリ全体） ---
+    @app.errorhandler(RateLimitExceeded)
+    def handle_rate_limit(e):
+        response = format_error_response(
+            code=429,
+            status="Too Many Requests",
+            message="リクエストが多すぎます。しばらく待って再度お試しください。",
+        )
+        r = jsonify(response)
+        r.status_code = 429
+        r.headers["Retry-After"] = str(e.retry_after)
+        return r
 
     db.init_app(app)
     migrate.init_app(app, db)

@@ -8,6 +8,7 @@ class GroupRequestSchema(Schema):
     name = fields.Str(required=True, description="グループ名")
     email = fields.Str(required=True, description="メールアドレス一覧")
     timezone = fields.Str(required=False, description="ユーザーのタイムゾーン（例: 'Asia/Tokyo'）")
+    recaptcha_token = fields.Str(required=True, description="reCAPTCHAのトークン")
 class GroupResponseSchema(Schema):
     """グループリクエストレスポンス"""
     message = fields.Str(required=True, description="メッセージ")

@@ -19,6 +19,7 @@ _ACCESS_PRIORITY = {
 }
 
 from app.tasks.email_tasks import send_group_creation_email_task
+from app.utils.recaptcha import verify_recaptcha
 
 
 # =========================================================
@@ -54,7 +55,10 @@ def create_group_creation_token(data: GroupRequestSchema) -> GroupCreationToken:
     email = data.get('email')
     group_name = data.get('name')
     tz_str = data.get('timezone',"Asia/Tokyo")
-
+    # 🟩 reCAPTCHA（最初にチェック）
+    recaptcha = data.get("recaptcha_token")
+    if not recaptcha or not verify_recaptcha(recaptcha):
+        raise ServicePermissionError("不正なアクセスが検出されました。（reCAPTCHA）")
     try:
         tz = ZoneInfo(tz_str)
     except ZoneInfoNotFoundError:
