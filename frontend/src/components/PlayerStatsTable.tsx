@@ -11,31 +11,33 @@ import {
 import { Button } from './ui/button';
 import { PlayerStatsModal } from './PlayerStatsModal';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface PlayerStatsTableProps {
   playerStatsList: GroupPlayerStat[];
 }
 
 export const PlayerStatsTable = ({ playerStatsList }: PlayerStatsTableProps) => {
+  const { t } = useTranslation();
   const [selectedPlayerStats, setSelectedPlayerStats] = useState<GroupPlayerStat | null>(null);
 
   return (
     <>
       <Table>
-        <TableCaption>プレイヤー統計</TableCaption>
+        <TableCaption>{t('statsPage.tableTitle')}</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead>名前</TableHead>
-            <TableHead>参加回数</TableHead>
-            <TableHead>合計得点</TableHead>
-            <TableHead>収支</TableHead>
+            <TableHead>{t('statsPage.thName')}</TableHead>
+            <TableHead>{t('statsPage.thGamesPlayed')}</TableHead>
+            <TableHead>{t('statsPage.thTotalPoints')}</TableHead>
+            <TableHead>{t('statsPage.thBalance')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {playerStatsList.map((p) => (
             <TableRow key={p.player_id}>
               <TableCell>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedPlayerStats(p)}>
+                <Button variant="outline" size="sm" onClick={() => setSelectedPlayerStats(p)}>
                   {p.player_name}
                 </Button>
               </TableCell>

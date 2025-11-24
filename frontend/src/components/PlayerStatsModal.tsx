@@ -3,18 +3,19 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader } 
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { Button } from './ui/button';
 import { Table, TableBody, TableCell, TableRow } from './ui/table';
+import { useTranslation } from 'react-i18next';
 
 export const STATS_NAME_MAP = {
-  tournament_count: '大会参加回数',
-  game_count: '対局数',
-  total_score: '得点合計（チップ・換算含まない）',
-  total_balance: '収支（チップ・換算含む）',
-  average_rank: '平均順位',
-  rank1_rate: '1位率',
-  rank1_count: '1位回数',
-  rank2_count: '2位回数',
-  rank3_count: '3位回数',
-  rank4_or_lower_count: '4位以下回数',
+  tournament_count: 'tournament_count',
+  game_count: 'game_count',
+  total_score: 'total_score',
+  total_balance: 'total_balance',
+  average_rank: 'average_rank',
+  rank1_rate: 'rank1_rate',
+  rank1_count: 'rank1_count',
+  rank2_count: 'rank2_count',
+  rank3_count: 'rank3_count',
+  rank4_or_lower_count: 'rank4_or_lower_count',
 };
 interface PlayerStatsModalProps {
   open: boolean;
@@ -23,13 +24,16 @@ interface PlayerStatsModalProps {
 }
 
 export const PlayerStatsModal = ({ open, onClose, playerStats }: PlayerStatsModalProps) => {
+  const { t } = useTranslation();
   if (!playerStats) return null;
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>プレイヤー成績</DialogTitle>
-          <DialogDescription>{playerStats.player_name}さんの成績</DialogDescription>
+          <DialogTitle>{t('statsPage.dialogTitle')}</DialogTitle>
+          <DialogDescription>
+            {t('statsPage.dialogDescription', { playerName: playerStats.player_name })}
+          </DialogDescription>
         </DialogHeader>
         <Table>
           <TableBody>
@@ -41,7 +45,9 @@ export const PlayerStatsModal = ({ open, onClose, playerStats }: PlayerStatsModa
 
               return (
                 <TableRow key={key}>
-                  <TableCell className="font-medium">{label}</TableCell>
+                  <TableCell className="font-medium">
+                    {t(`statsPage.statsNameMap.${label}`)}
+                  </TableCell>
                   <TableCell className="text-right">
                     {typeof value === 'number' ? value.toLocaleString() : value}
                   </TableCell>
@@ -51,7 +57,7 @@ export const PlayerStatsModal = ({ open, onClose, playerStats }: PlayerStatsModa
           </TableBody>
         </Table>
         <DialogFooter>
-          <Button onClick={onClose}> 閉じる</Button>
+          <Button onClick={onClose}> {t('Common.close')}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

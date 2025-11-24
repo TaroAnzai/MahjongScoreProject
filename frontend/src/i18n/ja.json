@@ -124,6 +124,29 @@
     "shareViewLink": "閲覧リンクを共有",
     "shareEditLink": "編集リンクを共有"
   },
+  "statsPage": {
+    "errorInvalidGroupKey": "不正なアクセスです（グループキーが指定されていません）",
+    "pageTitle": "グループメンバー成績",
+    "tableTitle": "プレイヤー統計",
+    "thName": "名前",
+    "thGamesPlayed": "参加回数",
+    "thTotalPoints": "合計得点",
+    "thBalance": "収支",
+    "statsNameMap": {
+      "tournament_count": "大会参加回数",
+      "game_count": "対局数",
+      "total_score": "得点合計（チップ・換算含まない）",
+      "total_balance": "収支（チップ・換算含む）",
+      "average_rank": "平均順位",
+      "rank1_rate": "1位率",
+      "rank1_count": "1位回数",
+      "rank2_count": "2位回数",
+      "rank3_count": "3位回数",
+      "rank4_or_lower_count": "4位以下回数"
+    },
+    "dialogTitle": "プレイヤー成績",
+    "dialogDescription": "{{playerName}}さんの成績"
+  },
   "hooks": {
     "groupRequest": {
       "emailSentTitle": "グループ作成用メールを送信しました",

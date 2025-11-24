@@ -125,6 +125,29 @@
     "shareViewLink": "Share View Link",
     "shareEditLink": "Share Edit Link"
   },
+  "statsPage": {
+    "errorInvalidGroupKey": "Invalid access (group key is missing).",
+    "pageTitle": "Group Member Statistics",
+    "tableTitle": "Player Statistics",
+    "thName": "Name",
+    "thGamesPlayed": "Games Played",
+    "thTotalPoints": "Total Points",
+    "thBalance": "Balance",
+    "statsNameMap": {
+      "tournament_count": "Tournaments Joined",
+      "game_count": "Number of Games",
+      "total_score": "Total Score (without chips/adjustments)",
+      "total_balance": "Balance (including chips/adjustments)",
+      "average_rank": "Average Rank",
+      "rank1_rate": "1st Place Rate",
+      "rank1_count": "1st Place Count",
+      "rank2_count": "2nd Place Count",
+      "rank3_count": "3rd Place Count",
+      "rank4_or_lower_count": "4th Place or Lower Count"
+    },
+    "dialogTitle": "Player Statistics",
+    "dialogDescription": "Statistics for {{playerName}}"
+  },
 
   "hooks": {
     "groupRequest": {

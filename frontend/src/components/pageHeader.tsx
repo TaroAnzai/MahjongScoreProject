@@ -1,6 +1,6 @@
 export const PageHeader = () => {
   return (
-    <div className="flex items-center justify-between max-w-[500px] mx-auto">
+    <div className="flex items-center justify-between max-w-[500px] mx-auto mb-1">
       <div className="ml-auto">
         <LanguageSelector />
       </div>
@@ -27,7 +27,7 @@ export function LanguageSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost">🌐Langage</Button>
+        <span className="cursor-pointer select-none">🌐Language</span>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
