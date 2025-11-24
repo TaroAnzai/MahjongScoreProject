@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom'; // ← 追加
 
@@ -16,7 +16,7 @@ function WelcomePage() {
   const navigate = useNavigate(); // ← フックの呼び出し
   const { t } = useTranslation();
   const { groups, isLoading, refetch } = useGroupQueries();
-  const { mutate: createGroup } = useCreateGroupRequest();
+  const { mutate: createGroup, isPending: isCreateGroupPending } = useCreateGroupRequest();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCreateGroup = async (groupName: string, email: string) => {
@@ -44,6 +44,12 @@ function WelcomePage() {
 
   return (
     <div className="mahjong-container">
+      {/* ← 追加：処理中オーバーレイ */}
+      {isCreateGroupPending && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+          <Spinner className="w-12 h-12" />
+        </div>
+      )}
       <p className="mahjong-title">{t('welcomPage.pageTitle')}</p>
 
       <ButtonGridSection>
