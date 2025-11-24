@@ -1,6 +1,7 @@
 // React 関連
 import React, { useEffect, useState, useRef, use } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 // API 関連
 
@@ -28,6 +29,7 @@ import { Spinner } from '@/components/ui/spinner';
 export default function TablePage() {
   const { alertDialog } = useAlertDialog();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   //State系フック設定
   const [showAddPlayerModal, setShowAddPlayerModal] = useState(false);
   const [showDeletePlayerModal, setShowDeletePlayerModal] = useState(false);
@@ -72,14 +74,14 @@ export default function TablePage() {
   // Early retrurn
   // --- ① 不正URL対応 ---
   if (!tableKey) {
-    return <div>不正なアクセスです（卓キーが指定されていません）</div>;
+    return <div>{t('tablePage.errorInvalidTableKey')}</div>;
   }
   const handleTableNameChange = (newTitle: string) => {
     updateTable({ tableKey: tableKey!, tableUpdate: { name: newTitle } });
   };
   // --- ④ データが存在しない ---
   if (!table && !isLoadingTable) {
-    return <div>卓が見つかりませんでした。</div>;
+    return <div>{t('tablePage.errorTableNotFound')}</div>;
   }
   const handleAddPlayer = (selectedPlayers: Player[]) => {
     const plyerIds: TablePlayerItem[] = selectedPlayers.map((p) => ({ player_id: p.id }));
@@ -104,8 +106,8 @@ export default function TablePage() {
 
   const handleDeleteTable = async () => {
     const confirmed = await alertDialog({
-      title: 'Delete Table',
-      description: 'Are you sure you want to delete this table?',
+      title: t('tablePage.alertDeleteGameTitle'),
+      description: t('tablePage.alertDeleteGameDescription'),
     });
     if (!confirmed) return;
     deleteTable({ tableKey: tableKey! });
@@ -126,7 +128,7 @@ export default function TablePage() {
   return (
     <div className="mahjong-container">
       <PageTitleBar
-        title={table ? table.name : 'Loading...'}
+        title={table ? table.name : t('Common.loading')}
         onTitleChange={handleTableNameChange}
         shareLinks={table ? table.table_links : []}
         parentUrl={sessionStorage.getItem('tournamentPage')}
@@ -141,35 +143,35 @@ export default function TablePage() {
               setShowAddPlayerModal(true);
             }}
           >
-            参加者を追加
+            {t('tablePage.buttonAddPlayer')}
           </button>
           <button
             className="mahjong-button"
             disabled={accessLevel == 'VIEW'}
             onClick={() => setShowDeletePlayerModal(true)}
           >
-            参加者を削除
+            {t('tablePage.buttonDeletePlayer')}
           </button>
           <button
             className="mahjong-button"
             disabled={accessLevel == 'VIEW'}
             onClick={handleDeleteGameClick}
           >
-            データを削除
+            {t('tablePage.buttonDeleteGame')}
           </button>
           <button
             className="mahjong-button"
             disabled={accessLevel == 'VIEW'}
             onClick={handleDeleteTable}
           >
-            記録表削除
+            {t('tablePage.buttonDeleteTable')}
           </button>
         </ButtonGridSection>
       )}
       {!table || isLoadingGames || isLoadingTablePlayers ? (
         <div className="flex items-center justify-center gap-2">
           <Spinner />
-          <span>Loading...</span>
+          <span>{t('Common.loading')}</span>
         </div>
       ) : (
         <TableScoreBoard
@@ -183,7 +185,7 @@ export default function TablePage() {
 
       {showAddPlayerModal && (
         <MultiSelectorModal
-          title="参加者を選択"
+          title={t('tablePage.modalAddPlayerTitle')}
           items={remainingPlayers ?? []}
           onConfirm={handleAddPlayer}
           onClose={() => setShowAddPlayerModal(false)}
@@ -192,7 +194,7 @@ export default function TablePage() {
 
       {showDeletePlayerModal && (
         <SelectorModal
-          title="参加者を削除"
+          title={t('tablePage.modalDeletePlayerTitle')}
           open={showDeletePlayerModal}
           items={tablePlayers}
           onSelect={handleDeletePlayer}
@@ -201,9 +203,12 @@ export default function TablePage() {
       )}
       {showDeleteGameModal && (
         <SelectorModal
-          title="削除するゲームを選択"
+          title={t('tablePage.modalDeleteGameTitle')}
           open={showDeleteGameModal}
-          items={games?.map((g, index) => ({ id: g.id, name: `第${index + 1}局` }))}
+          items={games?.map((g, index) => ({
+            id: g.id,
+            name: t('tablePage.gameLabel', { index: index + 1 }),
+          }))}
           onSelect={handleDeleteGame}
           onClose={() => setShowDeleteGameModal(false)}
         />

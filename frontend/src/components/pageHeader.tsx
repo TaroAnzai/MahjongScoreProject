@@ -20,6 +20,10 @@ import {
 export function LanguageSelector() {
   const { i18n } = useTranslation();
 
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -27,8 +31,8 @@ export function LanguageSelector() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => i18n.changeLanguage('ja')}>日本語</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => i18n.changeLanguage('en')}>English</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => changeLanguage('ja')}>日本語</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => changeLanguage('en')}>English</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

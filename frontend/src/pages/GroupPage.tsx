@@ -66,7 +66,7 @@ function GroupPage() {
     if (!data.edit_link) return;
     await createChipTable({
       tournamentKey: data.edit_link,
-      tableCreate: { name: t('groupPage.chip'), type: 'CHIP' },
+      tableCreate: { name: t('Common.chip'), type: 'CHIP' },
     });
     navigate(`/tournament/${data.edit_link}`);
   };

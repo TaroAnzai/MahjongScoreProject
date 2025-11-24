@@ -1,6 +1,7 @@
 {
   "Common": {
     "Confirm": "Confirm",
+    "Confirmed": "Confirmed",
     "Cancel": "Cancel",
     "chip": "Chip",
     "Select": "Please select",
@@ -82,10 +83,78 @@
     "alertDeleteTournamentTitle": "Delete Tournament",
     "alertDeleteTournamentDescription": "Are you sure you want to delete this tournament?"
   },
+  "tablePage": {
+    "errorInvalidTableKey": "Invalid access (table key missing).",
+    "errorTableNotFound": "Table not found.",
+
+    "buttonAddPlayer": "Add Player",
+    "buttonDeletePlayer": "Remove Player",
+    "buttonDeleteGame": "Delete Game Data",
+    "buttonDeleteTable": "Delete Table",
+
+    "modalAddPlayerTitle": "Select Players",
+    "modalDeletePlayerTitle": "Select a Player to Remove",
+    "modalDeleteGameTitle": "Select a Game to Delete",
+
+    "alertDeleteTableTitle": "Delete Table",
+    "alertDeleteTableDescription": "Are you sure you want to delete this table?",
+
+    "alertDeleteGameTitle": "Delete Game",
+    "alertDeleteGameDescription": "Are you sure you want to delete this game?",
+
+    "gameLabel": "Game {{index}}"
+  },
+  "scoreBoard": {
+    "gameTitle": "Game",
+    "gameLabel": "Game{{index}}",
+    "totalLabel": "Total"
+  },
+  "titleBar": {
+    "group": "Group",
+    "tournament": "Tournament",
+    "table": "Score Sheet",
+    "undefined": "Undefined",
+    "noLink": "No {{accessType}} link available",
+    "shareTitle": "Invite to {{typeName}}",
+    "shareText": "You can access {{typeName}} using this link.",
+    "shareError": "Failed to share",
+    "shareSuccessTitle": "URL Copied",
+    "shareSuccessDescription": "Copied the URL for {{typeName}} to your clipboard:\n{{url}}",
+    "shareErrorTitle": "Copy Failed",
+    "shareErrorDescription": "Failed to copy the URL to clipboard.\n{{error}}",
+    "shareViewLink": "Share View Link",
+    "shareEditLink": "Share Edit Link"
+  },
+
+  "hooks": {
+    "groupRequest": {
+      "emailSentTitle": "Group creation email sent",
+      "emailSentDescription": "We have sent a link to create the group to the email address you provided.",
+      "emailSentBodyLink": "Please click the link in the email to complete the group registration.",
+      "emailSentBodyExpire": "⚠️ The link is valid for 30 minutes after issuance. (until {{expire_at}})",
+      "emailSentBodyNote": "The link will expire after that time, so please complete the process as soon as possible.",
+      "createErrorTitle": "Error creating group",
+      "unknownError": "Unknown error"
+    },
+    "group": {
+      "createSuccess": "Group created successfully",
+      "updateSuccess": "Group updated successfully",
+      "createErrorTitle": "Error creating group",
+      "updateErrorTitle": "Error updating group",
+      "unknownError": "Unknown error"
+    }
+  },
   "scoreTable": {
     "noScoreData": "No score data available",
     "columnParticipant": "Participant",
     "columnTotal": "Total",
     "columnConvertedTotal": "Converted"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "path": "Path",
+    "query": "Query",
+    "toHome": "Back to Home",
+    "openExternal": "Open in external browser"
   }
 }

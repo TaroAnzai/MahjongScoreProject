@@ -21,6 +21,7 @@ import { useQueries } from '@tanstack/react-query';
 import { getGetApiGroupsGroupKeyQueryOptions } from '@/api/generated/mahjongApi';
 import { toast } from 'sonner';
 import { formatLocalDateTime, toLocalDate } from '@/utils/date_utils';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Hook to create a new group.
@@ -35,21 +36,21 @@ import { formatLocalDateTime, toLocalDate } from '@/utils/date_utils';
  */
 export const useCreateGroupRequest = () => {
   const { alertDialog } = useAlertDialog();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: GroupRequest) => {
       return postApiGroupsRequestLink(data);
     },
     onSuccess: (data: GroupResponse) => {
-      console.log('Group created successfully:', data);
       const expire_at = formatLocalDateTime(toLocalDate(data.expires_at));
       alertDialog({
-        title: 'グループ作成用メールを送信しました',
-        description: `ご入力いただいたメールアドレス宛に、グループ作成用のリンクをお送りしました。`,
+        title: t('hooks.groupRequest.emailSentTitle'),
+        description: t('hooks.groupRequest.emailSentDescription'),
         body: (
           <div>
-            <p>メール内のリンクをクリックして、グループの登録を完了してください。</p>
-            <p>⚠️ このリンクは発行から30分間有効です。({expire_at}まで)</p>
-            <p>期限を過ぎると無効になりますので、お早めに手続きをお願いします。</p>
+            <p>{t('hooks.groupRequest.emailSentBodyLink')}</p>
+            <p>{t('hooks.groupRequest.emailSentBodyExpire', { expire_at })}</p>
+            <p>{t('hooks.groupRequest.emailSentBodyNote')}</p>
           </div>
         ),
         showCancelButton: false,
@@ -64,9 +65,9 @@ export const useCreateGroupRequest = () => {
         error.body?.errors?.json?.message?.[0] ??
         error.body?.message ??
         error.statusText ??
-        'Unknown error';
+        t('hooks.groupRequest.unknownError');
       alertDialog({
-        title: 'Error creating group',
+        title: t('hooks.groupRequest.createErrorTitle'),
         description: message,
         showCancelButton: false,
       });
@@ -76,13 +77,14 @@ export const useCreateGroupRequest = () => {
 
 export const useCreateGroup = (onAfterCreate?: () => void) => {
   const { alertDialog } = useAlertDialog();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: GroupCreate) => {
       return postApiGroups(data);
     },
     onSuccess: (data: Group) => {
       console.log('Group created successfully:', data);
-      toast.success('Group created successfully');
+      toast.success(t('hooks.group.createSuccess'));
       localStorage.setItem(`group_key_${data.owner_link}`, data.owner_link ?? '');
       onAfterCreate?.();
     },
@@ -92,9 +94,9 @@ export const useCreateGroup = (onAfterCreate?: () => void) => {
         error.body?.errors?.json?.message?.[0] ??
         error.body?.message ??
         error.statusText ??
-        'Unknown error';
+        t('hooks.group.unknownError');
       alertDialog({
-        title: 'Error creating group',
+        title: t('hooks.group.createErrorTitle'),
         description: message,
         showCancelButton: false,
       });
@@ -103,12 +105,13 @@ export const useCreateGroup = (onAfterCreate?: () => void) => {
 };
 export const useUpdateGroup = (onAfterUpdate?: () => void) => {
   const { alertDialog } = useAlertDialog();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (data: { groupKey: string; groupUpdate: GroupUpdate }) => {
       return putApiGroupsGroupKey(data.groupKey, data.groupUpdate);
     },
     onSuccess: (data: Group) => {
-      toast.success('Group updated successfully');
+      toast.success(t('hooks.group.updateSuccess'));
       onAfterUpdate?.();
     },
     onError: (error: any) => {
@@ -117,9 +120,9 @@ export const useUpdateGroup = (onAfterUpdate?: () => void) => {
         error.body?.errors?.json?.message?.[0] ??
         error.body?.message ??
         error.statusText ??
-        'Unknown error';
+        t('hooks.group.unknownError');
       alertDialog({
-        title: 'Error updating group',
+        title: t('hooks.group.updateErrorTitle'),
         description: message,
         showCancelButton: false,
       });

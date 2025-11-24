@@ -1,6 +1,4 @@
 // src/components/SelectorModal.jsx
-import React from 'react';
-import Modal from './Modal';
 import styles from './SelectorModal.module.css';
 import {
   Dialog,
@@ -29,9 +27,10 @@ function SelectorModal({
   onSelect,
   onClose,
   plusDisplayItem = null,
-  emptyMessage = '項目がありません',
+  emptyMessage,
 }: SelectorModalProps) {
   const { t } = useTranslation();
+  const msg = emptyMessage ?? t('Common.emptyMessage');
   return (
     <Dialog open={open}>
       <DialogContent showCloseButton={false}>
@@ -40,7 +39,7 @@ function SelectorModal({
           <DialogDescription>{t('Common.Select')}</DialogDescription>
         </DialogHeader>
         {items === undefined || items.length === 0 ? (
-          <div className={styles.emptyMessage}>{emptyMessage}</div>
+          <div className={styles.emptyMessage}>{msg}</div>
         ) : (
           <ul className={styles.list}>
             {items?.map((item) => (

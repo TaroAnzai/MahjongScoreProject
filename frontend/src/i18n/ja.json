@@ -1,11 +1,12 @@
 {
   "Common": {
     "Confirm": "確認",
+    "Confirmed": "確定",
     "Cancel": "キャンセル",
     "chip": "チップ",
     "Select": "選択してください",
     "close": "閉じる",
-    "emptyMessage": "表示する項目がありません"
+    "emptyMessage": "項目がありません"
   },
   "welcomPage": {
     "pageTitle": "麻雀大会 集計",
@@ -81,11 +82,77 @@
     "alertDeleteTournamentTitle": "Delete Tournament",
     "alertDeleteTournamentDescription": "大会を削除してよいですか?"
   },
+  "tablePage": {
+    "errorInvalidTableKey": "不正なアクセスです（卓キーが指定されていません）",
+    "errorTableNotFound": "卓が見つかりませんでした",
 
+    "buttonAddPlayer": "参加者を追加",
+    "buttonDeletePlayer": "参加者を削除",
+    "buttonDeleteGame": "対局データを削除",
+    "buttonDeleteTable": "記録表削除",
+
+    "modalAddPlayerTitle": "参加者を選択",
+    "modalDeletePlayerTitle": "削除する参加者を選択",
+    "modalDeleteGameTitle": "削除するゲームを選択",
+
+    "alertDeleteTableTitle": "記録表削除",
+    "alertDeleteTableDescription": "この記録表を削除してよいですか？",
+
+    "alertDeleteGameTitle": "ゲーム削除",
+    "alertDeleteGameDescription": "この対局を削除してよいですか？",
+
+    "gameLabel": "第{{index}}局"
+  },
+  "scoreBoard": {
+    "gameTitle": "局",
+    "gameLabel": "第{{index}}局",
+    "totalLabel": "合計"
+  },
+  "titleBar": {
+    "group": "グループ",
+    "tournament": "大会",
+    "table": "記録表",
+    "undefined": "未定義",
+    "noLink": "{{accessType}}リンクが存在しません",
+    "shareTitle": "{{typeName}}への招待",
+    "shareText": "このリンクから{{typeName}}にアクセスできます",
+    "shareError": "共有に失敗しました",
+    "shareSuccessTitle": "URLをコピーしました",
+    "shareSuccessDescription": "{{typeName}}のURLをクリップボードにコピーしました:\n{{url}}",
+    "shareErrorTitle": "コピーに失敗しました",
+    "shareErrorDescription": "URLをクリップボードにコピーに失敗しました。\n{{error}}",
+    "shareViewLink": "閲覧リンクを共有",
+    "shareEditLink": "編集リンクを共有"
+  },
+  "hooks": {
+    "groupRequest": {
+      "emailSentTitle": "グループ作成用メールを送信しました",
+      "emailSentDescription": "ご入力いただいたメールアドレス宛に、グループ作成用のリンクをお送りしました。",
+      "emailSentBodyLink": "メール内のリンクをクリックして、グループの登録を完了してください。",
+      "emailSentBodyExpire": "⚠️ このリンクは発行から30分間有効です。（{{expire_at}}まで）",
+      "emailSentBodyNote": "期限を過ぎると無効になりますので、お早めに手続きをお願いします。",
+      "createErrorTitle": "グループ作成時にエラーが発生しました",
+      "unknownError": "不明なエラー"
+    },
+    "group": {
+      "createSuccess": "グループを作成しました",
+      "updateSuccess": "グループを更新しました",
+      "createErrorTitle": "グループ作成時にエラーが発生しました",
+      "updateErrorTitle": "グループ更新時にエラーが発生しました",
+      "unknownError": "不明なエラー"
+    }
+  },
   "scoreTable": {
     "noScoreData": "成績データがありません",
     "columnParticipant": "参加者",
     "columnTotal": "合計",
     "columnConvertedTotal": "換算点"
+  },
+  "notFound": {
+    "title": "ページが見つかりません",
+    "path": "パス",
+    "query": "クエリ",
+    "toHome": "ホームに戻る",
+    "openExternal": "外部ブラウザで開く"
   }
 }

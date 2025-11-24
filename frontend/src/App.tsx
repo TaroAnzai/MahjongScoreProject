@@ -12,20 +12,26 @@ import GroupPlayerStatsPage from './pages/GroupPlayerStats';
 import { AdminProtected } from './pages/admin/AdminProtected';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminGroups } from './pages/admin/AdminGroups';
+import { useTranslation } from 'react-i18next';
 
 function NotFoundPage() {
   const location = useLocation();
+  const { t } = useTranslation();
 
   return (
     <div style={{ padding: '20px', textAlign: 'center' }}>
-      <h2>ページが見つかりません</h2>
-      <p>パス: {location.pathname}</p>
-      <p>クエリ: {location.search}</p>
-      <button onClick={() => (window.location.href = '/mahjong/')}>ホームに戻る</button>
+      <h2>{t('notFound.title')}</h2>
+      <p>
+        {t('notFound.path')}: {location.pathname}
+      </p>
+      <p>
+        {t('notFound.query')}: {location.search}
+      </p>
+      <button onClick={() => (window.location.href = '/mahjong/')}>{t('notFound.toHome')}</button>
       <br />
       <br />
       <button onClick={() => window.open(window.location.href, '_blank')}>
-        外部ブラウザで開く
+        {t('notFound.openExternal')}
       </button>
     </div>
   );

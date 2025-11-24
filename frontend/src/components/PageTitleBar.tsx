@@ -1,6 +1,7 @@
 // src/components/PageTitleBar.jsx
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import styles from './PageTitleBar.module.css';
 import EditableTitle from './EditableTitle';
 import { ChevronsLeft, ChevronsRight, ChevronsUp, Share2 } from 'lucide-react';
@@ -31,6 +32,7 @@ function PageTitleBar({
 }: PageTitleBarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { alertDialog } = useAlertDialog();
 
   const [accessLevel, setAccessLevel] = useState('');
@@ -40,15 +42,15 @@ function PageTitleBar({
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const type = pathSegments[0] as keyof typeof typeNameMap;
   const typeNameMap = {
-    group: 'グループ',
-    tournament: '大会',
-    table: '記録表',
+    group: t('titleBar.group'),
+    tournament: t('titleBar.tournament'),
+    table: t('titleBar.table'),
   };
-  const typeName = typeNameMap[type] ?? '未定義';
+  const typeName = typeNameMap[type] ?? t('titleBar.undefined');
 
   const handleShareUrl = async (accessType: string) => {
     const shortKey = shareLinks.find((l) => l.access_level === accessType)?.short_key;
-    if (!shortKey) return alert(`${accessType}リンクが存在しません`);
+    if (!shortKey) return alert(t('titleBar.noLink', { accessType: accessType }));
     const basePath = import.meta.env.BASE_URL;
     const shareUrl = `${window.location.origin}${basePath}/${type}/${shortKey}`.replace(
       /([^:]\/)\/+/g,
@@ -57,13 +59,13 @@ function PageTitleBar({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${typeName}への招待`,
-          text: `このリンクから${typeName}にアクセスできます`,
+          title: t('titleBar.shareTitle', { typeName: typeName }),
+          text: t('titleBar.shareText', { typeName: typeName }),
           url: shareUrl,
         });
       } catch (err: any) {
         alertDialog({
-          title: '共有に失敗しました',
+          title: t('titleBar.shareError'),
           description: err.message,
           showCancelButton: false,
         });
@@ -72,14 +74,14 @@ function PageTitleBar({
       try {
         navigator.clipboard.writeText(shareUrl);
         alertDialog({
-          title: 'URLをコピーしました',
-          description: `${typeName}のURLをクリップボードにコピーしました:\n` + shareUrl,
+          title: t('titleBar.shareSuccessTitle'),
+          description: t('titleBar.shareSuccessDescription', { typeName: typeName, url: shareUrl }),
           showCancelButton: false,
         });
       } catch (err: any) {
         alertDialog({
-          title: 'コピーに失敗しました',
-          description: 'クリップボードへのコピーに失敗しました: ' + err.message,
+          title: t('titleBar.shareErrorTitle'),
+          description: t('titleBar.shareErrorDescription', { error: err.message }),
           showCancelButton: false,
         });
       }
@@ -109,11 +111,11 @@ function PageTitleBar({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleShareUrl('VIEW')}>
-                閲覧リンクを共有
+                {t('titleBar.shareViewLink')}
               </DropdownMenuItem>
               {accessLevel !== 'VIEW' && (
                 <DropdownMenuItem onClick={() => handleShareUrl('EDIT')}>
-                  編集リンクを共有
+                  {t('titleBar.shareEditLink')}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>

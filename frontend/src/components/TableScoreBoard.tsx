@@ -3,6 +3,7 @@ import type { Game, Player, ScoreInput, Table } from '@/api/generated/mahjongApi
 import styles from './TableScoreBoard.module.css';
 import React, { useState } from 'react';
 import { Button } from './ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface TableScoreBoardProps {
   table: Table;
@@ -18,6 +19,7 @@ function TableScoreBoard({
   onUpdateGame,
   disabled = false,
 }: TableScoreBoardProps) {
+  const { t } = useTranslation();
   if (!table || !players || !games) return null;
   const [editingGameIndex, setEditingGameIndex] = useState<number | null>(null);
   const [editingScores, setEditingScores] = useState<Record<number, string>>({});
@@ -127,7 +129,7 @@ function TableScoreBoard({
       <table className={`${styles.scoreTable} table`}>
         <thead>
           <tr>
-            <th className={styles.header}>回</th>
+            <th className={styles.header}>{t('scoreBoard.gameTitle')}</th>
             {displayPlayers.map((player) => (
               <th key={player.id} className={styles.header}>
                 {player.name}
@@ -139,7 +141,9 @@ function TableScoreBoard({
           {displayGames.map((game, index) => (
             <React.Fragment key={game?.id ?? `row-${index}`}>
               <tr onClick={() => handleRowClick(index)}>
-                <td className={styles.cell}>{isChipTable ? 'チップ' : `第${index + 1}回`}</td>
+                <td className={styles.cell}>
+                  {isChipTable ? t('Common.chip') : t('scoreBoard.gameLabel', { index: index + 1 })}
+                </td>
                 {displayPlayers.map((player) => (
                   <td key={`${index}-${player.id}`} className={styles.cell}>
                     {editingGameIndex === index && player.id > 0 ? (
@@ -166,7 +170,7 @@ function TableScoreBoard({
                       colSpan={displayPlayers.length + 1}
                       style={{ textAlign: 'right', fontWeight: 'bold' }}
                     >
-                      合計: {rowTotal}
+                      {t('scoreBoard.totalLabel')}: {rowTotal}
                     </td>
                   </tr>
                   <tr className={styles.confirmRow}>
@@ -177,14 +181,14 @@ function TableScoreBoard({
                           className={`${styles.addButton} mahjong-button`}
                           disabled={rowTotal !== 0 && table.type === 'NORMAL'}
                         >
-                          確定
+                          {t('Common.Confirmed')}
                         </Button>
                         <Button
                           onClick={handleCancel}
                           className={`${styles.addButton} mahjong-button`}
                           style={{ marginLeft: '1rem' }}
                         >
-                          キャンセル
+                          {t('Common.Cancel')}
                         </Button>
                       </div>
                     </td>
@@ -195,7 +199,7 @@ function TableScoreBoard({
           ))}
           {!isChipTable && (
             <tr className={styles.totalRow}>
-              <td className={styles.header}>合計</td>
+              <td className={styles.header}>{t('scoreBoard.totalLabel')}</td>
               {displayPlayers.map((player) => (
                 <td key={`total-${player.id}`} className={styles.cell}>
                   {totalScores[player.id] ?? 0}
