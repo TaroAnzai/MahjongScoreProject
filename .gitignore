@@ -43,6 +43,7 @@ pnpm-debug.log*
 
 backend/.env
 backend/.env.production
+backend/.env.secrets
 
 # ==============================
 # OS / Editor
@@ -56,3 +57,4 @@ backend/celerybeat-schedule
 
 frontend/ssl/*
 frontend/.htaccess
+

@@ -25,7 +25,7 @@ def create_group(client):
         # ------------------------------------------------------------
         # 1️⃣ メール送信リクエスト
         # ------------------------------------------------------------
-        res1 = client.post("/api/groups/request-link", json={"name": name, "email": email})
+        res1 = client.post("/api/groups/request-link", json={"name": name, "email": email, "recaptcha_token":"xxx"})
         assert res1.status_code == 200
         res1_json = res1.get_json()
         assert "expires_at" in res1_json

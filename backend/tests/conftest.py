@@ -68,6 +68,17 @@ def mock_celery_delay():
     """
     with patch("app.api.services.group_service.send_group_creation_email_task.delay") as mock_delay:
         yield mock_delay
+# ------------------------------------------------------------
+# reCAPTCHA をモックして成功扱いにする（RateLimitテスト用）
+# ------------------------------------------------------------
+
+@pytest.fixture(autouse=True)
+def mock_recaptcha_ok(monkeypatch):
+    """reCAPTCHA 確認関数を常に True を返すようにモック"""
+    monkeypatch.setattr(
+        "app.api.services.group_service.verify_recaptcha",
+        lambda token, action="create_group": True
+    )
 # =========================================================
 # テストデータ生成用ユーティリティ
 # =========================================================

@@ -21,7 +21,9 @@ def create_app(config_name=None, config_override=None):
             TESTING=True,
             SQLALCHEMY_DATABASE_URI="sqlite:///:memory:",
             SQLALCHEMY_TRACK_MODIFICATIONS=False,
+            RATELIMIT_ENABLED=False,
         )
+
     if config_override:
         app.config.update(config_override)
 

@@ -11,7 +11,7 @@ class TestGroupEndpoints:
         # ------------------------------------------------------------
         # 1️⃣ メール送信リクエスト
         # ------------------------------------------------------------
-        res1 = client.post("/api/groups/request-link", json={"name": group_name, "email": email})
+        res1 = client.post("/api/groups/request-link", json={"name": group_name, "email": email, "recaptcha_token":"xxx"})
         print(res1.get_json())
         assert res1.status_code == 200
         res1_json = res1.get_json()

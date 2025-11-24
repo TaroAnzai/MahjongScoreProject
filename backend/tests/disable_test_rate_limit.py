@@ -50,14 +50,4 @@ def test_request_group_creation_rate_limit(client):
     assert "Retry-After" in r4.headers
 
 
-# ------------------------------------------------------------
-# reCAPTCHA をモックして成功扱いにする（RateLimitテスト用）
-# ------------------------------------------------------------
 
-@pytest.fixture(autouse=True)
-def mock_recaptcha_ok(monkeypatch):
-    """reCAPTCHA 確認関数を常に True を返すようにモック"""
-    monkeypatch.setattr(
-        "app.api.services.group_service.verify_recaptcha",
-        lambda token, action="create_group": True
-    )

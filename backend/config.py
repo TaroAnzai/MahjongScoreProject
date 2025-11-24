@@ -2,9 +2,9 @@
 
 import os
 from dotenv import load_dotenv
-import secrets
 
 
+load_dotenv(".env.secrets")
 # FLASK_ENV の値に応じて .env を読み込む
 env_name = os.getenv("FLASK_ENV", "development")
 print("env_name:", env_name)
