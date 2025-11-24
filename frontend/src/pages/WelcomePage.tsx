@@ -11,7 +11,7 @@ import { TextInputModal } from '@/components/TextInputModal';
 import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 import { Spinner } from '@/components/ui/spinner';
 import { useTranslation } from 'react-i18next';
-
+import { getRecaptchaToken } from '@/utils/recaptcha';
 function WelcomePage() {
   const navigate = useNavigate(); // ← フックの呼び出し
   const { t } = useTranslation();
@@ -19,14 +19,20 @@ function WelcomePage() {
   const { mutate: createGroup } = useCreateGroupRequest();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleCreateGroup = (groupName: string, email: string) => {
+  const handleCreateGroup = async (groupName: string, email: string) => {
     if (!groupName || !email) return;
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
     setIsModalOpen(false);
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    createGroup({ name: groupName, email: email, timezone: timezone });
+    const recaptchaToken = await getRecaptchaToken('create_group');
+    createGroup({
+      name: groupName,
+      email: email,
+      timezone: timezone,
+      recaptcha_token: recaptchaToken,
+    });
   };
 
   const handleEnterGroup = (group: Group) => {
