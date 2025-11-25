@@ -25,5 +25,6 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 
 limiter = Limiter(
     key_func=get_remote_address,
+    storage_uri="memory://",
     default_limits=["200 per hour"],     # ← 全APIのデフォルト制限
 )

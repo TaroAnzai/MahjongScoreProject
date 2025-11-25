@@ -16,7 +16,11 @@ class TableTypeEnum(StrEnum):
     NORMAL = "NORMAL"
     CHIP = "CHIP"
 
-
+class ContactStatus(StrEnum):
+    RECEIVED = "received"        # 受信
+    IN_PROGRESS = "in_progress"  # 対応中
+    ANSWERED = "answered"        # 回答済み
+    CLOSED = "closed"            # 完了
 # =========================================================
 # グループ（最上位レイヤー）
 # =========================================================
@@ -252,6 +256,36 @@ class GroupCreationToken(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
     is_used = db.Column(db.Boolean, default=False)
+
+# =========================================================
+# お問い合わせモデル
+# =========================================================
+class Contact(db.Model):
+    __tablename__ = "tbl_contacts"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # --- ユーザー入力 ---
+    name = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), nullable=False)
+    subject = db.Column(db.String(255), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+
+    # --- 状態管理（String Enum） ---
+    status = db.Column(
+        db.Enum(ContactStatus),
+        default=ContactStatus.RECEIVED,
+        nullable=False
+    )
+
+    # --- 任意ログ ---
+    ip_address = db.Column(db.String(50), nullable=True)
+    user_agent = db.Column(db.String(500), nullable=True)
+
+    # --- 時刻 ---
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 # =========================================================
 # Groupの最終更新日時を自動更新するイベントリスナー
 # =========================================================

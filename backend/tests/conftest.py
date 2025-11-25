@@ -73,10 +73,17 @@ def mock_celery_delay():
 # ------------------------------------------------------------
 
 @pytest.fixture(autouse=True)
-def mock_recaptcha_ok(monkeypatch):
+def mock_recaptcha_ok_group(monkeypatch):
     """reCAPTCHA 確認関数を常に True を返すようにモック"""
     monkeypatch.setattr(
         "app.api.services.group_service.verify_recaptcha",
+        lambda token, action="create_group": True
+    )
+@pytest.fixture(autouse=True)
+def mock_recaptcha_ok_contact(monkeypatch):
+    """reCAPTCHA 確認関数を常に True を返すようにモック"""
+    monkeypatch.setattr(
+        "app.api.services.contact_service.verify_recaptcha",
         lambda token, action="create_group": True
     )
 # =========================================================
