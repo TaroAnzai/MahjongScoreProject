@@ -13,6 +13,7 @@ import { AdminProtected } from './pages/admin/AdminProtected';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminGroups } from './pages/admin/AdminGroups';
 import { useTranslation } from 'react-i18next';
+import ContactPage from './pages/ContactPage';
 
 function NotFoundPage() {
   const location = useLocation();
@@ -47,6 +48,7 @@ function App() {
         <Route path="/group/:groupKey" element={<GroupPage />} />
         <Route path="/tournament/:tournamentKey" element={<TournamentPage />} />
         <Route path="/table/:tableKey" element={<TablePage />} />
+        <Route path="/contact" element={<ContactPage />} />
         {/* 🔒 管理者保護ルート */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route element={<AdminProtected />}>

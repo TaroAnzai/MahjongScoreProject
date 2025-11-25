@@ -147,6 +147,17 @@
     "dialogTitle": "プレイヤー成績",
     "dialogDescription": "{{playerName}}さんの成績"
   },
+  "contactPage": {
+    "title": "お問い合わせ",
+    "name": "名前",
+    "email": "メールアドレス",
+    "subject": "件名",
+    "message": "メッセージ",
+    "send": "送信する",
+    "sending": "送信中...",
+    "success": "お問い合わせを受け付けました。通常24時間以内に返信いたします。",
+    "error": "送信に失敗しました。再度お試しください。"
+  },
   "hooks": {
     "groupRequest": {
       "emailSentTitle": "グループ作成用メールを送信しました",

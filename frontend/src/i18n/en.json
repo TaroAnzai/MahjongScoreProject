@@ -148,7 +148,17 @@
     "dialogTitle": "Player Statistics",
     "dialogDescription": "Statistics for {{playerName}}"
   },
-
+  "contactPage": {
+    "title": "Contact Us",
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send",
+    "sending": "Sending...",
+    "success": "Your message has been sent. We will reply within 24 hours.",
+    "error": "Failed to send your message. Please try again."
+  },
   "hooks": {
     "groupRequest": {
       "emailSentTitle": "Group creation email sent",
