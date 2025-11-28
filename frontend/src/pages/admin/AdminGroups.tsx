@@ -17,8 +17,6 @@ import { useNavigate } from 'react-router-dom';
 import { is } from 'zod/v4/locales';
 
 export function AdminGroups() {
-  const { isAdmin } = useCheckAdmin();
-  console.log('AdminGroups rendered', isAdmin);
   const { groups, isLoading, refetch: refetchGroups } = useAdminGetGroups();
   const { mutate: deleteGroup, isSuccess } = useAdminDeleteGroup();
 

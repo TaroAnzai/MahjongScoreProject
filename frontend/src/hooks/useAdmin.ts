@@ -35,8 +35,11 @@ export const useAdminLogin = () => {
 
 export const useAdminLogout = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => {
+      const queryKey = getGetApiAdminMeQueryKey();
+      queryClient.setQueriesData({ queryKey }, false);
       return postApiAdminLogout();
     },
     onSuccess: () => {
