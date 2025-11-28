@@ -7,31 +7,27 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useAdminDeleteGroup, useAdminGetGroups, useAdminLogout } from '@/hooks/useAdmin';
+import {
+  useAdminDeleteGroup,
+  useAdminGetGroups,
+  useAdminLogout,
+  useCheckAdmin,
+} from '@/hooks/useAdmin';
 import { useNavigate } from 'react-router-dom';
+import { is } from 'zod/v4/locales';
 
 export function AdminGroups() {
-  const navigate = useNavigate();
-  const { mutate: logout, isPending } = useAdminLogout();
+  const { isAdmin } = useCheckAdmin();
+  console.log('AdminGroups rendered', isAdmin);
   const { groups, isLoading, refetch: refetchGroups } = useAdminGetGroups();
   const { mutate: deleteGroup, isSuccess } = useAdminDeleteGroup();
-  const handleLogout = () => {
-    logout();
-    navigate('/admin/login');
-  };
+
   const handleDelete = (GroupKey: string | undefined) => () => {
     if (!GroupKey) return;
     deleteGroup({ groupKey: GroupKey });
   };
   return (
     <div className="mahjong-container max-w-1000! ">
-      <div className="flex">
-        <h1 className="absolute left-1/2 -translate-x-1/2">All Groups</h1>
-        <Button className="ml-auto" onClick={() => handleLogout()}>
-          Logout
-        </Button>
-      </div>
-
       <Table className="mt-5">
         <TableHeader>
           <TableRow>

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAdminLogin } from '@/hooks/useAdmin';
+import { useAdminLogin, useCheckAdmin } from '@/hooks/useAdmin';
 import { Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -11,13 +11,13 @@ export function AdminLogin() {
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const { mutate: login, isPending, isSuccess } = useAdminLogin();
+  const { isAdmin } = useCheckAdmin();
 
   useEffect(() => {
-    if (isSuccess) {
-      console.log('Admin login success');
+    if (isAdmin) {
       navigate('/admin/groups');
     }
-  }, [isSuccess]);
+  }, [isAdmin]);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     login({ username: username, password: password });

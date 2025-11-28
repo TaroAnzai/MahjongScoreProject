@@ -10,7 +10,7 @@ export function AdminProtected() {
     return <div className="p-4">Checking admin session...</div>;
   }
   // --- 管理者ではない場合 ---
-  if (!isAdmin || isAdmin.is_admin === false) {
+  if (!isAdmin) {
     return <Navigate to="/admin/login" replace />;
   }
   // --- OK → 子ルートを表示 ---
