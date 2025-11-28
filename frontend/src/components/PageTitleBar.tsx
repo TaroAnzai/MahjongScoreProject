@@ -21,6 +21,7 @@ interface PageTitleBarProps {
   onTitleClick?: () => void;
   onTitleChange?: (newTitle: string) => void;
   parentUrl?: string | null;
+  showBackButton?: boolean;
 }
 function PageTitleBar({
   title,
@@ -29,6 +30,7 @@ function PageTitleBar({
   onTitleClick,
   onTitleChange,
   parentUrl,
+  showBackButton = false,
 }: PageTitleBarProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -94,6 +96,7 @@ function PageTitleBar({
         {parentUrl !== null && parentUrl !== undefined && (
           <ChevronsUp className="cursor-pointer" onClick={() => navigate(parentUrl)} />
         )}
+        {showBackButton && <ChevronsLeft className="cursor-pointer" onClick={() => navigate(-1)} />}
       </div>
 
       <div className={styles.center}>

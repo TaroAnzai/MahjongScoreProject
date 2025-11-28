@@ -57,11 +57,11 @@
 /* === リンク・テキスト === */
 a {
   font-weight: 500;
-  color: oklch(0.5 0.15 140);
+  color: oklch(0.85 0.03 140);
   text-decoration: inherit;
 }
 a:hover {
-  color: oklch(0.45 0.2 140);
+  color: oklch(0.78 0.04 140);
 }
 
 /* === 背景・本文 === */

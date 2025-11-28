@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { Link } from 'react-router-dom';
+import { Globe } from 'lucide-react';
 export const PageHeader = () => {
   const { t } = useTranslation();
   return (
@@ -13,7 +14,7 @@ export const PageHeader = () => {
       <div className="ml-auto flex items-center">
         <Link
           to="/contact" // コンタクトページへのリンク
-          className="cursor-pointer  hover:underline mr-4 text-sm" // リンクとして見せるためのスタイル
+          className="cursor-pointer  hover:underline mr-4 text-sm leading-none" // リンクとして見せるためのスタイル
         >
           {t('contactPage.title')}
         </Link>
@@ -33,7 +34,10 @@ export function LanguageSelector() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <span className="cursor-pointer select-none">🌐Language</span>
+        <span className="cursor-pointer select-none text-[oklch(0.85_0.03_140)] hover:text-[oklch(0.78_0.04_140)] text-sm leading-none flex items-center">
+          <Globe className="inline-block w-4 h-4 mr-1" />
+          Language
+        </span>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end">

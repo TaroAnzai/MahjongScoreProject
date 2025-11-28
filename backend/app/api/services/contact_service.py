@@ -16,7 +16,7 @@ class ContactService:
         """
             # 🟩 reCAPTCHA（最初にチェック）
         recaptcha = data.get("recaptcha_token")
-        if not recaptcha or not verify_recaptcha(recaptcha):
+        if not recaptcha or not verify_recaptcha(recaptcha, "create_contact"):
           raise ServicePermissionError("不正なアクセスが検出されました。（reCAPTCHA）")
         data.pop("recaptcha_token", None)
         try:
