@@ -19,8 +19,8 @@ export const PageHeader = () => {
   };
   return (
     <div className="flex items-center justify-between max-w-[500px] mx-auto mb-1">
-      <div className="flex items-center">
-        <Link to="/admin/groups">
+      <div className="flex items-center gap-2">
+        <Link to="/admin/">
           <UserCog className="w-4 h-4 text-[oklch(0.85_0.03_140)] hover:text-[oklch(0.78_0.04_140)] " />
         </Link>
         {isAdmin && (

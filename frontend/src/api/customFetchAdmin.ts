@@ -37,7 +37,7 @@ export const customFetchAdmin = async <T>(
     credentials: 'include',
     ...options,
   });
-
+  console.log('Response:', response);
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
     throw {

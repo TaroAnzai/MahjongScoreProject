@@ -14,6 +14,8 @@ import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminGroups } from './pages/admin/AdminGroups';
 import { useTranslation } from 'react-i18next';
 import ContactPage from './pages/ContactPage';
+import { AdminTop } from './pages/admin/AdminTop';
+import { AdminContact } from './pages/admin/AdminContact';
 
 function NotFoundPage() {
   const location = useLocation();
@@ -52,7 +54,9 @@ function App() {
         {/* 🔒 管理者保護ルート */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route element={<AdminProtected />}>
+          <Route path="/admin" element={<AdminTop />} />
           <Route path="/admin/groups" element={<AdminGroups />} />
+          <Route path="/admin/contact" element={<AdminContact />} />
         </Route>
         {/* 404対策 */}
         <Route path="*" element={<NotFoundPage />} />

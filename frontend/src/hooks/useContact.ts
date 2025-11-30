@@ -1,11 +1,12 @@
 import {
   deleteApiContactsContactId,
+  getGetApiContactsQueryKey,
   patchApiContactsContactId,
   postApiContacts,
   useGetApiContacts,
 } from '@/api/generated/mahjongApi';
 import type { ContactCreate, ContactUpdate } from '@/api/generated/mahjongApi.schemas';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 export const useCreateContact = () => {
@@ -42,11 +43,14 @@ export const useUpdateContact = () => {
 };
 
 export const useDeleteContact = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { id: number }) => {
       return deleteApiContactsContactId(data.id);
     },
     onSuccess: () => {
+      const querykey = getGetApiContactsQueryKey();
+      queryClient.invalidateQueries({ queryKey: querykey });
       toast.success('Contact deleted successfully');
     },
     onError: (error) => {
