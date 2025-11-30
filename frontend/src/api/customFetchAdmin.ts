@@ -37,7 +37,6 @@ export const customFetchAdmin = async <T>(
     credentials: 'include',
     ...options,
   });
-  console.log('Response:', response);
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
     throw {
@@ -48,6 +47,9 @@ export const customFetchAdmin = async <T>(
     };
   }
 
+  if (response.status === 204) {
+    return null as T;
+  }
   // JSON以外のレスポンスにも対応
   const contentType = response.headers.get('content-type');
   if (contentType?.includes('application/json')) {

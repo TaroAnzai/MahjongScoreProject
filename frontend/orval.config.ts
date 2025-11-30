@@ -32,7 +32,7 @@ export default {
       filters: {
         // /api/admin/* のみ抽出する
 
-        tags: ['admin_auth', 'admin_groups'],
+        tags: ['admin_auth', 'admin_resources'],
       },
     },
     output: {
