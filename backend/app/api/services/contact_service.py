@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.service_errors import ServiceNotFoundError, ServicePermissionError
 from app.utils.recaptcha import verify_recaptcha
 
+
 class ContactService:
     """Contact（問い合わせ）に関するビジネスロジック"""
 
@@ -43,7 +44,7 @@ class ContactService:
         """
         contact = Contact.query.get(contact_id)
         if not contact:
-            return None
+            raise ServiceNotFoundError(f"Contact not found with id: {contact_id}")
         return contact
 
     @staticmethod
@@ -91,4 +92,4 @@ class ContactService:
 
         db.session.delete(contact)
         db.session.commit()
-        return True
+        return {"message": "Contact deleted successfully."}

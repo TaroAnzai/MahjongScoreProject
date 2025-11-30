@@ -1,9 +1,27 @@
 # backend/tests/contacts/test_contact_api.py
-
+import pytest
 from app import db
 from app.models import Contact, ContactStatus
 
+# ==== 管理者ログイン情報（グローバル変数） ====
+ADMIN_TEST_USER = "admin"
+ADMIN_TEST_PASSWORD = "testpassword"
+# ============================================================
+# すべてのテストで管理者ログイン状態にする共通 fixture
+# ============================================================
+@pytest.fixture()
+def admin_logged_in(client, monkeypatch):
+    """
+    管理者ログインを行い、Cookie セッション付きの client を返す。
+    """
+    # --- ログイン ---
+    res = client.post(
+        "/api/admin/login",
+        json={"username": ADMIN_TEST_USER, "password": ADMIN_TEST_PASSWORD},
+    )
 
+    assert res.status_code == 200
+    return client   # ← ログイン済み client を返す
 # ===============================
 # CREATE (POST)
 # ===============================
@@ -29,7 +47,9 @@ def test_create_contact(client):
 # ===============================
 # LIST (GET)
 # ===============================
-def test_list_contacts(client):
+def test_list_contacts(client, admin_logged_in):
+    client = admin_logged_in
+
     db.session.add(Contact(
         name="User1",
         email="u1@example.com",
@@ -39,7 +59,7 @@ def test_list_contacts(client):
     ))
     db.session.commit()
 
-    res = client.get("/api/contacts/")
+    res = client.get("/api/admin/contacts")
     assert res.status_code == 200
 
     data = res.get_json()
@@ -51,7 +71,8 @@ def test_list_contacts(client):
 # ===============================
 # GET ONE
 # ===============================
-def test_get_contact(client):
+def test_get_contact(client, admin_logged_in):
+    client = admin_logged_in
     contact = Contact(
         name="User2",
         email="u2@example.com",
@@ -62,21 +83,23 @@ def test_get_contact(client):
     db.session.add(contact)
     db.session.commit()
 
-    res = client.get(f"/api/contacts/{contact.id}")
+    res = client.get(f"/api/admin/contacts/{contact.id}")
     assert res.status_code == 200
     data = res.get_json()
     assert data["email"] == "u2@example.com"
 
 
-def test_get_contact_not_found(client):
-    res = client.get("/api/contacts/9999")
+def test_get_contact_not_found(client, admin_logged_in):
+    client = admin_logged_in
+    res = client.get("/api/admin/contacts/9999")
     assert res.status_code == 404
 
 
 # ===============================
 # UPDATE (PATCH)
 # ===============================
-def test_update_contact_status(client):
+def test_update_contact_status(client, admin_logged_in):
+    client = admin_logged_in
     contact = Contact(
         name="User3",
         email="u3@example.com",
@@ -89,7 +112,7 @@ def test_update_contact_status(client):
 
     payload = {"status": "in_progress"}
 
-    res = client.patch(f"/api/contacts/{contact.id}", json=payload)
+    res = client.patch(f"/api/admin/contacts/{contact.id}", json=payload)
     print(res.get_json())
     assert res.status_code == 200
 
@@ -97,15 +120,17 @@ def test_update_contact_status(client):
     assert data["status"] == "in_progress"
 
 
-def test_update_contact_not_found(client):
-    res = client.patch("/api/contacts/9999", json={"status": "answered"})
+def test_update_contact_not_found(client, admin_logged_in):
+    client = admin_logged_in
+    res = client.patch("/api/admin/contacts/9999", json={"status": "answered"})
     assert res.status_code == 404
 
 
 # ===============================
 # DELETE
 # ===============================
-def test_delete_contact(client):
+def test_delete_contact(client, admin_logged_in):
+    client = admin_logged_in
     contact = Contact(
         name="User4",
         email="u4@example.com",
@@ -116,14 +141,15 @@ def test_delete_contact(client):
     db.session.add(contact)
     db.session.commit()
 
-    res = client.delete(f"/api/contacts/{contact.id}")
+    res = client.delete(f"/api/admin/contacts/{contact.id}")
     assert res.status_code == 204
 
     # 削除確認
-    res2 = client.get(f"/api/contacts/{contact.id}")
+    res2 = client.get(f"/api/admin/contacts/{contact.id}")
     assert res2.status_code == 404
 
 
-def test_delete_contact_not_found(client):
-    res = client.delete("/api/contacts/9999")
+def test_delete_contact_not_found(client, admin_logged_in):
+    client = admin_logged_in
+    res = client.delete("/api/admin/contacts/9999")
     assert res.status_code == 404
