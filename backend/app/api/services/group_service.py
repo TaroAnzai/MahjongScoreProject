@@ -1,5 +1,5 @@
 from datetime import datetime, timezone, timedelta
-from flask import current_app
+from flask import current_app, request
 import secrets
 from app import db
 from app.models import AccessLevel, Group, GroupCreationToken
@@ -51,14 +51,45 @@ def _ensure_access(link, group, required: AccessLevel, message: str):
 # =========================================================
 # グループ作成メール送信
 # =========================================================
+def get_client_ip() -> str:
+    forwarded_for = request.headers.get("X-Forwarded-For")
+
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+
+    return request.remote_addr or "unknown"
+
+def check_group_creation_rate_limit(email: str, ip_address: str) -> None:
+    now = datetime.now(timezone.utc)
+
+    ip_count_1h = GroupCreationToken.query.filter(
+        GroupCreationToken.ip_address == ip_address,
+        GroupCreationToken.created_at >= now - timedelta(hours=1),
+    ).count()
+
+    if ip_count_1h >= 5:
+        raise ServicePermissionError("同一IPからのリクエストが多すぎます。しばらくしてから再試行してください。")
+
+    email_count_1h = GroupCreationToken.query.filter(
+        GroupCreationToken.email == email,
+        GroupCreationToken.created_at >= now - timedelta(hours=1),
+    ).count()
+
+    if email_count_1h >= 3:
+        raise ServicePermissionError("同一メールアドレスへの送信回数が多すぎます。しばらくしてから再試行してください。")
+
+    email_count_1d = GroupCreationToken.query.filter(
+        GroupCreationToken.email == email,
+        GroupCreationToken.created_at >= now - timedelta(days=1),
+    ).count()
+
+    if email_count_1d >= 10:
+        raise ServicePermissionError("本日の送信回数上限に達しました。明日以降に再試行してください。")
 def create_group_creation_token(data: GroupRequestSchema) -> GroupCreationToken:
     email = data.get('email')
     group_name = data.get('name')
     tz_str = data.get('timezone',"Asia/Tokyo")
-    # 🟩 reCAPTCHA（最初にチェック）
-    recaptcha = data.get("recaptcha_token")
-    if not recaptcha or not verify_recaptcha(recaptcha):
-        raise ServicePermissionError("不正なアクセスが検出されました。（reCAPTCHA）")
+
     try:
         tz = ZoneInfo(tz_str)
     except ZoneInfoNotFoundError:
@@ -70,6 +101,11 @@ def create_group_creation_token(data: GroupRequestSchema) -> GroupCreationToken:
 
     if not group_name:
         raise ServiceValidationError("グループ名は必須です。")
+
+    ip_address = get_client_ip()
+
+    # アクセス制限チェック
+    check_group_creation_rate_limit(email, ip_address)
 
     # 既存の未使用トークンを無効化
     existing_tokens = GroupCreationToken.query.filter_by(email=email, is_used=False).all()

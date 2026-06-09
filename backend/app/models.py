@@ -256,6 +256,7 @@ class GroupCreationToken(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
     is_used = db.Column(db.Boolean, default=False)
+    ip_address = db.Column(db.String(45), nullable=True)
 
 # =========================================================
 # お問い合わせモデル
