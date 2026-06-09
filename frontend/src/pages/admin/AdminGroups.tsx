@@ -13,8 +13,6 @@ import {
   useAdminLogout,
   useCheckAdmin,
 } from '@/hooks/useAdmin';
-import { useNavigate } from 'react-router-dom';
-import { is } from 'zod/v4/locales';
 
 export function AdminGroups() {
   const { groups, isLoading, refetch: refetchGroups } = useAdminGetGroups();
