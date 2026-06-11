@@ -11,7 +11,6 @@ class GroupRequestSchema(Schema):
     recaptcha_token = fields.Str(required=False, description="reCAPTCHAのトークン(未使用)")
 class GroupResponseSchema(Schema):
     """グループリクエストレスポンス"""
-    message = fields.Str(required=True, description="メッセージ")
     expires_at = fields.DateTime(required=True, description="有効期限")
     token = fields.Str(required=True, description="作成中トークン")
 

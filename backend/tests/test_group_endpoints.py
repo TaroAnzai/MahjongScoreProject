@@ -16,6 +16,7 @@ class TestGroupEndpoints:
         assert res1.status_code == 200
         res1_json = res1.get_json()
         assert "expires_at" in res1_json
+        assert "token" in res1_json
 
         # ------------------------------------------------------------
         # 2️⃣ トークンをDBから取得（実際にはメールで届く想定）

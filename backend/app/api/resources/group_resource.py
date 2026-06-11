@@ -60,12 +60,8 @@ class GroupsResource(MethodView):
 def request_group_creation(args):
     """グループ作成リンクをリクエストする"""
     # サービス層へ委譲
-    token_record = create_group_creation_token(args)
-    print("token_record", token_record.expires_at)
-    return {
-        "message": "グループ作成リンク送信を開始しました。",
-        "expires_at": token_record.expires_at,
-    }, 200
+    return create_group_creation_token(args)
+
 
 
 
