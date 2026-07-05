@@ -106,7 +106,8 @@
   "scoreBoard": {
     "gameTitle": "局",
     "gameLabel": "第{{index}}局",
-    "totalLabel": "合計"
+    "totalLabel": "合計",
+    "errorInvalidScore": "半角数値で入力してください"
   },
   "titleBar": {
     "group": "グループ",

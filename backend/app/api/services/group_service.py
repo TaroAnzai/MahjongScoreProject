@@ -1,5 +1,6 @@
 from datetime import datetime, timezone, timedelta
-from flask import current_app, request
+import os
+from flask import app, current_app, request
 import secrets
 from app import db
 from app.models import AccessLevel, Group, GroupCreationToken
@@ -105,7 +106,8 @@ def create_group_creation_token(data: GroupRequestSchema) -> GroupCreationToken:
     ip_address = get_client_ip()
 
     # アクセス制限チェック
-    check_group_creation_rate_limit(email, ip_address)
+    if os.getenv("FLASK_ENV") == "production":
+        check_group_creation_rate_limit(email, ip_address)
 
     # 既存の未使用トークンを無効化
     existing_tokens = GroupCreationToken.query.filter_by(email=email, is_used=False).all()

@@ -63,3 +63,6 @@ class Config:
 
     # Frontend URL
     FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173/")
+
+    # Rate Limit
+    RATELIMIT_ENABLED = os.getenv("RATELIMIT_ENABLED", "True").lower() in ("true", "1")

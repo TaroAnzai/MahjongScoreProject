@@ -68,7 +68,11 @@ export const useUpdateTournament = () => {
       const queryKeytournament = getGetApiTournamentsTournamentKeyQueryOptions(
         variables.tournamentKey
       ).queryKey;
+      const queryKeyScore = getGetApiTournamentsTournamentKeyScoreMapQueryOptions(
+        variables.tournamentKey
+      ).queryKey;
       queryClient.invalidateQueries({ queryKey: queryKeytournament });
+      queryClient.invalidateQueries({ queryKey: queryKeyScore });
     },
     onError: (error: any) => {
       console.error('Error updating tournament:', error);

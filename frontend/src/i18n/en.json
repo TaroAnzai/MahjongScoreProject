@@ -107,7 +107,8 @@
   "scoreBoard": {
     "gameTitle": "Game",
     "gameLabel": "Game{{index}}",
-    "totalLabel": "Total"
+    "totalLabel": "Total",
+    "errorInvalidScore": "Please enter a valid number"
   },
   "titleBar": {
     "group": "Group",

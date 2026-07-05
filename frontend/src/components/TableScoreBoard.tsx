@@ -4,6 +4,7 @@ import styles from './TableScoreBoard.module.css';
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 interface TableScoreBoardProps {
   table: Table;
@@ -108,9 +109,13 @@ function TableScoreBoard({
     }
   });
   const handleScoreChange = (playerId: number, value: string) => {
+    console.log('handleScoreChange', playerId, value);
     // 数値・マイナス・小数点・空欄以外は無視
-    if (value !== '' && !/^-?\d*\.?\d*$/.test(value)) return;
-
+    if (value !== '' && !/^-?\d*\.?\d*$/.test(value)) {
+      toast.error(t('scoreBoard.errorInvalidScore'));
+      return;
+    }
+    console.log('handleScoreChange valid', playerId, value);
     setEditingScores((prev) => {
       const newScores = { ...prev, [playerId]: value };
 
@@ -152,12 +157,13 @@ function TableScoreBoard({
                         inputMode="numeric"
                         className={styles.input}
                         value={editingScores[player.id] ?? ''}
+                        onClick={(e) => e.stopPropagation()}
                         onChange={(e) => {
                           handleScoreChange(player.id, e.target.value);
                         }}
                       />
                     ) : (
-                      game?.scores?.find((s) => s.player_id === player.id)?.score ?? ''
+                      (game?.scores?.find((s) => s.player_id === player.id)?.score ?? '')
                     )}
                   </td>
                 ))}
