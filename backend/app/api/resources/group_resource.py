@@ -8,7 +8,8 @@ from app.api.schemas.group_schema import (
     GroupUpdateSchema,
     GroupSchema,
     GroupRequestSchema,
-    GroupResponseSchema
+    GroupResponseSchema,
+    GroupCreateStatusSchema,
 )
 from app.api.schemas.tournament_schema import TournamentSchema, TournamentCreateSchema
 from app.service_errors import ServiceError
@@ -17,6 +18,7 @@ from app.service_errors import format_error_response
 
 from app.api.services.group_service import (
     create_group,
+    create_group_status,
     get_group_by_key,
     update_group,
     delete_group,
@@ -62,6 +64,15 @@ def request_group_creation(args):
     # サービス層へ委譲
     return create_group_creation_token(args)
 
+@group_bp.route("/request-link/status", methods=["POST"])
+@limiter.limit("3 per hour; 10 per day")
+@group_bp.arguments(GroupCreateSchema)
+@group_bp.response(200, GroupCreateStatusSchema)
+@with_common_error_responses(group_bp)
+def request_group_creation_status(args):
+    """グループ作成リンクのステータスをリクエストする"""
+    # サービス層へ委譲
+    return create_group_status(args)
 
 
 

@@ -257,7 +257,7 @@ class GroupCreationToken(db.Model):
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
     is_used = db.Column(db.Boolean, default=False)
     ip_address = db.Column(db.String(45), nullable=True)
-
+    group_id = db.Column(db.Integer, db.ForeignKey("tbl_groups.id", ondelete="SET NULL"), nullable=True,)
 # =========================================================
 # お問い合わせモデル
 # =========================================================

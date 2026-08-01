@@ -18,6 +18,11 @@ class GroupCreateSchema(Schema):
     """グループ作成用リクエスト"""
     token = fields.Str(required=True, description="作成用トークン")
 
+class GroupCreateStatusSchema(Schema):
+    """グループ作成ステータスレスポンス"""
+    status = fields.Str(required=True, description="作成ステータス")
+    owner_link = fields.Str(required=False, description="管理者用キー")
+
 class GroupUpdateSchema(Schema):
     """グループ更新用リクエスト"""
     name = fields.Str(description="グループ名")

@@ -24,7 +24,13 @@ class TestGroupEndpoints:
         token_record = GroupCreationToken.query.filter_by(email=email).order_by(GroupCreationToken.id.desc()).first()
         assert token_record is not None
         token = token_record.token
-
+        # ------------------------------------------------------------
+        # 3️⃣ トークンを使ってstatusを確認(Pending)
+        # ------------------------------------------------------------
+        res2 = client.post("/api/groups/request-link/status", json={"token": token})
+        assert res2.status_code == 200, f"Unexpected status code: {res2.status_code}, response: {res2.get_data(as_text=True)}"
+        res2_json = res2.get_json()
+        assert res2_json["status"] == "pending"
         # ------------------------------------------------------------
         # 3️⃣ トークンを使ってグループを作成
         # ------------------------------------------------------------
@@ -39,7 +45,14 @@ class TestGroupEndpoints:
         assert levels == {AccessLevel.OWNER.value, AccessLevel.EDIT.value, AccessLevel.VIEW.value}
         for link in data["group_links"]:
             assert link["short_key"]
-
+        # ------------------------------------------------------------
+        # 3️⃣ トークンを使ってstatusを確認(ready)
+        # ------------------------------------------------------------
+        res2 = client.post("/api/groups/request-link/status", json={"token": token})
+        assert res2.status_code == 200, f"Unexpected status code: {res2.status_code}, response: {res2.get_data(as_text=True)}"
+        res2_json = res2.get_json()
+        assert res2_json["status"] == "ready"
+        assert res2_json["owner_link"] == links[AccessLevel.OWNER.value]
     def test_get_group_by_short_key_ok(self, client, db_session, create_group):
         group_data, links = create_group("View Group")
         # ✅ group_links に変更
@@ -99,3 +112,9 @@ class TestGroupEndpoints:
         res = client.delete(f"/api/groups/{edit_key}")
         assert res.status_code == 403
         assert db_session.get(Group, group_id) is not None
+
+    def test_group_creation_status_invalid_token(self, client, db_session):
+        # 無効なトークンでステータスを確認
+        res = client.post("/api/groups/request-link/status", json={"token": "invalid_token"})
+        assert res.status_code == 404
+

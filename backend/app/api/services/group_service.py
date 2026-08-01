@@ -150,17 +150,17 @@ def create_group(data: GroupCreateSchema) -> Group:
     if record.is_used:
         raise ServiceValidationError("このトークンはすでに使用されています。")
 
-    if record.expires_at.tzinfo is None:
-        record.expires_at = record.expires_at.replace(tzinfo=timezone.utc)
-    if record.expires_at < datetime.now(timezone.utc):
+    expires_at = record.expires_at
+
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    if expires_at < datetime.now(timezone.utc):
         raise ServiceValidationError("このトークンは有効期限が切れています。")
 
-    record.is_used = True
-    db.session.commit()
-    name = record.group_name
 
     group = Group(
-        name=name,
+        name=record.group_name,
         description=data.get("description"),
         created_by=data.get("created_by", "anonymous"),
         created_at=datetime.now(timezone.utc),
@@ -168,13 +168,45 @@ def create_group(data: GroupCreateSchema) -> Group:
     )
     db.session.add(group)
     db.session.flush()
-
+    # トークンを作成済みグループに紐付ける
+    record.group_id = group.id
+    record.is_used = True
     # デフォルト共有リンク作成
     create_default_share_links("group", group.id, group.created_by)
     db.session.refresh(group)
     group.current_user_access = "OWNER"
     return group
 
+def create_group_status(data: GroupRequestSchema) -> dict[str, str]:
+    """グループ作成ステータスを取得する"""
+    token = data.get("token")
+    """トークン検証"""
+    record = GroupCreationToken.query.filter_by(token=token).first()
+
+    if not record:
+        raise ServiceNotFoundError("トークンが無効です。")
+
+    expires_at = record.expires_at
+
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    if expires_at < datetime.now(timezone.utc):
+        raise ServiceValidationError("このトークンは有効期限が切れています。")
+
+    if not record.is_used:
+        return {"status": "pending"}
+
+    group = db.session.get(Group, record.group_id)
+    if not group:
+        raise ServiceNotFoundError("トークンが無効です。")
+
+    group_links = group.group_links
+    owner_link = next((link.short_key for link in group_links if link.access_level == AccessLevel.OWNER), None)
+    if owner_link is None:
+        raise ServiceNotFoundError("オーナーリンクが見つかりません。")
+
+    return {"status": "ready", "owner_link": owner_link}
 
 # =========================================================
 # グループ取得
