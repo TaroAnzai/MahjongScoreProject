@@ -104,6 +104,31 @@ def test_delete_tournament_participant(client, setup_group_with_tournament, db_s
     assert deleted is None
 
 
+def test_delete_tournament_participant_with_score_is_rejected(
+    client, setup_full_tournament, db_session
+):
+    """卓に参加してスコア登録済みの大会参加者は削除できない"""
+    data = setup_full_tournament(client)
+    player = data["players"][0]
+    tournament_id = data["tournament_data"]["id"]
+    tournament_key = data["tournament_links"][AccessLevel.EDIT.value]
+
+    res = client.delete(
+        f"/api/tournaments/{tournament_key}/participants/{player['id']}"
+    )
+
+    assert res.status_code == 400
+    assert res.get_json()["errors"]["json"]["message"] == [
+        "スコアが登録されている大会参加者は削除できません。"
+    ]
+    assert (
+        db_session.query(TournamentPlayer)
+        .filter_by(tournament_id=tournament_id, player_id=player["id"])
+        .first()
+        is not None
+    )
+
+
 def test_create_with_invalid_key(client, setup_group_with_tournament):
     """無効な tournament_key の場合 404"""
     d = setup_group_with_tournament

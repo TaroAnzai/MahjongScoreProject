@@ -1,7 +1,16 @@
 # app/services/tournament_participant_service.py
 
 from app import db
-from app.models import AccessLevel, Tournament, TournamentPlayer, Player
+from app.models import (
+    AccessLevel,
+    Game,
+    Player,
+    Score,
+    Table,
+    TablePlayer,
+    Tournament,
+    TournamentPlayer,
+)
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
@@ -119,6 +128,25 @@ def delete_participant(tournament_key: str, player_id: int):
         raise ServiceNotFoundError("大会参加者が見つかりません。")
 
     _ensure_access(link, AccessLevel.EDIT, "大会参加者を削除する権限がありません。")
+
+    score = (
+        Score.query.join(Game, Score.game_id == Game.id)
+        .join(Table, Game.table_id == Table.id)
+        .join(
+            TablePlayer,
+            (TablePlayer.table_id == Table.id)
+            & (TablePlayer.player_id == Score.player_id),
+        )
+        .filter(
+            Table.tournament_id == participant.tournament_id,
+            Score.player_id == participant.player_id,
+        )
+        .first()
+    )
+    if score:
+        raise ServiceValidationError(
+            "スコアが登録されている大会参加者は削除できません。"
+        )
 
     db.session.delete(participant)
     db.session.commit()

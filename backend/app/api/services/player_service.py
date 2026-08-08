@@ -1,5 +1,5 @@
 from app import db
-from app.models import AccessLevel, Group, Player
+from app.models import AccessLevel, Group, Player, TournamentPlayer
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
@@ -117,6 +117,12 @@ def delete_player(group_key: str, player_id: int) -> None:
         raise ServiceNotFoundError("プレイヤーが見つかりません。")
 
     _ensure_access(link, AccessLevel.EDIT, "プレイヤーを削除する権限がありません。")
+
+    participation = TournamentPlayer.query.filter_by(player_id=player.id).first()
+    if participation:
+        raise ServiceValidationError(
+            "このプレイヤーは大会に参加しているため削除できません。"
+        )
 
     db.session.delete(player)
     db.session.commit()

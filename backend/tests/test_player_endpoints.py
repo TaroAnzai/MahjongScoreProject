@@ -72,3 +72,31 @@ class TestPlayerEndpoints:
         assert allowed.status_code == 200
         assert allowed.get_json()["message"] == "Player deleted"
         assert db_session.get(Player, player["id"]) is None
+
+    def test_delete_player_rejects_tournament_participant(
+        self,
+        client,
+        db_session,
+        create_group,
+        create_tournament,
+        register_tournament_participants,
+    ):
+        _, group_links = create_group("Player Group")
+        create_res = _create_player(client, group_links[AccessLevel.EDIT.value])
+        player = create_res.get_json()
+        _, tournament_links = create_tournament(
+            group_links[AccessLevel.EDIT.value]
+        )
+        register_tournament_participants(
+            tournament_links[AccessLevel.EDIT.value], [player]
+        )
+
+        res = client.delete(
+            f"/api/groups/{group_links[AccessLevel.EDIT.value]}/players/{player['id']}"
+        )
+
+        assert res.status_code == 400
+        assert res.get_json()["errors"]["json"]["message"] == [
+            "このプレイヤーは大会に参加しているため削除できません。"
+        ]
+        assert db_session.get(Player, player["id"]) is not None
