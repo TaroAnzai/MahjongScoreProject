@@ -65,7 +65,6 @@ def request_group_creation(args):
     return create_group_creation_token(args)
 
 @group_bp.route("/request-link/status", methods=["POST"])
-@limiter.limit("3 per hour; 10 per day")
 @group_bp.arguments(GroupCreateSchema)
 @group_bp.response(200, GroupCreateStatusSchema)
 @with_common_error_responses(group_bp)
