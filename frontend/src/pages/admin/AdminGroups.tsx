@@ -31,7 +31,9 @@ const accessLevels = [
 ] as const;
 
 function buildGroupUrl(shortKey: string) {
-  return `${window.location.origin}${import.meta.env.BASE_URL}/group/${shortKey}`.replace(
+  const shareOrigin = import.meta.env.DEV ? 'mahjongapp:' : window.location.origin;
+
+  return `${shareOrigin}${import.meta.env.BASE_URL}/group/${shortKey}`.replace(
     /([^:]\/)\/+/g,
     '$1'
   );
