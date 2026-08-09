@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy.exc import IntegrityError
 from app import db
-from app.models import AccessLevel, Group, Tournament
+from app.models import AccessLevel, Group, TableTypeEnum, Tournament
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
@@ -132,6 +132,23 @@ def delete_tournament(short_key: str) -> None:
     link, tournament = _require_tournament(short_key)
     _ensure_access(link, AccessLevel.EDIT, "大会を削除する権限がありません。")
     try:
+        # CHIP卓は全員のスコアが0ならデータなしとして扱う。
+        # 対局がない卓も all() の空真により削除対象になる。
+        empty_chip_tables = [
+            table
+            for table in tournament.tables
+            if table.type == TableTypeEnum.CHIP
+            and all(
+                score.score == 0
+                for game in table.games
+                for score in game.scores
+            )
+        ]
+        for table in empty_chip_tables:
+            for game in table.games:
+                db.session.delete(game)
+            db.session.delete(table)
+
         db.session.delete(tournament)
         db.session.commit()
     except IntegrityError:

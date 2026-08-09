@@ -1,6 +1,6 @@
 import pytest
 
-from app.models import AccessLevel, Tournament
+from app.models import AccessLevel, Table, Tournament
 
 
 def _create_tournament(client, group_key, name="Main Tournament"):
@@ -129,6 +129,58 @@ class TestTournamentEndpoints:
         allowed = client.delete(f"/api/tournaments/{t_links[AccessLevel.EDIT.value]}")
         assert allowed.status_code == 200
         #assert allowed.get_json()["message"] == "Tournament deleted"
+        assert db_session.get(Tournament, tournament["id"]) is None
+
+    def test_delete_tournament_removes_zero_score_chip_table(
+        self,
+        client,
+        db_session,
+        create_group,
+        create_players,
+        register_tournament_participants,
+        register_table_players,
+        create_game,
+    ):
+        _, group_links = create_group()
+        players = create_players(group_links[AccessLevel.EDIT.value])
+        tournament_response = _create_tournament(
+            client, group_links[AccessLevel.EDIT.value]
+        )
+        tournament = tournament_response.get_json()
+        tournament_links = {
+            link["access_level"]: link["short_key"]
+            for link in tournament["tournament_links"]
+        }
+        tournament_edit_key = tournament_links[AccessLevel.EDIT.value]
+        register_tournament_participants(tournament_edit_key, players)
+
+        table_response = client.post(
+            f"/api/tournaments/{tournament_edit_key}/tables",
+            json={"name": "Zero-score chip table", "type": "CHIP"},
+        )
+        assert table_response.status_code == 201
+        table = table_response.get_json()
+        table_id = table["id"]
+        table_links = {
+            link["access_level"]: link["short_key"]
+            for link in table["table_links"]
+        }
+        table_edit_key = table_links[AccessLevel.EDIT.value]
+        register_table_players(table_edit_key, players)
+        create_game(
+            table_edit_key,
+            players,
+            scores=[
+                {"player_id": player["id"], "score": 0} for player in players
+            ],
+        )
+
+        deleted = client.delete(
+            f"/api/tournaments/{tournament_edit_key}"
+        )
+
+        assert deleted.status_code == 200
+        assert db_session.get(Table, table_id) is None
         assert db_session.get(Tournament, tournament["id"]) is None
 
     def test_get_tournaments_by_group(self, client, db_session, create_group):
