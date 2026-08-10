@@ -5,6 +5,22 @@ from app.models import ShareLink
 from app.models import GroupCreationToken
 @pytest.mark.api
 class TestGroupEndpoints:
+    def test_group_creation_request_rejects_invalid_email(self, client, db_session):
+        response = client.post(
+            "/api/groups/request-link",
+            json={
+                "name": "TEST GROUP",
+                "email": "invalid-email",
+                "recaptcha_token": "xxx",
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.get_json()["errors"]["json"]["email"] == [
+            "正しい形式のメールアドレスを入力してください。"
+        ]
+        assert GroupCreationToken.query.count() == 0
+
     def test_create_group_returns_owner_edit_view_links(self, client, db_session):
         email = "user@example.com"
         group_name = "TEST GROUP"
@@ -117,4 +133,3 @@ class TestGroupEndpoints:
         # 無効なトークンでステータスを確認
         res = client.post("/api/groups/request-link/status", json={"token": "invalid_token"})
         assert res.status_code == 404
-

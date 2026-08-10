@@ -6,7 +6,8 @@
     "chip": "Chip",
     "Select": "Please select",
     "close": "Close",
-    "emptyMessage": "No items found."
+    "emptyMessage": "No items found.",
+    "invalidEmail": "Enter a valid email address"
   },
   "welcomPage": {
     "pageTitle": "Table Game Scoreboard",

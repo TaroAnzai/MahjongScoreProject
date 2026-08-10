@@ -6,7 +6,11 @@ from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
 class GroupRequestSchema(Schema):
     """グループリクエスト"""
     name = fields.Str(required=True, description="グループ名")
-    email = fields.Str(required=True, description="メールアドレス一覧")
+    email = fields.Email(
+        required=True,
+        description="メールアドレス",
+        error_messages={"invalid": "正しい形式のメールアドレスを入力してください。"},
+    )
     timezone = fields.Str(required=False, description="ユーザーのタイムゾーン（例: 'Asia/Tokyo'）")
     recaptcha_token = fields.Str(required=False, description="reCAPTCHAのトークン(未使用)")
 class GroupResponseSchema(Schema):

@@ -6,7 +6,8 @@
     "chip": "チップ",
     "Select": "選択してください",
     "close": "閉じる",
-    "emptyMessage": "項目がありません"
+    "emptyMessage": "項目がありません",
+    "invalidEmail": "正しい形式のメールアドレスを入力してください"
   },
   "welcomPage": {
     "pageTitle": "麻雀大会 集計",

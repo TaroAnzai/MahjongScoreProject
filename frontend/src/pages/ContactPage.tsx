@@ -90,6 +90,7 @@ export default function ContactPage() {
         <div>
           <label className="font-semibold">{t('contactPage.email')}</label>
           <Input type="email" value={form.email} onChange={handleChange('email')} required />
+          {errors.email && <span className="text-red-500">{errors.email}</span>}
         </div>
 
         <div>
