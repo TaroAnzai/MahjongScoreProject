@@ -8,7 +8,12 @@
     SMTP_TIMEOUT
 - 使い方：
     from app.util.mailer import MailMessage, send_email
-    send_email(MailMessage(to=["user@example.com"], subject="Hello", text="Hi"))
+    send_email(MailMessage(
+        to=["user@example.com"],
+        subject="Hello",
+        sender_name="麻雀集計ScoreBoard",
+        text="Hi",
+    ))
 """
 
 from __future__ import annotations
@@ -37,6 +42,7 @@ class MailMessage:
     Attributes:
         to: 宛先（必須）
         subject: 件名（必須）
+        sender_name: 送信者の表示名（必須）
         text: プレーンテキスト本文
         html: HTML本文（任意）
         reply_to: 返信先（"Name <addr>" または "addr"）
@@ -47,6 +53,7 @@ class MailMessage:
         self,
         to: List[str],                 # ✅ list[str] に統一
         subject: str,
+        sender_name: str,
         text: Optional[str] = None,
         html: Optional[str] = None,
         reply_to: Optional[str] = None,
@@ -55,6 +62,7 @@ class MailMessage:
     ):
         self.to = to
         self.subject = subject
+        self.sender_name = sender_name
         self.text = text
         self.html = html
         self.reply_to = reply_to
@@ -119,7 +127,7 @@ def send_email(msg: MailMessage) -> str:
     # メッセージ構築（alternative: text + html）
     m = MIMEMultipart("alternative")
     m["Subject"] = str(Header(msg.subject, "utf-8"))
-    m["From"] = _fmt(mail_from)
+    m["From"] = formataddr((str(Header(msg.sender_name, "utf-8")), mail_from))
     m["To"] = ", ".join(_fmt(a) for a in msg.to)
     if msg.cc:
         m["Cc"] = ", ".join(_fmt(a) for a in msg.cc)

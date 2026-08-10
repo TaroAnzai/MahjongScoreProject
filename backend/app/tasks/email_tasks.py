@@ -16,7 +16,13 @@ def send_group_creation_email_task(email: str, url: str, group_name: str,expires
     text_body, html_body = render_mail_template("group_creation", **context)
 
     to_list = [email]
-    mail_message =MailMessage(to=to_list, subject=subject, text=text_body, html=html_body)
+    mail_message = MailMessage(
+        to=to_list,
+        subject=subject,
+        sender_name="麻雀集計ScoreBoard",
+        text=text_body,
+        html=html_body,
+    )
     try:
         mid = send_email(mail_message)
         print("OK:", mid)
