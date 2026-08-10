@@ -10,6 +10,7 @@
     "allowJs": true, // ← これが重要
     "outDir": "dist", // ← 出力先を分離
     "noEmit": true, // ← Vite/Reactなら基本はこれを付ける
+    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     },

@@ -80,7 +80,7 @@ def _connect() -> smtplib.SMTP:
     user = os.getenv("SMTP_USERNAME")
     pw = os.getenv("SMTP_PASSWORD", "")
     timeout = int(os.getenv("SMTP_TIMEOUT", "30"))
-    print(f"Connecting to {host}:{port}... (user={user}) password={pw}")
+    print(f"Connecting to {host}:{port}... (user={user})")
     try:
         if port == 465:
             smtp = smtplib.SMTP_SSL(host, port, timeout=timeout)
