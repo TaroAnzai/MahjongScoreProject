@@ -23,7 +23,7 @@ services:
     container_name: mahjongscore-mitmproxy
     ports:
       - '6080:6080' # これまでと同じAPI入口
-      - '8081:8081' # mitmweb GUI
+      - '127.0.0.1:8090:8090' # mitmweb GUI
     command:
       - mitmweb
       - --mode
@@ -35,7 +35,7 @@ services:
       - --web-host
       - 0.0.0.0
       - --web-port
-      - '8081'
+      - '8090'
       - --set
       - web_password=mahjong
     depends_on:
