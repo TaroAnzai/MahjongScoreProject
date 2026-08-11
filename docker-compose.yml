@@ -2,8 +2,9 @@ services:
   api:
     build: ./backend
     container_name: mahjongscore-api
-    ports:
-      - '6080:5000' # ホスト6080 → コンテナ5000
+    # ホストには公開しない
+    expose:
+      - '5000'
     command: >
       gunicorn -b 0.0.0.0:5000 "app:create_app()"
     volumes:
@@ -17,6 +18,29 @@ services:
       - db
       - redis
 
+  mitmproxy:
+    image: mitmproxy/mitmproxy:latest
+    container_name: mahjongscore-mitmproxy
+    ports:
+      - '6080:6080' # これまでと同じAPI入口
+      - '8081:8081' # mitmweb GUI
+    command:
+      - mitmweb
+      - --mode
+      - reverse:http://api:5000
+      - --listen-host
+      - 0.0.0.0
+      - --listen-port
+      - '6080'
+      - --web-host
+      - 0.0.0.0
+      - --web-port
+      - '8081'
+      - --set
+      - web_password=mahjong
+    depends_on:
+      - api
+
   db:
     image: mysql:8.0
     container_name: mahjongscore-db
@@ -28,13 +52,12 @@ services:
       - MYSQL_DATABASE=mahjongscore
     volumes:
       - db_data:/var/lib/mysql
+
   redis:
     image: redis:7
     container_name: mahjongscore-redis
     restart: always
-  # ポートを外部公開しない（コメントアウト or 削除）
-  # ports:
-  #   - "6379:6379"
+
   celery_worker:
     build: ./backend
     container_name: mahjongscore-celery
