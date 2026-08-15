@@ -2,11 +2,12 @@
 
 from marshmallow import Schema, fields
 from app.api.schemas.player_schema import PlayerSchema
+from app.api.schemas.common_schemas import UTCDateTime
 
 class TournamentParticipantSchema(Schema):
     """大会参加者"""
     player_id = fields.Int(required=True,description="大会に登録するプレイヤーID")
-    created_at = fields.DateTime(dump_only=True)
+    created_at = UTCDateTime(dump_only=True)
 class TournamentParticipantsCreateSchema(Schema):
     """大会への複数プレイヤー登録用"""
     participants = fields.List(
@@ -29,4 +30,3 @@ class TournamentParticipantsSchema(Schema):
         description="登録時のエラー情報一覧",
     )
     added_count = fields.Int(description="追加された参加者の数")
-

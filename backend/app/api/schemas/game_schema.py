@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields,validates, ValidationError
-from app.api.schemas.common_schemas import ShareLinkSchema
+from app.api.schemas.common_schemas import ShareLinkSchema, UTCDateTime
 from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
 
 
@@ -11,7 +11,7 @@ class GameUpdateSchema(Schema):
     """対局更新リクエスト"""
     game_index = fields.Int(description="対局インデックス")
     memo = fields.Str(allow_none=True, description="メモ")
-    played_at = fields.DateTime(allow_none=True, description="対局日時")
+    played_at = UTCDateTime(allow_none=True, description="対局日時")
     scores = fields.List(fields.Nested(ScoreInputSchema),  description="スコア一覧")
 
 class GameSchema(ShareLinkMixin, Schema):
@@ -20,9 +20,9 @@ class GameSchema(ShareLinkMixin, Schema):
     table_id = fields.Int(required=True)
     game_index = fields.Int(required=True)
     memo = fields.Str(allow_none=True)
-    played_at = fields.DateTime(allow_none=True)
+    played_at = UTCDateTime(allow_none=True)
     created_by = fields.Str(dump_only=True)
-    created_at = fields.DateTime(dump_only=True)
+    created_at = UTCDateTime(dump_only=True)
     scores = fields.List(fields.Nested(ScoreInputSchema))
 
     _share_link_field_name = "game_links"
@@ -38,8 +38,6 @@ class GameCreateSchema(Schema):
     """卓に対局（ゲーム）を追加"""
     scores = fields.List(fields.Nested(ScoreInputSchema), required=True, description="スコア一覧")
     memo = fields.Str(allow_none=True, description="メモ")
-
-
 
 
 

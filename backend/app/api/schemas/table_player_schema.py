@@ -2,6 +2,7 @@
 
 from marshmallow import Schema, fields, validate
 from app.api.schemas.player_schema import PlayerSchema
+from app.api.schemas.common_schemas import UTCDateTime
 
 class TablePlayerItemSchema(Schema):
     """卓への1人分の参加情報"""
@@ -23,7 +24,7 @@ class TablePlayerSchema(Schema):
     table_id = fields.Int(required=True)
     player_id = fields.Int(required=True)
     seat_position = fields.Int(allow_none=True)
-    created_at = fields.DateTime(dump_only=True)
+    created_at = UTCDateTime(dump_only=True)
 
 class TablePlayersSchema(Schema):
     """複数卓参加者レスポンス"""

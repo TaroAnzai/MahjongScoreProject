@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields,post_dump
-from app.api.schemas.common_schemas import ShareLinkSchema
+from app.api.schemas.common_schemas import ShareLinkSchema, UTCDateTime
 from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
 from app.api.schemas.group_schema import GroupSchema
 
@@ -15,7 +15,7 @@ class TournamentUpdateSchema(Schema):
     name = fields.Str(description="大会名")
     description = fields.Str(allow_none=True, description="大会説明")
     rate = fields.Float(description="レート")
-    started_at = fields.DateTime(allow_none=True, description="大会開始日時（ISO 8601形式）")
+    started_at = UTCDateTime(allow_none=True, description="大会開始日時（RFC 3339形式）")
 
 class GroupLinkSchema(ShareLinkMixin,Schema):
     """グループ共有リンク情報（短縮版）"""
@@ -34,8 +34,8 @@ class TournamentSchema(ShareLinkMixin,Schema):
     description = fields.Str(allow_none=True, description="大会説明")
     rate = fields.Float(required=True, description="レート")
     created_by = fields.Str(dump_only=True, description="作成時のKey")
-    created_at = fields.DateTime(dump_only=True, description="大会作成日時（ISO 8601形式）")
-    started_at = fields.DateTime(allow_none=True, description="大会開始日時（ISO 8601形式）")
+    created_at = UTCDateTime(dump_only=True, description="大会作成日時（RFC 3339形式）")
+    started_at = UTCDateTime(allow_none=True, description="大会開始日時（RFC 3339形式）")
     parent_group_link = fields.Nested(
         GroupLinkSchema,
         required=True,
@@ -52,4 +52,3 @@ class TournamentSchema(ShareLinkMixin,Schema):
         dump_default=[],
         description="大会に紐づく共有リンク一覧",
     )
-

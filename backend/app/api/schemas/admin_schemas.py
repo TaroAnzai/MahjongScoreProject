@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields
-from app.api.schemas.common_schemas import ShareLinkSchema
+from app.api.schemas.common_schemas import ShareLinkSchema, UTCDateTime
 from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
 # -------------------------------------------------
 # グループ情報スキーマ
@@ -11,8 +11,8 @@ class AdminGroupSchema(Schema):
     name = fields.Str(required=True)
     description = fields.Str(allow_none=True)
     created_by = fields.Str(dump_only=True)
-    created_at = fields.DateTime(dump_only=True)
-    last_updated_at = fields.DateTime(dump_only=True)
+    created_at = UTCDateTime(dump_only=True)
+    last_updated_at = UTCDateTime(dump_only=True)
     email = fields.Str(dump_only=True)
 
     _share_link_field_name = "group_links"

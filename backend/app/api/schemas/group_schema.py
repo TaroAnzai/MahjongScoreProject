@@ -1,6 +1,6 @@
 # app/schemas/group_schema.py
 from marshmallow import Schema, fields
-from app.api.schemas.common_schemas import ShareLinkSchema
+from app.api.schemas.common_schemas import ShareLinkSchema, UTCDateTime
 from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
 
 class GroupRequestSchema(Schema):
@@ -15,7 +15,7 @@ class GroupRequestSchema(Schema):
     recaptcha_token = fields.Str(required=False, description="reCAPTCHAのトークン(未使用)")
 class GroupResponseSchema(Schema):
     """グループリクエストレスポンス"""
-    expires_at = fields.DateTime(required=True, description="有効期限")
+    expires_at = UTCDateTime(required=True, description="有効期限")
     token = fields.Str(required=True, description="作成中トークン")
 
 class GroupCreateSchema(Schema):
@@ -39,8 +39,8 @@ class GroupSchema(ShareLinkMixin,Schema):
     name = fields.Str(required=True)
     description = fields.Str(allow_none=True)
     created_by = fields.Str(dump_only=True)
-    created_at = fields.DateTime(dump_only=True)
-    last_updated_at = fields.DateTime(dump_only=True)
+    created_at = UTCDateTime(dump_only=True)
+    last_updated_at = UTCDateTime(dump_only=True)
 
     _share_link_field_name = "group_links"
 

@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields, post_dump
-from app.api.schemas.common_schemas import ShareLinkSchema
+from app.api.schemas.common_schemas import ShareLinkSchema, UTCDateTime
 from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
 from app.api.schemas.tournament_schema import TournamentSchema
 from app.models import TableTypeEnum
@@ -31,7 +31,7 @@ class TableSchema(ShareLinkMixin,Schema):
     name = fields.Str(required=True, description="卓名")
     type = fields.Enum(TableTypeEnum, required=True, description="卓タイプ")
     created_by = fields.Str(dump_only=True, description="作成時のKey")
-    created_at = fields.DateTime(dump_only=True, description="卓作成日時（ISO 8601形式）")
+    created_at = UTCDateTime(dump_only=True, description="卓作成日時（RFC 3339形式）")
     parent_tournament_link = fields.Nested(
         TournamentLinkSchema,
         required=True,
@@ -48,4 +48,3 @@ class TableSchema(ShareLinkMixin,Schema):
         dump_default=[],
         description="卓に紐づく共有リンク一覧",
     )
-

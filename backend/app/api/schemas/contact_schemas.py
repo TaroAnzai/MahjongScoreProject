@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields
 from app.models import ContactStatus
+from app.api.schemas.common_schemas import UTCDateTime
 
 class ContactCreateSchema(Schema):
     name = fields.String(required=True, description="名前")
@@ -23,5 +24,5 @@ class ContactSchema(Schema):
     status = fields.String(required=True, dump_only=True, description="ステータス")
     ip_address = fields.String(dump_only=True, description="IPアドレス")
     user_agent = fields.String(dump_only=True, description="ユーザーエージェント")
-    created_at = fields.DateTime(dump_only=True, description="作成日時")
-    updated_at = fields.DateTime(dump_only=True, description="更新日時")
+    created_at = UTCDateTime(dump_only=True, description="作成日時")
+    updated_at = UTCDateTime(dump_only=True, description="更新日時")
