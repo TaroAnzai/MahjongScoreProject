@@ -11,6 +11,9 @@ from app.api.resources.export_resource import export_bp
 from app.api.resources.admin_resource import admin_group_bp
 from app.api.resources.admin_auth_route import admin_auth_bp
 from app.api.resources.contact_resource import contact_bp
+from app.api.resources.group_v2_resource import group_v2_bp
+from app.api.resources.tournament_v2_resource import tournament_v2_bp
+from app.api.resources.table_v2_resource import table_v2_bp
 
 def register_blueprints(api):
     api.register_blueprint(tournament_bp)
@@ -24,3 +27,6 @@ def register_blueprints(api):
     api.register_blueprint(admin_group_bp)
     api.register_blueprint(admin_auth_bp)
     api.register_blueprint(contact_bp)
+    api.register_blueprint(group_v2_bp)
+    api.register_blueprint(tournament_v2_bp)
+    api.register_blueprint(table_v2_bp)

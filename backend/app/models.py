@@ -258,6 +258,23 @@ class GroupCreationToken(db.Model):
     is_used = db.Column(db.Boolean, default=False)
     ip_address = db.Column(db.String(45), nullable=True)
     group_id = db.Column(db.Integer, db.ForeignKey("tbl_groups.id", ondelete="SET NULL"), nullable=True,)
+
+
+class IdempotencyRecord(db.Model):
+    """V2 mutation responses persisted for safe client retries."""
+
+    __tablename__ = "tbl_idempotency_records"
+    id = db.Column(db.Integer, primary_key=True)
+    scope = db.Column(db.String(255), nullable=False)
+    idempotency_key = db.Column(db.String(255), nullable=False)
+    request_hash = db.Column(db.String(64), nullable=False)
+    status_code = db.Column(db.Integer, nullable=False)
+    response_body = db.Column(db.JSON, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    __table_args__ = (
+        db.UniqueConstraint("scope", "idempotency_key", name="uq_idempotency_scope_key"),
+    )
+
 # =========================================================
 # お問い合わせモデル
 # =========================================================
