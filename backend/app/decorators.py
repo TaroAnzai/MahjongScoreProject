@@ -1,5 +1,6 @@
 from functools import wraps
 from app.api.schemas.common_schemas import ErrorResponseSchema
+from app.api.schemas.v2_schema import V2ErrorSchema
 
 def with_common_error_responses(bp):
     """共通のエラーレスポンス（400,401,403）を追加する簡素版デコレーター"""
@@ -23,4 +24,23 @@ def with_common_error_responses(bp):
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
         return wrapper
+    return decorator
+
+
+def with_v2_error_responses(bp):
+    """Document the error envelope returned by V2 service errors."""
+    def decorator(func):
+        wrapped = func
+        for status, description in reversed((
+            (400, "Bad Request"),
+            (403, "Forbidden"),
+            (404, "Not Found"),
+            (409, "Conflict"),
+        )):
+            wrapped = bp.alt_response(status, {
+                "description": description,
+                "schema": V2ErrorSchema,
+                "content_type": "application/json",
+            })(wrapped)
+        return wraps(func)(wrapped)
     return decorator

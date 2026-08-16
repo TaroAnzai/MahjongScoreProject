@@ -45,12 +45,17 @@ def _links(resource_type, resource_id, created_by):
     return result
 
 
-def _resource_links(resource_type, resource_id):
+def _resource_links(resource_type, resource_id, access_level=None):
+    links = ShareLink.query.filter_by(
+        resource_type=resource_type, resource_id=resource_id
+    ).order_by(ShareLink.id).all()
+    if access_level is not None:
+        links = [link for link in links if (
+            ACCESS_PRIORITY[link.access_level] <= ACCESS_PRIORITY[access_level]
+        )]
     return [
         {"short_key": link.short_key, "access_level": link.access_level.value}
-        for link in ShareLink.query.filter_by(
-            resource_type=resource_type, resource_id=resource_id
-        ).order_by(ShareLink.id).all()
+        for link in links
     ]
 
 
@@ -58,38 +63,31 @@ def _player(player):
     return {"id": player.id, "group_id": player.group_id, "name": player.name}
 
 
-def _table(table, flat_links=False):
-    value = {
+def _table(table, access_level):
+    return {
         "id": table.id, "tournament_id": table.tournament_id,
         "name": table.name, "type": table.type.value,
+        "created_at": table.created_at.isoformat() if table.created_at else None,
+        "table_links": _resource_links("table", table.id, access_level),
     }
-    if flat_links:
-        for link in table.table_links:
-            value[link.access_level.value.lower() + "_link"] = link.short_key
-    else:
-        value["table_links"] = _resource_links("table", table.id)
-    return value
 
 
-def _tournament(tournament, flat_links=False):
-    value = {
+def _tournament(tournament, access_level):
+    return {
         "id": tournament.id, "group_id": tournament.group_id,
         "name": tournament.name, "description": tournament.description,
         "rate": tournament.rate,
+        "started_at": tournament.started_at.isoformat() if tournament.started_at else None,
         "created_at": tournament.created_at.isoformat() if tournament.created_at else None,
+        "tournament_links": _resource_links("tournament", tournament.id, access_level),
     }
-    if flat_links:
-        for link in tournament.tournament_links:
-            value[link.access_level.value.lower() + "_link"] = link.short_key
-    else:
-        value["tournament_links"] = _resource_links("tournament", tournament.id)
-    return value
 
 
-def _group(group):
+def _group(group, access_level):
     return {
         "id": group.id, "name": group.name, "description": group.description,
-        "group_links": _resource_links("group", group.id),
+        "created_at": group.created_at.isoformat() if group.created_at else None,
+        "group_links": _resource_links("group", group.id, access_level),
     }
 
 
@@ -125,7 +123,7 @@ def create_tournament_with_tables(group_key, payload, idempotency_key=None):
     replay = _replay(scope, idempotency_key, payload)
     if replay:
         return replay
-    _, group = _require(group_key, "group", Group, AccessLevel.EDIT)
+    link, group = _require(group_key, "group", Group, AccessLevel.EDIT)
     if not payload.get("name"):
         raise V2Error(400, "VALIDATION_ERROR", "name is required")
     initial_tables = payload.get("initial_tables", [])
@@ -155,9 +153,9 @@ def create_tournament_with_tables(group_key, payload, idempotency_key=None):
             db.session.flush()
             _links("table", table.id, table.created_by)
             db.session.flush()
-            created.append({"client_id": item["client_id"], "table": _table(table, True)})
+            created.append({"client_id": item["client_id"], "table": _table(table, link.access_level)})
         db.session.flush()
-        body = {"tournament": _tournament(tournament, True), "created_tables": created}
+        body = {"tournament": _tournament(tournament, link.access_level), "created_tables": created}
         _remember(scope, idempotency_key, payload, body, 201)
         db.session.commit()
         return body, 201
@@ -181,17 +179,13 @@ def batch_add_participants(tournament_key, payload, idempotency_key=None):
         raise V2Error(400, "INVALID_PLAYER", "All players must belong to the tournament group")
     existing = {row.player_id for row in TournamentPlayer.query.filter_by(tournament_id=tournament.id).all()}
     added_ids = set(ids) - existing
-    requested_types = (payload.get("propagate_to") or {}).get("table_types", [])
-    propagate = {item.value if isinstance(item, TableTypeEnum) else item for item in requested_types}
-    if not propagate.issubset({item.value for item in TableTypeEnum}):
-        raise V2Error(400, "VALIDATION_ERROR", "Unknown table type")
     try:
         for player_id in added_ids:
             db.session.add(TournamentPlayer(tournament_id=tournament.id, player_id=player_id))
         propagated = []
         tables = Table.query.filter_by(tournament_id=tournament.id).all()
         for table in tables:
-            if table.type.value not in propagate:
+            if table.type != TableTypeEnum.CHIP:
                 continue
             registered = {row.player_id for row in TablePlayer.query.filter_by(table_id=table.id).all()}
             table_added = set(ids) - registered
@@ -212,8 +206,8 @@ def batch_add_participants(tournament_key, payload, idempotency_key=None):
         raise
 
 
-def delete_participant(tournament_key, player_id, propagate_to=None, idempotency_key=None):
-    payload = {"player_id": player_id, "propagate_to": propagate_to}
+def delete_participant(tournament_key, player_id, idempotency_key=None):
+    payload = {"player_id": player_id}
     scope = f"delete-participant:{tournament_key}:{player_id}"
     replay = _replay(scope, idempotency_key, payload)
     if replay:
@@ -223,7 +217,7 @@ def delete_participant(tournament_key, player_id, propagate_to=None, idempotency
     if not participant:
         raise V2Error(404, "PARTICIPANT_NOT_FOUND", "Participant was not found")
     tables = Table.query.filter_by(tournament_id=tournament.id).all()
-    target_tables = [t for t in tables if propagate_to and t.type.value == propagate_to]
+    target_tables = [t for t in tables if t.type == TableTypeEnum.CHIP]
     table_ids = [t.id for t in target_tables]
     scored = []
     if table_ids:
@@ -288,18 +282,18 @@ def batch_get_groups(payload):
         if not link or link.resource_type != "group" or not db.session.get(Group, link.resource_id):
             result["status"] = "not_found"
         else:
-            result.update(status="ok", group=_group(db.session.get(Group, link.resource_id)))
+            result.update(status="ok", group=_group(db.session.get(Group, link.resource_id), link.access_level))
         results.append(result)
     return {"results": results}
 
 
 def group_dashboard(group_key):
-    _, group = _require(group_key, "group", Group)
+    link, group = _require(group_key, "group", Group)
     tournaments = Tournament.query.filter_by(group_id=group.id).order_by(Tournament.created_at.desc()).all()
-    return {"group": _group(group), "tournaments": [_tournament(t) for t in tournaments], "players": [_player(p) for p in Player.query.filter_by(group_id=group.id).all()]}
+    return {"group": _group(group, link.access_level), "tournaments": [_tournament(t, link.access_level) for t in tournaments], "players": [_player(p) for p in Player.query.filter_by(group_id=group.id).all()]}
 
 
-def _score_map(tournament):
+def _score_map(tournament, access_level):
     tables = Table.query.filter_by(tournament_id=tournament.id).all()
     participants = [row.player for row in TournamentPlayer.query.filter_by(tournament_id=tournament.id).all()]
     values = {p.id: {"id": p.id, "name": p.name, "scores": {}, "total": 0, "converted_total": 0} for p in participants}
@@ -313,22 +307,20 @@ def _score_map(tournament):
     for value in values.values():
         value["total"] = sum(value["scores"].values())
         value["converted_total"] = round(value["total"] * rate, 2)
-    return {"tournament_id": tournament.id, "tables": [_table(t) for t in tables], "players": list(values.values()), "rate": rate}
+    return {"tournament_id": tournament.id, "tables": [_table(t, access_level) for t in tables], "players": list(values.values()), "rate": rate}
 
 
 def tournament_dashboard(tournament_key):
-    _, tournament = _require(tournament_key, "tournament", Tournament)
+    link, tournament = _require(tournament_key, "tournament", Tournament)
     participants = [row.player for row in TournamentPlayer.query.filter_by(tournament_id=tournament.id).all()]
     participant_ids = {p.id for p in participants}
     available = Player.query.filter(Player.group_id == tournament.group_id, ~Player.id.in_(participant_ids)).all() if participant_ids else Player.query.filter_by(group_id=tournament.group_id).all()
-    value = _tournament(tournament)
-    group_view = ShareLink.query.filter_by(resource_type="group", resource_id=tournament.group_id, access_level=AccessLevel.VIEW).first()
-    value["parent_group_link"] = {"view_link": group_view.short_key if group_view else None}
-    return {"tournament": value, "participants": [_player(p) for p in participants], "available_group_players": [_player(p) for p in available], "tables": [_table(t) for t in Table.query.filter_by(tournament_id=tournament.id).all()], "score_map": _score_map(tournament)}
+    value = _tournament(tournament, link.access_level)
+    return {"tournament": value, "participants": [_player(p) for p in participants], "available_group_players": [_player(p) for p in available], "tables": [_table(t, link.access_level) for t in Table.query.filter_by(tournament_id=tournament.id).all()], "score_map": _score_map(tournament, link.access_level)}
 
 
 def table_dashboard(table_key):
-    _, table = _require(table_key, "table", Table)
+    link, table = _require(table_key, "table", Table)
     seated = [row.player for row in TablePlayer.query.filter_by(table_id=table.id).all()]
     seated_ids = {p.id for p in seated}
     participant_ids = [row.player_id for row in TournamentPlayer.query.filter_by(tournament_id=table.tournament_id).all()]
@@ -336,8 +328,8 @@ def table_dashboard(table_key):
     available = Player.query.filter(Player.id.in_(available_ids)).all() if available_ids else []
     games = []
     for game in Game.query.filter_by(table_id=table.id).order_by(Game.game_index).all():
-        games.append({"id": game.id, "table_id": table.id, "game_index": game.game_index, "memo": game.memo, "scores": [{"player_id": s.player_id, "score": s.score} for s in Score.query.filter_by(game_id=game.id).all()]})
-    return {"table": _table(table), "table_players": [_player(p) for p in seated], "available_tournament_players": [_player(p) for p in available], "games": games}
+        games.append({"id": game.id, "table_id": table.id, "game_index": game.game_index, "memo": game.memo, "played_at": game.played_at.isoformat() if game.played_at else None, "scores": [{"player_id": s.player_id, "score": s.score} for s in Score.query.filter_by(game_id=game.id).all()]})
+    return {"table": _table(table, link.access_level), "table_players": [_player(p) for p in seated], "available_tournament_players": [_player(p) for p in available], "games": games}
 
 
 def batch_group_status(payload):
