@@ -31,7 +31,7 @@ const accessLevels = [
 ] as const;
 
 function buildGroupUrl(shortKey: string) {
-  const shareOrigin = import.meta.env.DEV ? 'mahjongapp:' : window.location.origin;
+  const shareOrigin = import.meta.env.DEV ? 'mahjongapp-dev:' : window.location.origin;
 
   return `${shareOrigin}${import.meta.env.BASE_URL}/group/${shortKey}`.replace(
     /([^:]\/)\/+/g,
@@ -176,10 +176,7 @@ export function AdminGroups() {
               <TableCell>{group.last_updated_at?.split('T')[0]}</TableCell>
               <TableCell>{group.email}</TableCell>
               <TableCell>
-                <ShareGroupButton
-                  groupName={group.name}
-                  shareLinks={group.group_links}
-                />
+                <ShareGroupButton groupName={group.name} shareLinks={group.group_links} />
               </TableCell>
               <TableCell>
                 <Button
