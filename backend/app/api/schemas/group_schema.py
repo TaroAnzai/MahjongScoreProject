@@ -1,40 +1,57 @@
 # app/schemas/group_schema.py
 from marshmallow import Schema, fields
+
 from app.api.schemas.common_schemas import ShareLinkSchema, UTCDateTime
 from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
 
+
 class GroupRequestSchema(Schema):
     """グループリクエスト"""
+
     name = fields.Str(required=True, description="グループ名")
     email = fields.Email(
         required=True,
         description="メールアドレス",
         error_messages={"invalid": "正しい形式のメールアドレスを入力してください。"},
     )
-    timezone = fields.Str(required=False, description="ユーザーのタイムゾーン（例: 'Asia/Tokyo'）")
-    recaptcha_token = fields.Str(required=False, description="reCAPTCHAのトークン(未使用)")
+    timezone = fields.Str(
+        required=False, description="ユーザーのタイムゾーン（例: 'Asia/Tokyo'）"
+    )
+    recaptcha_token = fields.Str(
+        required=False, description="reCAPTCHAのトークン(未使用)"
+    )
+
+
 class GroupResponseSchema(Schema):
     """グループリクエストレスポンス"""
+
     expires_at = UTCDateTime(required=True, description="有効期限")
     token = fields.Str(required=True, description="作成中トークン")
 
+
 class GroupCreateSchema(Schema):
     """グループ作成用リクエスト"""
+
     token = fields.Str(required=True, description="作成用トークン")
+
 
 class GroupCreateStatusSchema(Schema):
     """グループ作成ステータスレスポンス"""
+
     status = fields.Str(required=True, description="作成ステータス")
     owner_link = fields.Str(required=False, description="管理者用キー")
 
+
 class GroupUpdateSchema(Schema):
     """グループ更新用リクエスト"""
+
     name = fields.Str(description="グループ名")
     description = fields.Str(allow_none=True, description="説明")
 
 
-class GroupSchema(ShareLinkMixin,Schema):
+class GroupSchema(ShareLinkMixin, Schema):
     """グループレスポンス"""
+
     id = fields.Int(dump_only=True)
     name = fields.Str(required=True)
     description = fields.Str(allow_none=True)

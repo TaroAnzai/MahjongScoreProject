@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
+
 from sqlalchemy.exc import IntegrityError
+
 from app import db
 from app.models import AccessLevel, Group, TableTypeEnum, Tournament
 from app.service_errors import (
@@ -80,8 +82,9 @@ def create_tournament(data: dict, group_key: str) -> Tournament:
     db.session.flush()
     create_default_share_links("tournament", tournament.id, tournament.created_by)
     db.session.refresh(tournament)
-    tournament.current_user_access =  AccessLevel.OWNER
+    tournament.current_user_access = AccessLevel.OWNER
     return tournament
+
 
 def get_tournaments_by_group(group_key: str):
     """グループ内の大会一覧を取得"""
@@ -95,8 +98,12 @@ def get_tournaments_by_group(group_key: str):
         .order_by(Tournament.created_at.desc())
         .all()
     )
-    tournaments = [setattr(t, "current_user_access", link.access_level) or t for t in tournaments]
+    tournaments = [
+        setattr(t, "current_user_access", link.access_level) or t for t in tournaments
+    ]
     return tournaments
+
+
 def get_tournament_by_key(short_key: str) -> Tournament:
     """大会共有キーから大会取得"""
     link, tournament = _require_tournament(short_key)
@@ -138,11 +145,7 @@ def delete_tournament(short_key: str) -> None:
             table
             for table in tournament.tables
             if table.type == TableTypeEnum.CHIP
-            and all(
-                score.score == 0
-                for game in table.games
-                for score in game.scores
-            )
+            and all(score.score == 0 for game in table.games for score in game.scores)
         ]
         for table in empty_chip_tables:
             for game in table.games:
@@ -153,4 +156,6 @@ def delete_tournament(short_key: str) -> None:
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        raise ServiceValidationError("この大会には関連データが存在するため削除できません。")
+        raise ServiceValidationError(
+            "この大会には関連データが存在するため削除できません。"
+        )

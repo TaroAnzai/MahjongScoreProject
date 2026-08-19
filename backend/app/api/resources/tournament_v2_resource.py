@@ -1,21 +1,28 @@
 """V2 tournament endpoints."""
+
 from flask import jsonify
 from flask_smorest import Blueprint
 
 from app import db
-from app.decorators import with_v2_error_responses
 from app.api.schemas.v2_schema import (
-    IdempotencyHeaderSchema, ParticipantBatchAddResponseSchema,
+    IdempotencyHeaderSchema,
+    ParticipantBatchAddResponseSchema,
     ParticipantBatchAddSchema,
-    ParticipantDeleteResponseSchema, TournamentDashboardResponseSchema,
+    ParticipantDeleteResponseSchema,
+    TournamentDashboardResponseSchema,
 )
 from app.api.services.v2_service import (
-    V2Error, batch_add_participants, delete_participant, tournament_dashboard,
+    V2Error,
+    batch_add_participants,
+    delete_participant,
+    tournament_dashboard,
 )
-
+from app.decorators import with_v2_error_responses
 
 tournament_v2_bp = Blueprint(
-    "tournaments_v2", __name__, url_prefix="/api/v2/tournaments",
+    "tournaments_v2",
+    __name__,
+    url_prefix="/api/v2/tournaments",
     description="V2 tournament API",
 )
 
@@ -29,7 +36,9 @@ def handle_v2_error(error):
     return jsonify(body), error.status
 
 
-@tournament_v2_bp.route("/<string:tournament_key>/participants:batch-add", methods=["POST"])
+@tournament_v2_bp.route(
+    "/<string:tournament_key>/participants:batch-add", methods=["POST"]
+)
 @tournament_v2_bp.arguments(ParticipantBatchAddSchema)
 @tournament_v2_bp.doc(
     summary="大会参加者を一括追加して卓へ同期",
@@ -45,7 +54,9 @@ def batch_add_participants_v2(payload, headers, tournament_key):
     return body, status
 
 
-@tournament_v2_bp.route("/<string:tournament_key>/participants/<int(min=1):player_id>", methods=["DELETE"])
+@tournament_v2_bp.route(
+    "/<string:tournament_key>/participants/<int(min=1):player_id>", methods=["DELETE"]
+)
 @tournament_v2_bp.arguments(IdempotencyHeaderSchema, location="headers", required=False)
 @tournament_v2_bp.response(200, ParticipantDeleteResponseSchema)
 @tournament_v2_bp.doc(
@@ -53,12 +64,16 @@ def batch_add_participants_v2(payload, headers, tournament_key):
     description="大会参加者と大会配下のすべてのCHIP卓の参加者登録を同時に削除します。対象CHIP卓にスコアが存在する場合は409 Conflictを返します。",
     parameters=[
         {
-            "name": "player_id", "in": "path", "required": True,
+            "name": "player_id",
+            "in": "path",
+            "required": True,
             "description": "削除するプレイヤーIDです。1以上を指定します。",
             "schema": {"type": "integer", "minimum": 1},
         },
         {
-            "name": "Idempotency-Key", "in": "header", "required": False,
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": False,
             "description": "同じ更新リクエストの再送を安全に処理するための冪等キーです。最大255文字です。",
             "schema": {"type": "string", "maxLength": 255},
         },
@@ -67,7 +82,9 @@ def batch_add_participants_v2(payload, headers, tournament_key):
 @with_v2_error_responses(tournament_v2_bp)
 def delete_participant_v2(headers, tournament_key, player_id):
     body, status = delete_participant(
-        tournament_key, player_id, headers.get("idempotency_key"),
+        tournament_key,
+        player_id,
+        headers.get("idempotency_key"),
     )
     return body, status
 

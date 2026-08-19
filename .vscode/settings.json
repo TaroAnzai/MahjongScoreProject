@@ -42,5 +42,14 @@
   "js/ts.preferences.quoteStyle": "single",
 
   // ===== Vite/React で localhost のリンクをブラウザで開かない =====
-  "workbench.browser.openLocalhostLinks": false
+  "workbench.browser.openLocalhostLinks": false,
+
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "always",
+      "source.fixAll.ruff": "always"
+    }
+  }
 }

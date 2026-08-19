@@ -1,8 +1,11 @@
-from app import db
-from datetime import datetime, timezone
 import uuid
-from sqlalchemy import event
+from datetime import datetime, timezone
 from enum import StrEnum
+
+from sqlalchemy import event
+
+from app import db
+
 
 # =========================================================
 # Enum定義
@@ -12,15 +15,19 @@ class AccessLevel(StrEnum):
     EDIT = "EDIT"
     OWNER = "OWNER"
 
+
 class TableTypeEnum(StrEnum):
     NORMAL = "NORMAL"
     CHIP = "CHIP"
 
+
 class ContactStatus(StrEnum):
-    RECEIVED = "received"        # 受信
+    RECEIVED = "received"  # 受信
     IN_PROGRESS = "in_progress"  # 対応中
-    ANSWERED = "answered"        # 回答済み
-    CLOSED = "closed"            # 完了
+    ANSWERED = "answered"  # 回答済み
+    CLOSED = "closed"  # 完了
+
+
 # =========================================================
 # グループ（最上位レイヤー）
 # =========================================================
@@ -53,9 +60,9 @@ class Group(db.Model):
     group_links = db.relationship(
         "ShareLink",
         primaryjoin="and_(ShareLink.resource_type=='group', "
-                    "foreign(ShareLink.resource_id)==Group.id)",
+        "foreign(ShareLink.resource_id)==Group.id)",
         viewonly=True,
-        lazy="joined"
+        lazy="joined",
     )
 
 
@@ -88,9 +95,9 @@ class Tournament(db.Model):
     tournament_links = db.relationship(
         "ShareLink",
         primaryjoin="and_(ShareLink.resource_type=='tournament', "
-                    "foreign(ShareLink.resource_id)==Tournament.id)",
+        "foreign(ShareLink.resource_id)==Tournament.id)",
         viewonly=True,
-        lazy="joined"
+        lazy="joined",
     )
     participants = db.relationship(
         "TournamentPlayer",
@@ -111,7 +118,9 @@ class Table(db.Model):
         db.Integer, db.ForeignKey("tbl_tournaments.id"), nullable=False
     )
     name = db.Column(db.Text, nullable=False)
-    type = db.Column(db.Enum(TableTypeEnum), nullable=False, default=TableTypeEnum.NORMAL)
+    type = db.Column(
+        db.Enum(TableTypeEnum), nullable=False, default=TableTypeEnum.NORMAL
+    )
     created_by = db.Column(db.String(64), nullable=False)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
@@ -119,19 +128,21 @@ class Table(db.Model):
     tournament = db.relationship(
         "Tournament",
         back_populates="tables",
-        lazy="joined"  # join で一括取得（パフォーマンス向上）
+        lazy="joined",  # join で一括取得（パフォーマンス向上）
     )
-    table_players = db.relationship("TablePlayer", back_populates="table", lazy=True, cascade="all, delete-orphan")
+    table_players = db.relationship(
+        "TablePlayer", back_populates="table", lazy=True, cascade="all, delete-orphan"
+    )
 
-    games = db.relationship( "Game", backref="table", lazy=True)
+    games = db.relationship("Game", backref="table", lazy=True)
 
     # ✅ ShareLinkリレーション（卓 → table_links に変更）
     table_links = db.relationship(
         "ShareLink",
         primaryjoin="and_(ShareLink.resource_type=='table', "
-                    "foreign(ShareLink.resource_id)==Table.id)",
+        "foreign(ShareLink.resource_id)==Table.id)",
         viewonly=True,
-        lazy="joined"
+        lazy="joined",
     )
 
 
@@ -218,7 +229,9 @@ class TournamentPlayer(db.Model):
     __tablename__ = "tbl_tournament_players"
 
     id = db.Column(db.Integer, primary_key=True)
-    tournament_id = db.Column(db.Integer, db.ForeignKey("tbl_tournaments.id"), nullable=False)
+    tournament_id = db.Column(
+        db.Integer, db.ForeignKey("tbl_tournaments.id"), nullable=False
+    )
     player_id = db.Column(db.Integer, db.ForeignKey("tbl_players.id"), nullable=False)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
@@ -226,6 +239,7 @@ class TournamentPlayer(db.Model):
 
     tournament = db.relationship("Tournament", back_populates="participants")
     player = db.relationship("Player", back_populates="tournament_participations")
+
 
 # =========================================================
 # 共有リンク（短縮キー方式）
@@ -235,13 +249,18 @@ class ShareLink(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     short_key = db.Column(db.String(16), unique=True, nullable=False)
-    resource_type = db.Column(db.String(32), nullable=False)  # group / tournament / table / game
+    resource_type = db.Column(
+        db.String(32), nullable=False
+    )  # group / tournament / table / game
     resource_id = db.Column(db.Integer, nullable=False)
-    access_level = db.Column(db.Enum(AccessLevel), default=AccessLevel.VIEW, nullable=False)
+    access_level = db.Column(
+        db.Enum(AccessLevel), default=AccessLevel.VIEW, nullable=False
+    )
     created_by = db.Column(db.String(64), nullable=False)
     created_at = db.Column(
         db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+
 
 # =========================================================
 # グループ作成用トークン
@@ -253,11 +272,17 @@ class GroupCreationToken(db.Model):
     email = db.Column(db.String(255), nullable=False)
     group_name = db.Column(db.String(255), nullable=False)
     token = db.Column(db.String(64), unique=True, nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(
+        db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
+    )
     expires_at = db.Column(db.DateTime(timezone=True), nullable=False)
     is_used = db.Column(db.Boolean, default=False)
     ip_address = db.Column(db.String(45), nullable=True)
-    group_id = db.Column(db.Integer, db.ForeignKey("tbl_groups.id", ondelete="SET NULL"), nullable=True,)
+    group_id = db.Column(
+        db.Integer,
+        db.ForeignKey("tbl_groups.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
 
 class IdempotencyRecord(db.Model):
@@ -270,10 +295,17 @@ class IdempotencyRecord(db.Model):
     request_hash = db.Column(db.String(64), nullable=False)
     status_code = db.Column(db.Integer, nullable=False)
     response_body = db.Column(db.JSON, nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
-    __table_args__ = (
-        db.UniqueConstraint("scope", "idempotency_key", name="uq_idempotency_scope_key"),
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
     )
+    __table_args__ = (
+        db.UniqueConstraint(
+            "scope", "idempotency_key", name="uq_idempotency_scope_key"
+        ),
+    )
+
 
 # =========================================================
 # お問い合わせモデル
@@ -291,9 +323,7 @@ class Contact(db.Model):
 
     # --- 状態管理（String Enum） ---
     status = db.Column(
-        db.Enum(ContactStatus),
-        default=ContactStatus.RECEIVED,
-        nullable=False
+        db.Enum(ContactStatus), default=ContactStatus.RECEIVED, nullable=False
     )
 
     # --- 任意ログ ---
@@ -302,7 +332,10 @@ class Contact(db.Model):
 
     # --- 時刻 ---
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
 
 # =========================================================
 # Groupの最終更新日時を自動更新するイベントリスナー

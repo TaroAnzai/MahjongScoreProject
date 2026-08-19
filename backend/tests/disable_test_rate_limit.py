@@ -1,10 +1,7 @@
-import pytest
-from flask_limiter.errors import RateLimitExceeded
-from app.models import GroupCreationToken
-
 # ------------------------------------------------------------
 # RateLimit: /api/groups/request-link (3 per hour; 10 per day)
 # ------------------------------------------------------------
+
 
 def test_request_group_creation_rate_limit(client):
     """
@@ -15,7 +12,7 @@ def test_request_group_creation_rate_limit(client):
         "name": "TestGroup",
         "email": "user@example.com",
         "timezone": "Asia/Tokyo",
-        "recaptcha_token": "test-token-ok",   # reCAPTCHA はテストでは mock 推奨
+        "recaptcha_token": "test-token-ok",  # reCAPTCHA はテストでは mock 推奨
     }
 
     # --- 1️⃣ 1回目 OK ---
@@ -48,6 +45,3 @@ def test_request_group_creation_rate_limit(client):
 
     # Retry-After がヘッダに含まれること
     assert "Retry-After" in r4.headers
-
-
-

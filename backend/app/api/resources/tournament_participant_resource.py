@@ -1,21 +1,21 @@
 # app/resources/tournament_participant_resource.py
 
+from flask import jsonify
 from flask.views import MethodView
-from flask_smorest import Blueprint, abort
-from app.decorators import with_common_error_responses
+from flask_smorest import Blueprint
+
 from app.api.schemas.common_schemas import MessageSchema
 from app.api.schemas.tournament_participant_schema import (
     TournamentParticipantsCreateSchema,
     TournamentParticipantsSchema,
 )
-from app.service_errors import ServiceError
-from flask import jsonify
-from app.service_errors import format_error_response
 from app.api.services.tournament_participant_service import (
-    list_participants_by_key,
     create_participants,
     delete_participant,
+    list_participants_by_key,
 )
+from app.decorators import with_common_error_responses
+from app.service_errors import ServiceError, format_error_response
 
 tournament_participant_bp = Blueprint(
     "tournament_participants",
@@ -24,9 +24,11 @@ tournament_participant_bp = Blueprint(
     description="大会参加者管理API",
 )
 
+
 @tournament_participant_bp.errorhandler(ServiceError)
 def handle_service_error(e: ServiceError):
     return jsonify(format_error_response(e.code, e.name, e.description)), e.code
+
 
 # =========================================================
 # 大会参加者作成・一覧
@@ -52,7 +54,9 @@ class TournamentParticipantListResource(MethodView):
 # =========================================================
 # 大会参加者削除
 # =========================================================
-@tournament_participant_bp.route("/<string:tournament_key>/participants/<int:player_id>")
+@tournament_participant_bp.route(
+    "/<string:tournament_key>/participants/<int:player_id>"
+)
 class TournamentParticipantResource(MethodView):
     """DELETE: 大会参加者削除"""
 

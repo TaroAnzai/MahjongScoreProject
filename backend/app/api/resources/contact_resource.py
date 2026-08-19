@@ -1,14 +1,12 @@
 # backend/app/api/resources/contact_resource.py
 
-from flask import request, jsonify
-from flask_smorest import Blueprint, abort
+from flask import jsonify, request
+from flask_smorest import Blueprint
 
 from app.api.schemas.contact_schemas import (
     ContactCreateSchema,
-    ContactUpdateSchema,
     ContactSchema,
 )
-from app.api.schemas.common_schemas import MessageSchema
 from app.api.services.contact_service import ContactService
 from app.decorators import with_common_error_responses
 from app.service_errors import ServiceError, format_error_response
@@ -19,9 +17,12 @@ contact_bp = Blueprint(
     url_prefix="/api/contacts",
     description="問い合わせ（Contact）関連 API",
 )
+
+
 @contact_bp.errorhandler(ServiceError)
 def handle_service_error(e: ServiceError):
     return jsonify(format_error_response(e.code, e.name, e.description)), e.code
+
 
 # --------------------------
 # CREATE: POST /contacts
@@ -40,4 +41,3 @@ def create_contact(data):
         user_agent=user_agent,
     )
     return contact
-

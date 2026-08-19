@@ -1,13 +1,15 @@
 import pytest
-from app.models import AccessLevel
 
+from app.models import AccessLevel
 
 
 @pytest.mark.api
 class TestTournamentScoreMap:
     """GET /api/tournaments/<tournament_key>/score_map"""
 
-    def test_get_tournament_score_map_success(self, client, db_session, setup_full_tournament):
+    def test_get_tournament_score_map_success(
+        self, client, db_session, setup_full_tournament
+    ):
         """正常系: 大会スコアマップを取得"""
         # --- 前提データ作成 ---
         data = setup_full_tournament(client)
@@ -32,7 +34,6 @@ class TestTournamentScoreMap:
         assert isinstance(tables, list)
         assert all("id" in t and "name" in t for t in tables)
         assert all("id" in t and "type" in t for t in tables)
-
 
         # --- players 構造確認 ---
         players = result["players"]
@@ -64,20 +65,24 @@ class TestTournamentScoreMap:
         # すべてのtable_idが players[].scores のキーと整合すること
         table_ids = {str(t["id"]) for t in tables}
         for p in players:
-            for key in p["scores"].keys():
+            for key in p["scores"]:
                 assert key in table_ids or key.isnumeric()
 
     def test_get_tournament_score_map_not_found(self, client):
         """異常系: 存在しない大会キー"""
         res = client.get("/api/tournaments/xxxxxx/score_map")
         assert res.status_code == 404
-        msg = res.get_json()['errors']['json']["message"]
+        msg = res.get_json()["errors"]["json"]["message"]
         assert any("大会" in m for m in msg)
 
-    def test_get_tournament_score_map_empty(self, client,create_group, create_tournament):
+    def test_get_tournament_score_map_empty(
+        self, client, create_group, create_tournament
+    ):
         """正常系: スコアマップが空の大会"""
-        group, group_links = create_group()
-        tournament, tournament_links = create_tournament(group_links[AccessLevel.EDIT.value])
+        _group, group_links = create_group()
+        tournament, tournament_links = create_tournament(
+            group_links[AccessLevel.EDIT.value]
+        )
         res = client.get(
             f"/api/tournaments/{tournament_links[AccessLevel.VIEW.value]}/score_map"
         )
@@ -88,4 +93,3 @@ class TestTournamentScoreMap:
         assert result["tables"] == []
         assert result["players"] == []
         assert result["rate"] == 1.0
-

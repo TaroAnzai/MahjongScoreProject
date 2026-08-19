@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
+
 from sqlalchemy.exc import IntegrityError
+
 from app import db
 from app.models import AccessLevel, Table, Tournament
 from app.service_errors import (
@@ -79,6 +81,8 @@ def create_table(data: dict, tournament_key: str) -> Table:
     db.session.refresh(table)
     table.current_user_access = link.access_level
     return table
+
+
 # =========================================================
 # 対局一覧取得
 # =========================================================
@@ -90,6 +94,8 @@ def get_table_by_tournament(tournament_key: str):
     tables = Table.query.filter_by(tournament_id=tournament.id).all()
     tables = [setattr(t, "current_user_access", link.access_level) or t for t in tables]
     return tables
+
+
 # =========================================================
 # 卓取得
 # =========================================================
@@ -134,6 +140,8 @@ def delete_table(short_key: str) -> None:
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        raise ServiceValidationError("この卓には関連データが存在するため削除できません。")
+        raise ServiceValidationError(
+            "この卓には関連データが存在するため削除できません。"
+        )
 
     return {"message": "卓を削除しました。"}

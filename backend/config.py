@@ -1,8 +1,9 @@
 # config.py
 
 import os
-from dotenv import load_dotenv
+from typing import ClassVar
 
+from dotenv import load_dotenv
 
 load_dotenv(".env.secrets")
 # FLASK_ENV の値に応じて .env を読み込む
@@ -14,7 +15,8 @@ if env_name == "production":
 elif env_name == "testing":
     load_dotenv(".env.test")
 else:
-    load_dotenv(".env.development") #開発用
+    load_dotenv(".env.development")  # 開発用
+
 
 class Config:
     # Database
@@ -25,12 +27,17 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "fallback-secret")
 
     # CORS
-    CORS_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").split(",")]
+    CORS_ORIGINS: ClassVar[list[str]] = [
+        origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").split(",")
+    ]
     CORS_SUPPORTS_CREDENTIALS = True
 
     # Session / Cookie
     SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "None")
-    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() in ("true", "1")
+    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() in (
+        "true",
+        "1",
+    )
     SESSION_COOKIE_NAME = os.getenv("SESSION_COOKIE_NAME", "session")
 
     # Debug / Testing flags
@@ -46,17 +53,16 @@ class Config:
     OPENAPI_REDOC_PATH = os.getenv("OPENAPI_REDOC_PATH", "/redoc")
     OPENAPI_REDOC_URL = os.getenv(
         "OPENAPI_REDOC_URL",
-        "https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"
+        "https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js",
     )
     OPENAPI_SWAGGER_UI_PATH = os.getenv("OPENAPI_SWAGGER_UI_PATH", "/swagger-ui")
     OPENAPI_SWAGGER_UI_URL = os.getenv(
-        "OPENAPI_SWAGGER_UI_URL",
-        "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
+        "OPENAPI_SWAGGER_UI_URL", "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
     )
     # Celery設定
     CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
     CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
-    CELERY_ACCEPT_CONTENT = ["json"]
+    CELERY_ACCEPT_CONTENT: ClassVar[list[str]] = ["json"]
     CELERY_TASK_SERIALIZER = "json"
     CELERY_RESULT_SERIALIZER = "json"
     CELERY_TIMEZONE = "Asia/Tokyo"

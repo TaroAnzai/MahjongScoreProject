@@ -1,5 +1,6 @@
 from marshmallow import fields, post_dump
 
+
 class ShareLinkMixin:
     """
     リソースに紐づく共有リンクを権限ごとにフィルタし、

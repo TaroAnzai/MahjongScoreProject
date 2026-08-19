@@ -1,15 +1,21 @@
 # app/schemas/tournament_participant_schema.py
 
 from marshmallow import Schema, fields
-from app.api.schemas.player_schema import PlayerSchema
+
 from app.api.schemas.common_schemas import UTCDateTime
+from app.api.schemas.player_schema import PlayerSchema
+
 
 class TournamentParticipantSchema(Schema):
     """大会参加者"""
-    player_id = fields.Int(required=True,description="大会に登録するプレイヤーID")
+
+    player_id = fields.Int(required=True, description="大会に登録するプレイヤーID")
     created_at = UTCDateTime(dump_only=True)
+
+
 class TournamentParticipantsCreateSchema(Schema):
     """大会への複数プレイヤー登録用"""
+
     participants = fields.List(
         fields.Nested(TournamentParticipantSchema),
         required=True,
@@ -17,8 +23,10 @@ class TournamentParticipantsCreateSchema(Schema):
         example=[{"player_id": 1}, {"player_id": 2}],
     )
 
+
 class TournamentParticipantsSchema(Schema):
     """大会参加者レスポンス"""
+
     tournament_id = fields.Int(required=True)
     participants = fields.List(
         fields.Nested(PlayerSchema),

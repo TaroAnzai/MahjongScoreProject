@@ -1,8 +1,9 @@
 import pytest
-from app.models import TournamentPlayer, AccessLevel
 
+from app.models import AccessLevel, TournamentPlayer
 
 # ---------- ヘルパー関数群 ----------
+
 
 def _create_tournament(client, group_key, name="Main Tournament"):
     res = client.post(
@@ -52,18 +53,22 @@ def setup_group_with_tournament(client, create_group):
 
 # ---------- テストケース ----------
 
+
 def test_create_tournament_participant(client, setup_group_with_tournament, db_session):
     """POST /api/tournaments/<tournament_key>/participants — プレイヤー登録"""
     d = setup_group_with_tournament
     url = f"/api/tournaments/{d['tournament_key']}/participants"
 
-    res = client.post(url, json={'participants':[{"player_id": d["players"][0]["id"]}]})
+    res = client.post(
+        url, json={"participants": [{"player_id": d["players"][0]["id"]}]}
+    )
     assert res.status_code == 201
 
-    created = db_session.query(TournamentPlayer).filter_by(
-        tournament_id=d["tournament"]["id"],
-        player_id=d["players"][0]["id"]
-    ).first()
+    created = (
+        db_session.query(TournamentPlayer)
+        .filter_by(tournament_id=d["tournament"]["id"], player_id=d["players"][0]["id"])
+        .first()
+    )
     assert created is not None
 
 
@@ -71,8 +76,7 @@ def test_list_tournament_participants(client, setup_group_with_tournament, db_se
     """GET /api/tournaments/<tournament_key>/participants — 参加者一覧取得"""
     d = setup_group_with_tournament
     participant = TournamentPlayer(
-        tournament_id=d["tournament"]["id"],
-        player_id=d["players"][0]["id"]
+        tournament_id=d["tournament"]["id"], player_id=d["players"][0]["id"]
     )
     db_session.add(participant)
     db_session.commit()
@@ -80,7 +84,7 @@ def test_list_tournament_participants(client, setup_group_with_tournament, db_se
     url = f"/api/tournaments/{d['tournament_key']}/participants"
     res = client.get(url)
     assert res.status_code == 200
-    result = res.get_json()['participants']
+    result = res.get_json()["participants"]
     assert isinstance(result, list)
     assert any(p["id"] == d["players"][0]["id"] for p in result)
     print("Participants fetched:", result)
@@ -92,9 +96,11 @@ def test_delete_tournament_participant(client, setup_group_with_tournament, db_s
     d = setup_group_with_tournament
     url = f"/api/tournaments/{d['tournament_key']}/participants"
 
-    res = client.post(url, json={"participants":[{"player_id": d["players"][0]["id"]}]})
+    res = client.post(
+        url, json={"participants": [{"player_id": d["players"][0]["id"]}]}
+    )
     assert res.status_code == 201
-    participant = res.get_json()['participants'][0]
+    participant = res.get_json()["participants"][0]
     url = f"/api/tournaments/{d['tournament_key']}/participants/{participant['id']}"
     res = client.delete(url)
     assert res.status_code == 200
@@ -133,8 +139,8 @@ def test_create_with_invalid_key(client, setup_group_with_tournament):
     """無効な tournament_key の場合 404"""
     d = setup_group_with_tournament
     player = d["players"][0]
-    url = f"/api/tournaments/invalid-key/participants"
-    res = client.post(url, json={'participants':[{"player_id": player["id"]}]})
+    url = "/api/tournaments/invalid-key/participants"
+    res = client.post(url, json={"participants": [{"player_id": player["id"]}]})
     assert res.status_code == 404
 
 
@@ -149,9 +155,9 @@ def test_create_duplicate_participant(client, setup_group_with_tournament, db_se
     db_session.add(participant)
     db_session.commit()
     url = f"/api/tournaments/{d['tournament_key']}/participants"
-    res = client.post(url, json={'participants':[{"player_id": p["id"]}]})
+    res = client.post(url, json={"participants": [{"player_id": p["id"]}]})
     print("Response:", res.get_json())
     assert res.status_code == 201
     assert res.get_json()["added_count"] == 0
     assert len(res.get_json()["errors"]) == 1
-    assert "すでに登録されています" in res.get_json()["errors"][0]['error']
+    assert "すでに登録されています" in res.get_json()["errors"][0]["error"]

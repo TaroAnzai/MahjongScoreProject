@@ -1,8 +1,8 @@
 """Transactional and aggregate services for the V2 mobile API."""
 
-from datetime import datetime, timezone
 import hashlib
 import json
+from datetime import datetime, timezone
 
 from app import db
 from app.models import (
@@ -21,7 +21,6 @@ from app.models import (
     TournamentPlayer,
 )
 from app.utils.share_link_utils import create_unique_share_link, get_share_link_by_key
-
 
 ACCESS_PRIORITY = {AccessLevel.VIEW: 1, AccessLevel.EDIT: 2, AccessLevel.OWNER: 3}
 

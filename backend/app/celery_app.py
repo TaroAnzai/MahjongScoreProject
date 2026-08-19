@@ -1,8 +1,10 @@
 # backend/app/celery_app.py
-from celery import Celery
-from dotenv import load_dotenv
 import os
 from datetime import timedelta
+
+from celery import Celery
+from dotenv import load_dotenv
+
 env_name = os.getenv("FLASK_ENV", "development")
 print("env_name:", env_name)
 
@@ -11,13 +13,17 @@ if env_name == "production":
 elif env_name == "test":
     load_dotenv(".env.test")
 else:
-    load_dotenv(".env.development") #開発用
+    load_dotenv(".env.development")  # 開発用
+
+
 def make_celery():
     """Flaskに依存しないCeleryインスタンスを作成"""
     celery = Celery(__name__)
     # .envから直接取得
     celery.conf.broker_url = os.getenv("CELERY_BROKER_URL", "redis://redis:6379/0")
-    celery.conf.result_backend = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
+    celery.conf.result_backend = os.getenv(
+        "CELERY_RESULT_BACKEND", "redis://redis:6379/0"
+    )
     celery.conf.task_serializer = "json"
     celery.conf.result_serializer = "json"
     celery.conf.accept_content = ["json"]
@@ -43,11 +49,8 @@ def make_celery():
         },
     }
 
-
-
     return celery
 
 
 # Celeryインスタンス作成
 celery = make_celery()
-

@@ -1,31 +1,40 @@
-from marshmallow import Schema, fields, post_dump
+from marshmallow import Schema, fields
+
 from app.api.schemas.common_schemas import ShareLinkSchema, UTCDateTime
 from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
-from app.api.schemas.tournament_schema import TournamentSchema
 from app.models import TableTypeEnum
+
 
 class TableCreateSchema(Schema):
     """卓作成リクエスト"""
+
     name = fields.Str(required=True, description="卓名")
-    type = fields.Enum(TableTypeEnum, load_default=TableTypeEnum.NORMAL, description="卓タイプ")
+    type = fields.Enum(
+        TableTypeEnum, load_default=TableTypeEnum.NORMAL, description="卓タイプ"
+    )
 
 
 class TableUpdateSchema(Schema):
     """卓更新リクエスト"""
+
     name = fields.Str(description="卓名")
     type = fields.Enum(TableTypeEnum, description="卓タイプ")
 
 
-class TournamentLinkSchema(ShareLinkMixin,Schema):
+class TournamentLinkSchema(ShareLinkMixin, Schema):
     """グループ共有リンク情報（短縮版）"""
+
     _share_link_field_name = "tournament_links"
     tournament_links = fields.List(
         fields.Nested(ShareLinkSchema),
         dump_only=True,
         description="親トーナメントに紐づく共有リンク一覧",
     )
-class TableSchema(ShareLinkMixin,Schema):
+
+
+class TableSchema(ShareLinkMixin, Schema):
     """卓レスポンス"""
+
     id = fields.Int(required=True, dump_only=True, description="卓ID")
     tournament_id = fields.Int(required=True, dump_only=True, description="大会ID")
     name = fields.Str(required=True, description="卓名")
@@ -37,7 +46,7 @@ class TableSchema(ShareLinkMixin,Schema):
         required=True,
         dump_only=True,
         attribute="tournament",
-        description="卓が所属する大会の情報"
+        description="卓が所属する大会の情報",
     )
 
     _share_link_field_name = "table_links"

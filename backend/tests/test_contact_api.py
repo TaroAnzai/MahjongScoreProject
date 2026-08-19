@@ -1,11 +1,14 @@
 # backend/tests/contacts/test_contact_api.py
 import pytest
+
 from app import db
 from app.models import Contact, ContactStatus
 
 # ==== 管理者ログイン情報（グローバル変数） ====
 ADMIN_TEST_USER = "admin"
 ADMIN_TEST_PASSWORD = "testpassword"
+
+
 # ============================================================
 # すべてのテストで管理者ログイン状態にする共通 fixture
 # ============================================================
@@ -21,7 +24,9 @@ def admin_logged_in(client, monkeypatch):
     )
 
     assert res.status_code == 200
-    return client   # ← ログイン済み client を返す
+    return client  # ← ログイン済み client を返す
+
+
 # ===============================
 # CREATE (POST)
 # ===============================
@@ -31,7 +36,7 @@ def test_create_contact(client):
         "email": "taro@example.com",
         "subject": "問い合わせの件",
         "message": "テストメッセージです。",
-        "recaptcha_token": "dummy-token"
+        "recaptcha_token": "dummy-token",
     }
 
     res = client.post("/api/contacts/", json=payload)
@@ -50,13 +55,15 @@ def test_create_contact(client):
 def test_list_contacts(client, admin_logged_in):
     client = admin_logged_in
 
-    db.session.add(Contact(
-        name="User1",
-        email="u1@example.com",
-        subject="sub",
-        message="msg",
-        status=ContactStatus.RECEIVED,
-    ))
+    db.session.add(
+        Contact(
+            name="User1",
+            email="u1@example.com",
+            subject="sub",
+            message="msg",
+            status=ContactStatus.RECEIVED,
+        )
+    )
     db.session.commit()
 
     res = client.get("/api/admin/contacts")

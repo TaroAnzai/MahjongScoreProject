@@ -52,9 +52,7 @@ def list_participants_by_key(tournament_key: str):
     link, tournament = _require_tournament(tournament_key)
     _ensure_access(link, AccessLevel.VIEW, "参加者一覧を閲覧する権限がありません。")
     tournament_players = (
-        db.session.query(TournamentPlayer)
-        .filter_by(tournament_id=tournament.id)
-        .all()
+        db.session.query(TournamentPlayer).filter_by(tournament_id=tournament.id).all()
     )
     result = {
         "tournament_id": tournament.id,
@@ -78,24 +76,36 @@ def create_participants(tournament_key: str, data: list[dict]):
     added_participants = []
     errors = []
 
-    for i, data in enumerate(data_list, start=1):
-        player_id = data.get("player_id")
+    for i, participant_data in enumerate(data_list, start=1):
+        player_id = participant_data.get("player_id")
         if not player_id:
             errors.append({"index": i, "error": "player_id は必須です。"})
             continue
 
         player = Player.query.get(player_id)
         if not player:
-            errors.append({"index": i, "error": f"プレイヤー（ID={player_id}）が見つかりません。"})
+            errors.append(
+                {"index": i, "error": f"プレイヤー（ID={player_id}）が見つかりません。"}
+            )
             continue
         if player.group_id != tournament.group_id:
-            errors.append({"index": i, "error": f"プレイヤー（ID={player_id}）は別グループに属しています。"})
+            errors.append(
+                {
+                    "index": i,
+                    "error": f"プレイヤー（ID={player_id}）は別グループに属しています。",
+                }
+            )
             continue
         existing = TournamentPlayer.query.filter_by(
             tournament_id=tournament.id, player_id=player_id
         ).first()
         if existing:
-            errors.append({"index": i, "error": f"プレイヤー（ID={player_id}）はすでに登録されています。"})
+            errors.append(
+                {
+                    "index": i,
+                    "error": f"プレイヤー（ID={player_id}）はすでに登録されています。",
+                }
+            )
             continue
 
         participant = TournamentPlayer(tournament_id=tournament.id, player_id=player.id)
@@ -123,7 +133,9 @@ def delete_participant(tournament_key: str, player_id: int):
     if not link or link.resource_type != "tournament":
         raise ServicePermissionError("不正な共有リンクです。")
 
-    participant = TournamentPlayer.query.filter_by(player_id=player_id, tournament_id=link.resource_id).first()
+    participant = TournamentPlayer.query.filter_by(
+        player_id=player_id, tournament_id=link.resource_id
+    ).first()
     if not participant:
         raise ServiceNotFoundError("大会参加者が見つかりません。")
 

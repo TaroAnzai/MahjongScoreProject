@@ -1,32 +1,32 @@
+from flask import jsonify
 from flask.views import MethodView
-from flask_smorest import Blueprint, abort
+from flask_smorest import Blueprint
 
-from app.decorators import with_common_error_responses
 from app.api.schemas.common_schemas import MessageSchema
 from app.api.schemas.group_schema import (
     GroupCreateSchema,
-    GroupUpdateSchema,
-    GroupSchema,
+    GroupCreateStatusSchema,
     GroupRequestSchema,
     GroupResponseSchema,
-    GroupCreateStatusSchema,
+    GroupSchema,
+    GroupUpdateSchema,
 )
-from app.api.schemas.tournament_schema import TournamentSchema, TournamentCreateSchema
-from app.service_errors import ServiceError
-from flask import jsonify
-from app.service_errors import format_error_response
-
+from app.api.schemas.tournament_schema import TournamentCreateSchema, TournamentSchema
 from app.api.services.group_service import (
     create_group,
+    create_group_creation_token,
     create_group_status,
+    delete_group,
     get_group_by_key,
     update_group,
-    delete_group,
-    create_group_creation_token,
 )
-from app.api.services.tournament_service import create_tournament, get_tournaments_by_group
+from app.api.services.tournament_service import (
+    create_tournament,
+    get_tournaments_by_group,
+)
+from app.decorators import with_common_error_responses
 from app.extensions import limiter
-
+from app.service_errors import ServiceError, format_error_response
 
 # ✅ Blueprint設定（命名を仕様準拠に統一）
 group_bp = Blueprint(
@@ -35,9 +35,12 @@ group_bp = Blueprint(
     url_prefix="/api/groups",
     description="グループ管理API",
 )
+
+
 @group_bp.errorhandler(ServiceError)
 def handle_service_error(e: ServiceError):
     return jsonify(format_error_response(e.code, e.name, e.description)), e.code
+
 
 # =========================================================
 # 作成
@@ -45,12 +48,15 @@ def handle_service_error(e: ServiceError):
 @group_bp.route("")
 class GroupsResource(MethodView):
     """POST: 新規作成"""
+
     @group_bp.arguments(GroupCreateSchema)
     @group_bp.response(201, GroupSchema)
     @with_common_error_responses(group_bp)
     def post(self, new_data):
         """グループ新規作成"""
         return create_group(new_data)
+
+
 # =========================================================
 # グループ作成　リクエスト
 # =========================================================
@@ -64,6 +70,7 @@ def request_group_creation(args):
     # サービス層へ委譲
     return create_group_creation_token(args)
 
+
 @group_bp.route("/request-link/status", methods=["POST"])
 @group_bp.arguments(GroupCreateSchema)
 @group_bp.response(200, GroupCreateStatusSchema)
@@ -72,9 +79,6 @@ def request_group_creation_status(args):
     """グループ作成リンクのステータスをリクエストする"""
     # サービス層へ委譲
     return create_group_status(args)
-
-
-
 
 
 # =========================================================
@@ -90,14 +94,12 @@ class GroupByKeyResource(MethodView):
         """グループ詳細取得"""
         return get_group_by_key(group_key)
 
-
     @group_bp.arguments(GroupUpdateSchema)
     @group_bp.response(200, GroupSchema)
     @with_common_error_responses(group_bp)
     def put(self, update_data, group_key):
         """グループ更新"""
         return update_group(group_key, update_data)
-
 
     @group_bp.response(200, MessageSchema)
     @with_common_error_responses(group_bp)
@@ -121,10 +123,8 @@ class TournamentCreateResource(MethodView):
         """グループ共有キーから大会を作成"""
         return create_tournament(new_data, group_key)
 
-
     @group_bp.response(200, TournamentSchema(many=True))
     @with_common_error_responses(group_bp)
     def get(self, group_key):
         """グループキーから大会一覧を取得"""
         return get_tournaments_by_group(group_key)
-

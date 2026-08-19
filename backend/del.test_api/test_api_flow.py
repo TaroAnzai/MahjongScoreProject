@@ -1,7 +1,8 @@
 from test_api.group_module import test_create_group, test_login_group
 from test_api.player_module import test_register_players
-from test_api.tournament_module import test_create_tournament
 from test_api.table_module import test_create_table, test_register_game
+from test_api.tournament_module import test_create_tournament
+
 
 def test_full_flow(client):
     test_data = {}

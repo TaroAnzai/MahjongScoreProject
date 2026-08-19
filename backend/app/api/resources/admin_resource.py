@@ -1,26 +1,31 @@
-from flask_smorest import Blueprint
 from flask import jsonify
-from app.service_errors import ServiceError,format_error_response
-from app.utils.auth import require_admin_user
-from app.decorators import with_common_error_responses
-from app.api.services.admin_service import get_all_groups_service, delete_group_service
+from flask_smorest import Blueprint
+
 from app.api.schemas.admin_schemas import AdminGroupSchema
 from app.api.schemas.contact_schemas import (
-    ContactUpdateSchema,
     ContactSchema,
+    ContactUpdateSchema,
 )
+from app.api.services.admin_service import delete_group_service, get_all_groups_service
 from app.api.services.contact_service import ContactService
+from app.decorators import with_common_error_responses
+from app.service_errors import ServiceError, format_error_response
+from app.utils.auth import require_admin_user
+
 admin_group_bp = Blueprint("admin_resources", __name__, url_prefix="/api/admin")
+
+
 @admin_group_bp.errorhandler(ServiceError)
 def handle_service_error(e: ServiceError):
     return jsonify(format_error_response(e.code, e.name, e.description)), e.code
+
 
 # -------------------------------------------------
 # 1. すべてのグループを取得
 # -------------------------------------------------
 @admin_group_bp.get("/groups")
 @require_admin_user
-@admin_group_bp.response(200, AdminGroupSchema (many=True))
+@admin_group_bp.response(200, AdminGroupSchema(many=True))
 @with_common_error_responses(admin_group_bp)
 def get_all_groups():
     """すべてのグループを取得"""
@@ -82,5 +87,5 @@ def update_contact(data, contact_id):
 @require_admin_user
 @admin_group_bp.response(204)
 def delete_contact(contact_id):
-    success = ContactService.delete_contact(contact_id)
+    ContactService.delete_contact(contact_id)
     return ""

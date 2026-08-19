@@ -1,14 +1,13 @@
-# -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from celery import shared_task
 from datetime import datetime, timedelta, timezone
+
+from celery import shared_task
 from sqlalchemy import and_, func
 
 from app import create_app
 from app.extensions import db
 from app.models import GroupCreationToken
-import os
 
 
 @shared_task(
@@ -26,13 +25,10 @@ def delete_expired_group_tokens(self):
     with app.app_context():
         now = datetime.now(timezone.utc)
         try:
-            q = (
-                db.session.query(GroupCreationToken)
-                .filter(
-                    and_(
-                        GroupCreationToken.is_used.is_(False),
-                        GroupCreationToken.expires_at <= now,
-                    )
+            q = db.session.query(GroupCreationToken).filter(
+                and_(
+                    GroupCreationToken.is_used.is_(False),
+                    GroupCreationToken.expires_at <= now,
                 )
             )
             to_delete = q.count()
@@ -48,9 +44,7 @@ def delete_expired_group_tokens(self):
             return {"deleted": to_delete, "now": now.isoformat()}
         except Exception as e:
             db.session.rollback()
-            app.logger.exception(
-                "[Maintenance] Failed to delete expired group tokens"
-            )
+            app.logger.exception("[Maintenance] Failed to delete expired group tokens")
             raise self.retry(exc=e)
 
 

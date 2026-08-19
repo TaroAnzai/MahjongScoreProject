@@ -8,12 +8,11 @@
 | `create_table`                     | 卓作成                      | function | `tournament_key`, `name`（任意：卓名）          |
 | `register_table_players`           | 卓へのプレイヤー登録          | function | `table_key`, `players`（プレイヤーリスト）        |
 | `create_game`                      | 対局登録（スコア付き）        | function | `table_key`, `players`, `memo`, `scores`（任意） |
-| `setup_full_tournament`            | 上記すべてをまとめた完全データセット     | function | `client`（pytestのHTTPクライアント）            | """
-
-
+| `setup_full_tournament`            | 上記すべてをまとめた完全データセット     | function | `client`（pytestのHTTPクライアント）            |"""
 
 import pytest
-from app.models import AccessLevel,GroupCreationToken
+
+from app.models import AccessLevel, GroupCreationToken
 
 
 # ---------------------------------------------
@@ -25,7 +24,10 @@ def create_group(client):
         # ------------------------------------------------------------
         # 1️⃣ メール送信リクエスト
         # ------------------------------------------------------------
-        res1 = client.post("/api/groups/request-link", json={"name": name, "email": email, "recaptcha_token":"xxx"})
+        res1 = client.post(
+            "/api/groups/request-link",
+            json={"name": name, "email": email, "recaptcha_token": "xxx"},
+        )
         assert res1.status_code == 200
         res1_json = res1.get_json()
         assert "expires_at" in res1_json
@@ -33,7 +35,11 @@ def create_group(client):
         # ------------------------------------------------------------
         # 2️⃣ トークンをDBから取得（実際にはメールで届く想定）
         # ------------------------------------------------------------
-        token_record = GroupCreationToken.query.filter_by(email=email).order_by(GroupCreationToken.id.desc()).first()
+        token_record = (
+            GroupCreationToken.query.filter_by(email=email)
+            .order_by(GroupCreationToken.id.desc())
+            .first()
+        )
         assert token_record is not None
         token = token_record.token
 
@@ -45,6 +51,7 @@ def create_group(client):
         data = res.get_json()
         links = {l["access_level"]: l["short_key"] for l in data["group_links"]}
         return data, links
+
     return _create_group
 
 
@@ -62,6 +69,7 @@ def create_players(client):
             assert res.status_code == 201
             players.append(res.get_json())
         return players
+
     return _create_players
 
 
@@ -76,6 +84,7 @@ def create_tournament(client):
         data = res.get_json()
         links = {l["access_level"]: l["short_key"] for l in data["tournament_links"]}
         return data, links
+
     return _create_tournament
 
 
@@ -88,7 +97,7 @@ def register_tournament_participants(client):
         for p in players:
             res = client.post(
                 f"/api/tournaments/{tournament_key}/participants",
-                json={'participants': [{"player_id": p["id"]}]},
+                json={"participants": [{"player_id": p["id"]}]},
             )
             assert res.status_code == 201
 
@@ -101,11 +110,14 @@ def register_tournament_participants(client):
 @pytest.fixture(scope="function")
 def create_table(client):
     def _create_table(tournament_key, name="Export Table"):
-        res = client.post(f"/api/tournaments/{tournament_key}/tables", json={"name": name})
+        res = client.post(
+            f"/api/tournaments/{tournament_key}/tables", json={"name": name}
+        )
         assert res.status_code == 201
         data = res.get_json()
         links = {l["access_level"]: l["short_key"] for l in data["table_links"]}
         return data, links
+
     return _create_table
 
 
@@ -115,15 +127,14 @@ def create_table(client):
 @pytest.fixture(scope="function")
 def register_table_players(client):
     def _register_table_players(table_key, players):
-        player_ids = [{"player_id": p["id"] }for p in players]
-        payload ={
-            "players": player_ids
-        }
+        player_ids = [{"player_id": p["id"]} for p in players]
+        payload = {"players": player_ids}
         res = client.post(
-                f"/api/tables/{table_key}/players",
-                json=payload,
-            )
+            f"/api/tables/{table_key}/players",
+            json=payload,
+        )
         assert res.status_code == 201
+
     return _register_table_players
 
 
@@ -154,6 +165,7 @@ def create_game(client):
         )
         assert res.status_code == 201
         return res.get_json()
+
     return _create_game
 
 
@@ -178,10 +190,14 @@ def setup_full_tournament(
         players = create_players(group_links[AccessLevel.EDIT.value])
 
         # 3️⃣ トーナメント作成
-        tournament_data, tournament_links = create_tournament(group_links[AccessLevel.EDIT.value])
+        tournament_data, tournament_links = create_tournament(
+            group_links[AccessLevel.EDIT.value]
+        )
 
         # 4️⃣ トーナメント参加者登録
-        register_tournament_participants(tournament_links[AccessLevel.EDIT.value], players)
+        register_tournament_participants(
+            tournament_links[AccessLevel.EDIT.value], players
+        )
 
         # 5️⃣ テーブル作成
         table_data, table_links = create_table(tournament_links[AccessLevel.EDIT.value])

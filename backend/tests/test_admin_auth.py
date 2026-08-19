@@ -1,8 +1,6 @@
-import pytest
-from werkzeug.security import generate_password_hash
-import os
+TEST_PASSWORD = "testpassword"
 
-TEST_PASSWORD="testpassword"
+
 # ------------------------------------------------------
 # 1. ログイン成功テスト
 # ------------------------------------------------------

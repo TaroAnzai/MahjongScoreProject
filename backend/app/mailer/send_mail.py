@@ -20,10 +20,7 @@ from __future__ import annotations
 
 import os
 import smtplib
-import socket
 from dataclasses import dataclass
-from typing import List, Optional
-
 from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -49,16 +46,17 @@ class MailMessage:
         cc: Cc 宛先
         bcc: Bcc 宛先（ヘッダには含めない）
     """
+
     def __init__(
         self,
-        to: List[str],                 # ✅ list[str] に統一
+        to: list[str],  # ✅ list[str] に統一
         subject: str,
         sender_name: str,
-        text: Optional[str] = None,
-        html: Optional[str] = None,
-        reply_to: Optional[str] = None,
-        cc: Optional[List[str]] = None,
-        bcc: Optional[List[str]] = None,
+        text: str | None = None,
+        html: str | None = None,
+        reply_to: str | None = None,
+        cc: list[str] | None = None,
+        bcc: list[str] | None = None,
     ):
         self.to = to
         self.subject = subject
@@ -103,7 +101,7 @@ def _connect() -> smtplib.SMTP:
             smtp.login(user, pw)
 
         return smtp
-    except (socket.timeout, smtplib.SMTPException) as e:
+    except (TimeoutError, smtplib.SMTPException) as e:
         raise MailSendError(f"SMTP connect/login failed: {e}") from e
 
 

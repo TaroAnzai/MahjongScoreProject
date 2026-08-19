@@ -22,12 +22,14 @@ def test_send_email_sets_sender_display_name(monkeypatch):
     monkeypatch.setenv("MAIL_FROM", "noreply@example.com")
     monkeypatch.setattr(send_mail, "_connect", lambda: smtp)
 
-    result = send_mail.send_email(send_mail.MailMessage(
-        to=["user@example.com"],
-        subject="Test",
-        sender_name="麻雀スコア",
-        text="body",
-    ))
+    result = send_mail.send_email(
+        send_mail.MailMessage(
+            to=["user@example.com"],
+            subject="Test",
+            sender_name="麻雀スコア",
+            text="body",
+        )
+    )
 
     message = message_from_string(smtp.sent[2])
     sender_name, sender_address = parseaddr(message["From"])

@@ -1,18 +1,16 @@
-from flask.views import MethodView
-from flask_smorest import Blueprint, abort
-
-from app.decorators import with_common_error_responses
-from app.api.schemas.common_schemas import MessageSchema
-from app.api.schemas.game_schema import GameCreateSchema, GameUpdateSchema, GameSchema
-from app.service_errors import ServiceError
 from flask import jsonify
-from app.service_errors import format_error_response
+from flask.views import MethodView
+from flask_smorest import Blueprint
+
+from app.api.schemas.common_schemas import MessageSchema
+from app.api.schemas.game_schema import GameSchema, GameUpdateSchema
 from app.api.services.game_service import (
-    create_game,
+    delete_game,
     get_game_by_key,
     update_game,
-    delete_game,
 )
+from app.decorators import with_common_error_responses
+from app.service_errors import ServiceError, format_error_response
 
 # ✅ Blueprint設定
 game_bp = Blueprint(
@@ -21,6 +19,8 @@ game_bp = Blueprint(
     url_prefix="/api/tables/<string:table_key>/games",
     description="対局管理API",
 )
+
+
 @game_bp.errorhandler(ServiceError)
 def handle_service_error(e: ServiceError):
     return jsonify(format_error_response(e.code, e.name, e.description)), e.code
@@ -39,7 +39,6 @@ class GameByKeyResource(MethodView):
         """対局詳細取得"""
         return get_game_by_key(table_key, game_id)
 
-
     @game_bp.arguments(GameUpdateSchema)
     @game_bp.response(200, GameSchema)
     @with_common_error_responses(game_bp)
@@ -47,11 +46,9 @@ class GameByKeyResource(MethodView):
         """対局更新"""
         return update_game(table_key, game_id, update_data)
 
-
     @game_bp.response(200, MessageSchema)
     @with_common_error_responses(game_bp)
     def delete(self, table_key, game_id):
         """対局削除"""
         delete_game(table_key, game_id)
         return {"message": "Game deleted"}
-

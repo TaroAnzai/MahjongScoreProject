@@ -1,14 +1,13 @@
-from datetime import datetime, timezone
+from sqlalchemy import func
+
 from app import db
-from app.models import AccessLevel, Game, Table, Score,TablePlayer,TableTypeEnum
+from app.models import AccessLevel, Game, Score, Table, TablePlayer, TableTypeEnum
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
     ServiceValidationError,
 )
-from app.utils.share_link_utils import create_default_share_links, get_share_link_by_key
-
-from sqlalchemy import func
+from app.utils.share_link_utils import get_share_link_by_key
 
 _ACCESS_PRIORITY = {
     AccessLevel.VIEW: 1,
@@ -88,10 +87,14 @@ def create_game(table_key: str, data: dict) -> Game:
     }
     if not table_player_ids:
         raise ServiceValidationError("この卓にはまだプレイヤーが登録されていません。")
-    #作成者情報
+    # 作成者情報
     created_by = table.created_by or "anonymous"
     # game_index 自動採番
-    max_index = db.session.query(func.max(Game.game_index)).filter_by(table_id=table.id).scalar()
+    max_index = (
+        db.session.query(func.max(Game.game_index))
+        .filter_by(table_id=table.id)
+        .scalar()
+    )
     next_index = (max_index or 0) + 1
 
     game = Game(
@@ -106,15 +109,17 @@ def create_game(table_key: str, data: dict) -> Game:
     scores = sorted(scores, key=lambda s: s.get("score", 0), reverse=True)
     rank = 1
 
-    for i,s in enumerate(scores):
+    for i, s in enumerate(scores):
         pid = s.get("player_id")
         val = s.get("score")
         if pid is None or val is None:
             raise ServiceValidationError("player_id と score は必須です。")
         if pid not in table_player_ids:
-            raise ServiceValidationError(f"player_id {pid} はこの卓に登録されていません。")
-        if i>0 and val == scores[i-1].get("score"):
-            s["rank"] = scores[i-1]["rank"]
+            raise ServiceValidationError(
+                f"player_id {pid} はこの卓に登録されていません。"
+            )
+        if i > 0 and val == scores[i - 1].get("score"):
+            s["rank"] = scores[i - 1]["rank"]
         else:
             s["rank"] = rank
         rank += 1
@@ -123,10 +128,11 @@ def create_game(table_key: str, data: dict) -> Game:
     db.session.commit()
     return game
 
+
 def get_games_by_table(table_key: str):
     """卓共有キーから対局一覧（スコア込み）を取得"""
-    from app.utils.share_link_utils import get_share_link_by_key
     from app.models import Game, Score, Table
+    from app.utils.share_link_utils import get_share_link_by_key
 
     link = get_share_link_by_key(table_key)
     if not link or link.resource_type != "table":
@@ -143,14 +149,18 @@ def get_games_by_table(table_key: str):
             {"player_id": s.player_id, "score": s.score}
             for s in Score.query.filter_by(game_id=g.id).all()
         ]
-        result.append({
-            "id": g.id,
-            "table_id": table.id,
-            "game_index": g.game_index,
-            "memo": g.memo,
-            "scores": scores,
-        })
+        result.append(
+            {
+                "id": g.id,
+                "table_id": table.id,
+                "game_index": g.game_index,
+                "memo": g.memo,
+                "scores": scores,
+            }
+        )
     return result
+
+
 def get_game_by_key(table_key: str, game_id: int) -> Game:
     """Tableキー,Game_idから取得"""
     link = get_share_link_by_key(table_key)
@@ -161,7 +171,7 @@ def get_game_by_key(table_key: str, game_id: int) -> Game:
     return game
 
 
-def update_game(table_key: str,game_id: int, data: dict) -> Game:
+def update_game(table_key: str, game_id: int, data: dict) -> Game:
     """Tableキー,Game_idから更新（メモ・日付・スコア）"""
     link, table = _require_table(table_key)
     if not link:
@@ -197,19 +207,23 @@ def update_game(table_key: str,game_id: int, data: dict) -> Game:
         # 新しいスコアを追加
         scores = sorted(scores, key=lambda s: s.get("score", 0), reverse=True)
         rank = 1
-        for i,s in enumerate(scores):
+        for i, s in enumerate(scores):
             pid = s.get("player_id")
             val = s.get("score")
             if pid is None or val is None:
                 raise ServiceValidationError("player_id と score は必須です。")
             if pid not in table_player_ids:
-                raise ServiceValidationError(f"player_id {pid} はこの卓に登録されていません。")
-            if i>0 and val == scores[i-1].get("score"):
-                s["rank"] = scores[i-1]["rank"]
+                raise ServiceValidationError(
+                    f"player_id {pid} はこの卓に登録されていません。"
+                )
+            if i > 0 and val == scores[i - 1].get("score"):
+                s["rank"] = scores[i - 1]["rank"]
             else:
                 s["rank"] = rank
             rank += 1
-            db.session.add(Score(game_id=game.id, player_id=pid, score=val, rank=s["rank"]))
+            db.session.add(
+                Score(game_id=game.id, player_id=pid, score=val, rank=s["rank"])
+            )
 
     db.session.commit()
     db.session.refresh(game)

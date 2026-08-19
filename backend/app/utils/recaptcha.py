@@ -1,5 +1,7 @@
 import os
+
 import requests
+
 
 def verify_recaptcha(token: str, action: str = "create_group") -> bool:
     secret = os.getenv("RECAPTCHA_SECRET_KEY")
@@ -21,7 +23,4 @@ def verify_recaptcha(token: str, action: str = "create_group") -> bool:
         return False
 
     # スコアが低い → bot
-    if response.get("score", 0) < 0.7:
-        return False
-
-    return True
+    return response.get("score", 0) >= 0.7

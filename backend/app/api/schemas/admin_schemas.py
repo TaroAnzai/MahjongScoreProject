@@ -1,12 +1,15 @@
 from marshmallow import Schema, fields
+
 from app.api.schemas.common_schemas import ShareLinkSchema, UTCDateTime
-from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
+
 # -------------------------------------------------
 # グループ情報スキーマ
 # -------------------------------------------------
 
+
 class AdminGroupSchema(Schema):
     """Admin用グループ情報スキーマ"""
+
     id = fields.Int(dump_only=True)
     name = fields.Str(required=True)
     description = fields.Str(allow_none=True)

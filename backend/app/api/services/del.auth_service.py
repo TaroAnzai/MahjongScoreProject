@@ -1,7 +1,9 @@
 # app/services/auth_service.py
-from flask_login import login_user
-from app.models import Group, Tournament
 from app.auth import PseudoUser
+from flask_login import login_user
+
+from app.models import Group, Tournament
+
 
 class AuthService:
     @staticmethod
@@ -19,4 +21,3 @@ class AuthService:
         user = PseudoUser(id=f"{target}:{obj.id}", edit_key=edit_key)
         login_user(user)
         return user, {"message": "Login successful"}, 200
-

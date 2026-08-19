@@ -1,10 +1,12 @@
 # util/send_test_mail.py
 import argparse
-from .send_mail import MailMessage, send_email, MailSendError
-from dotenv import load_dotenv
 import os
 
-load_dotenv()# FLASK_ENV の値に応じて .env を読み込む
+from dotenv import load_dotenv
+
+from .send_mail import MailMessage, MailSendError, send_email
+
+load_dotenv()  # FLASK_ENV の値に応じて .env を読み込む
 env_name = os.getenv("FLASK_ENV", "development")
 print("FLASK_ENV:", env_name)
 if env_name == "production":
@@ -12,7 +14,9 @@ if env_name == "production":
 elif env_name == "test":
     load_dotenv(".env.test")
 else:
-    load_dotenv(".env") #開発用
+    load_dotenv(".env")  # 開発用
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--to", required=True, help="カンマ区切り: a@x,b@y")
@@ -24,17 +28,20 @@ def main():
 
     to_list = [s.strip() for s in args.to.split(",") if s.strip()]
     try:
-        mid = send_email(MailMessage(
-            to=to_list,
-            subject=args.subject,
-            sender_name=args.sender_name,
-            text=args.text,
-            html=args.html,
-        ))
+        mid = send_email(
+            MailMessage(
+                to=to_list,
+                subject=args.subject,
+                sender_name=args.sender_name,
+                text=args.text,
+                html=args.html,
+            )
+        )
         print("OK:", mid)
     except MailSendError as e:
         print("ERROR:", e)
         raise SystemExit(1)
+
 
 if __name__ == "__main__":
     main()

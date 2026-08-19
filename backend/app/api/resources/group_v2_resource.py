@@ -1,19 +1,27 @@
 """V2 group endpoints."""
+
 from flask import jsonify
 from flask_smorest import Blueprint
 
 from app import db
-from app.decorators import with_v2_error_responses
 from app.api.schemas.v2_schema import (
-    GroupBatchGetResponseSchema, GroupBatchGetSchema, GroupDashboardResponseSchema,
-    IdempotencyHeaderSchema, StatusBatchRequestSchema, StatusBatchResponseSchema,
-    TournamentCreateV2ResponseSchema, TournamentCreateV2Schema,
+    GroupBatchGetResponseSchema,
+    GroupBatchGetSchema,
+    GroupDashboardResponseSchema,
+    IdempotencyHeaderSchema,
+    StatusBatchRequestSchema,
+    StatusBatchResponseSchema,
+    TournamentCreateV2ResponseSchema,
+    TournamentCreateV2Schema,
 )
 from app.api.services.v2_service import (
-    V2Error, batch_get_groups, batch_group_status, create_tournament_with_tables,
+    V2Error,
+    batch_get_groups,
+    batch_group_status,
+    create_tournament_with_tables,
     group_dashboard,
 )
-
+from app.decorators import with_v2_error_responses
 
 group_v2_bp = Blueprint(
     "groups_v2", __name__, url_prefix="/api/v2", description="V2 group API"

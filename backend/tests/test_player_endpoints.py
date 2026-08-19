@@ -1,6 +1,6 @@
 import pytest
-from app.models import AccessLevel, Player
 
+from app.models import AccessLevel, Player
 
 
 def _create_player(client, group_key, name="Alice"):
@@ -23,24 +23,28 @@ class TestPlayerEndpoints:
         assert player["group_id"] == group_data["id"]
 
     def test_create_player_with_view_forbidden(self, client, db_session, create_group):
-        group_data, links = create_group("Player Group")
+        _group_data, links = create_group("Player Group")
         res = _create_player(client, links[AccessLevel.VIEW.value])
         assert res.status_code == 403
 
     def test_get_player_requires_view(self, client, db_session, create_group):
-        group_data, links = create_group()
+        _group_data, links = create_group()
         create_res = _create_player(client, links[AccessLevel.EDIT.value])
         player = create_res.get_json()
 
-        ok = client.get(f"/api/groups/{links[AccessLevel.VIEW.value]}/players/{player['id']}")
+        ok = client.get(
+            f"/api/groups/{links[AccessLevel.VIEW.value]}/players/{player['id']}"
+        )
         assert ok.status_code == 200
 
-        other_group, other_links = create_group("Other Group")
-        forbidden = client.get(f"/api/groups/{other_links[AccessLevel.VIEW.value]}/players/{player['id']}")
+        _other_group, other_links = create_group("Other Group")
+        forbidden = client.get(
+            f"/api/groups/{other_links[AccessLevel.VIEW.value]}/players/{player['id']}"
+        )
         assert forbidden.status_code == 404
 
     def test_update_player_requires_edit(self, client, db_session, create_group):
-        group_data, links = create_group()
+        _group_data, links = create_group()
         create_res = _create_player(client, links[AccessLevel.EDIT.value])
         player = create_res.get_json()
 
@@ -61,14 +65,18 @@ class TestPlayerEndpoints:
         assert updated.nickname == "Allowed"
 
     def test_delete_player_requires_group_edit(self, client, db_session, create_group):
-        group_data, links = create_group("Player Group")
+        _group_data, links = create_group("Player Group")
         create_res = _create_player(client, links[AccessLevel.EDIT.value])
         player = create_res.get_json()
 
-        forbidden = client.delete(f"/api/groups/{links[AccessLevel.VIEW.value]}/players/{player['id']}")
+        forbidden = client.delete(
+            f"/api/groups/{links[AccessLevel.VIEW.value]}/players/{player['id']}"
+        )
         assert forbidden.status_code == 403
 
-        allowed = client.delete(f"/api/groups/{links[AccessLevel.EDIT.value]}/players/{player['id']}")
+        allowed = client.delete(
+            f"/api/groups/{links[AccessLevel.EDIT.value]}/players/{player['id']}"
+        )
         assert allowed.status_code == 200
         assert allowed.get_json()["message"] == "Player deleted"
         assert db_session.get(Player, player["id"]) is None
@@ -84,9 +92,7 @@ class TestPlayerEndpoints:
         _, group_links = create_group("Player Group")
         create_res = _create_player(client, group_links[AccessLevel.EDIT.value])
         player = create_res.get_json()
-        _, tournament_links = create_tournament(
-            group_links[AccessLevel.EDIT.value]
-        )
+        _, tournament_links = create_tournament(group_links[AccessLevel.EDIT.value])
         register_tournament_participants(
             tournament_links[AccessLevel.EDIT.value], [player]
         )

@@ -1,4 +1,5 @@
 import pytest
+
 from app.models import TablePlayer
 
 
@@ -6,11 +7,9 @@ from app.models import TablePlayer
 def setup_table_with_participants(client, create_group):
     """グループ→大会→卓→プレイヤー→大会参加者までを登録"""
     # --- グループ作成 ---
-    group, links = create_group("GroupA")
+    group, _links = create_group("GroupA")
     group_key = next(
-        l["short_key"]
-        for l in group["group_links"]
-        if l["access_level"] == "EDIT"
+        l["short_key"] for l in group["group_links"] if l["access_level"] == "EDIT"
     )
 
     # --- 大会作成 ---
@@ -37,7 +36,7 @@ def setup_table_with_participants(client, create_group):
     # --- 大会参加者登録 ---
     participant_res = client.post(
         f"/api/tournaments/{tournament_key}/participants",
-        json={'participants':[{"player_id": player["id"]}]},
+        json={"participants": [{"player_id": player["id"]}]},
     )
     assert participant_res.status_code == 201
     participants = participant_res.get_json()
@@ -50,9 +49,7 @@ def setup_table_with_participants(client, create_group):
     assert table_res.status_code == 201
     table = table_res.get_json()
     table_key = next(
-        l["short_key"]
-        for l in table["table_links"]
-        if l["access_level"] == "EDIT"
+        l["short_key"] for l in table["table_links"] if l["access_level"] == "EDIT"
     )
 
     return {
@@ -62,11 +59,12 @@ def setup_table_with_participants(client, create_group):
         "tournament_key": tournament_key,
         "table": table,
         "table_key": table_key,
-        "participants": participants['participants'],
+        "participants": participants["participants"],
     }
 
 
 # ---------------- テストケース ----------------
+
 
 def test_create_table_player(client, db_session, setup_table_with_participants):
     """POST /api/tables/<table_key>/players — 卓参加者登録"""
@@ -77,13 +75,15 @@ def test_create_table_player(client, db_session, setup_table_with_participants):
     url = f"/api/tables/{table_key}/players"
     res = client.post(
         url,
-        json={'players':[{"player_id": participant["id"], "seat_position": 1}]},
+        json={"players": [{"player_id": participant["id"], "seat_position": 1}]},
     )
     assert res.status_code == 201
 
-    created = db_session.query(TablePlayer).filter_by(
-        table_id=data["table"]["id"], player_id=participant["id"]
-    ).first()
+    created = (
+        db_session.query(TablePlayer)
+        .filter_by(table_id=data["table"]["id"], player_id=participant["id"])
+        .first()
+    )
     assert created is not None
 
 
@@ -105,7 +105,7 @@ def test_list_table_players(client, db_session, setup_table_with_participants):
     url = f"/api/tables/{table_key}/players"
     res = client.get(url)
     assert res.status_code == 200
-    result = res.get_json()['table_players']
+    result = res.get_json()["table_players"]
     assert isinstance(result, list)
     assert any(p["id"] == participant["id"] for p in result)
 

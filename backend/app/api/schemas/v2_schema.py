@@ -23,7 +23,11 @@ class ParticipantItemSchema(Schema):
 
 
 class ParticipantBatchAddSchema(Schema):
-    participants = fields.List(fields.Nested(ParticipantItemSchema), required=True, validate=validate.Length(min=1))
+    participants = fields.List(
+        fields.Nested(ParticipantItemSchema),
+        required=True,
+        validate=validate.Length(min=1),
+    )
 
 
 class GroupBatchItemSchema(Schema):
@@ -32,7 +36,11 @@ class GroupBatchItemSchema(Schema):
 
 
 class GroupBatchGetSchema(Schema):
-    items = fields.List(fields.Nested(GroupBatchItemSchema), required=True, validate=validate.Length(max=50))
+    items = fields.List(
+        fields.Nested(GroupBatchItemSchema),
+        required=True,
+        validate=validate.Length(max=50),
+    )
 
 
 class CreationStatus(StrEnum):
@@ -48,12 +56,18 @@ class StatusBatchItemSchema(Schema):
 
 
 class StatusBatchRequestSchema(Schema):
-    items = fields.List(fields.Nested(StatusBatchItemSchema), required=True, validate=validate.Length(max=50))
+    items = fields.List(
+        fields.Nested(StatusBatchItemSchema),
+        required=True,
+        validate=validate.Length(max=50),
+    )
 
 
 class StatusResultSchema(Schema):
     client_id = fields.Str(required=True)
-    status = fields.Str(required=True, validate=validate.OneOf([item.value for item in CreationStatus]))
+    status = fields.Str(
+        required=True, validate=validate.OneOf([item.value for item in CreationStatus])
+    )
     owner_link = fields.Str()
 
 
@@ -63,7 +77,8 @@ class StatusBatchResponseSchema(Schema):
 
 class IdempotencyHeaderSchema(Schema):
     idempotency_key = fields.Str(
-        data_key="Idempotency-Key", load_default=None,
+        data_key="Idempotency-Key",
+        load_default=None,
         validate=validate.Length(max=255),
         metadata={"description": "Retry key for idempotent mutation processing"},
     )
@@ -77,7 +92,9 @@ class V2ErrorSchema(Schema):
 
 class ShareLinkV2Schema(Schema):
     short_key = fields.Str(required=True)
-    access_level = fields.Str(required=True, validate=validate.OneOf([item.value for item in AccessLevel]))
+    access_level = fields.Str(
+        required=True, validate=validate.OneOf([item.value for item in AccessLevel])
+    )
 
 
 class PlayerV2Schema(Schema):
@@ -90,7 +107,9 @@ class TableV2Schema(Schema):
     id = fields.Int(required=True, validate=validate.Range(min=1))
     tournament_id = fields.Int(required=True, validate=validate.Range(min=1))
     name = fields.Str(required=True)
-    type = fields.Str(required=True, validate=validate.OneOf([item.value for item in TableTypeEnum]))
+    type = fields.Str(
+        required=True, validate=validate.OneOf([item.value for item in TableTypeEnum])
+    )
     created_at = fields.Str(allow_none=True, metadata={"format": "date-time"})
     table_links = fields.List(fields.Nested(ShareLinkV2Schema))
 
@@ -126,7 +145,9 @@ class TournamentCreateV2ResponseSchema(Schema):
 
 class PropagatedTableSchema(Schema):
     table_id = fields.Int(required=True, validate=validate.Range(min=1))
-    type = fields.Str(required=True, validate=validate.OneOf([item.value for item in TableTypeEnum]))
+    type = fields.Str(
+        required=True, validate=validate.OneOf([item.value for item in TableTypeEnum])
+    )
     added_count = fields.Int(required=True)
 
 
@@ -168,7 +189,10 @@ class GroupLookupErrorSchema(Schema):
 
 class GroupBatchResultSchema(Schema):
     client_id = fields.Str(required=True)
-    status = fields.Str(required=True, validate=validate.OneOf(["ok", "not_found", "forbidden", "error"]))
+    status = fields.Str(
+        required=True,
+        validate=validate.OneOf(["ok", "not_found", "forbidden", "error"]),
+    )
     group = fields.Nested(GroupV2Schema)
     error = fields.Nested(GroupLookupErrorSchema)
 
@@ -239,7 +263,9 @@ class TableDashboardResponseSchema(Schema):
     parent = fields.Nested(TableDashboardParentSchema, required=True)
     table = fields.Nested(TableV2Schema, required=True)
     table_players = fields.List(fields.Nested(PlayerV2Schema), required=True)
-    available_tournament_players = fields.List(fields.Nested(PlayerV2Schema), required=True)
+    available_tournament_players = fields.List(
+        fields.Nested(PlayerV2Schema), required=True
+    )
     games = fields.List(fields.Nested(GameV2Schema), required=True)
 
 
@@ -257,7 +283,9 @@ _FIELD_DESCRIPTIONS = {
         "rate": "スコアを収支へ換算する際のレートです。",
         "initial_tables": "大会と同じトランザクションで作成する初期卓の一覧です。",
     },
-    "ParticipantItemSchema": {"player_id": "大会へ追加するグループプレイヤーのIDです。"},
+    "ParticipantItemSchema": {
+        "player_id": "大会へ追加するグループプレイヤーのIDです。"
+    },
     "ParticipantBatchAddSchema": {
         "participants": "大会へ一括追加する参加者の一覧です。",
     },
@@ -270,7 +298,9 @@ _FIELD_DESCRIPTIONS = {
         "client_id": "クライアントが入力と結果を対応付けるためのIDです。",
         "token": "状態を確認するグループ作成トークンです。",
     },
-    "StatusBatchRequestSchema": {"items": "状態を一括確認するトークン指定です。最大50件です。"},
+    "StatusBatchRequestSchema": {
+        "items": "状態を一括確認するトークン指定です。最大50件です。"
+    },
     "StatusResultSchema": {
         "client_id": "リクエストで指定された対応付け用IDです。",
         "status": "作成状態です。pending、ready、expired、invalid_tokenのいずれかです。",
@@ -290,88 +320,138 @@ _FIELD_DESCRIPTIONS = {
         "access_level": "共有キーに付与されたVIEW、EDIT、OWNERのアクセスレベルです。",
     },
     "PlayerV2Schema": {
-        "id": "プレイヤーIDです。", "group_id": "プレイヤーが所属するグループIDです。",
+        "id": "プレイヤーIDです。",
+        "group_id": "プレイヤーが所属するグループIDです。",
         "name": "プレイヤーの表示名です。",
     },
     "TableV2Schema": {
-        "id": "卓IDです。", "tournament_id": "卓が所属する大会IDです。", "name": "卓の表示名です。",
-        "type": "卓の種類です。", "created_at": "卓作成日時です。", "table_links": "リクエストに使用したアクセスレベル以下の卓共有リンク一覧です。",
+        "id": "卓IDです。",
+        "tournament_id": "卓が所属する大会IDです。",
+        "name": "卓の表示名です。",
+        "type": "卓の種類です。",
+        "created_at": "卓作成日時です。",
+        "table_links": "リクエストに使用したアクセスレベル以下の卓共有リンク一覧です。",
     },
     "TournamentV2Schema": {
-        "id": "大会IDです。", "group_id": "大会が所属するグループIDです。", "name": "大会の表示名です。",
-        "description": "大会の説明です。", "rate": "スコア換算レートです。", "started_at": "大会開始日時です。", "created_at": "大会作成日時です。",
+        "id": "大会IDです。",
+        "group_id": "大会が所属するグループIDです。",
+        "name": "大会の表示名です。",
+        "description": "大会の説明です。",
+        "rate": "スコア換算レートです。",
+        "started_at": "大会開始日時です。",
+        "created_at": "大会作成日時です。",
         "tournament_links": "リクエストに使用したアクセスレベル以下の大会共有リンク一覧です。",
     },
     "GroupV2Schema": {
-        "id": "グループIDです。", "name": "グループの表示名です。", "description": "グループの説明です。",
-        "created_at": "グループ作成日時です。", "group_links": "グループに発行された共有リンク一覧です。",
+        "id": "グループIDです。",
+        "name": "グループの表示名です。",
+        "description": "グループの説明です。",
+        "created_at": "グループ作成日時です。",
+        "group_links": "グループに発行された共有リンク一覧です。",
     },
     "CreatedTableSchema": {
-        "client_id": "リクエストの初期卓に指定された対応付け用IDです。", "table": "作成された卓です。",
+        "client_id": "リクエストの初期卓に指定された対応付け用IDです。",
+        "table": "作成された卓です。",
     },
     "TournamentCreateV2ResponseSchema": {
-        "tournament": "作成された大会です。", "created_tables": "大会と同時に作成された初期卓です。",
+        "tournament": "作成された大会です。",
+        "created_tables": "大会と同時に作成された初期卓です。",
     },
     "PropagatedTableSchema": {
-        "table_id": "同期対象の卓IDです。", "type": "同期対象の卓種別です。",
+        "table_id": "同期対象の卓IDです。",
+        "type": "同期対象の卓種別です。",
         "added_count": "この卓へ新たに追加された参加者数です。",
     },
     "ParticipantBatchAddResponseSchema": {
-        "tournament_id": "参加者を追加した大会IDです。", "participants": "指定後の対象参加者一覧です。",
+        "tournament_id": "参加者を追加した大会IDです。",
+        "participants": "指定後の対象参加者一覧です。",
         "added_count": "大会へ新たに追加された人数です。",
         "already_registered_count": "すでに大会へ登録済みだった人数です。",
         "propagated_tables": "参加者登録を同期した卓ごとの結果です。",
     },
     "ParticipantDeletedResourceSchema": {
-        "tournament_id": "参加者を削除した大会IDです。", "player_id": "削除したプレイヤーIDです。",
+        "tournament_id": "参加者を削除した大会IDです。",
+        "player_id": "削除したプレイヤーIDです。",
         "propagated_table_ids": "参加者削除を同期した卓ID一覧です。",
     },
-    "ParticipantDeleteResponseSchema": {"deleted": "削除された大会参加者と同期結果です。"},
-    "TableDeletedResourceSchema": {
-        "table_id": "削除した卓IDです。", "game_count": "削除したゲーム数です。",
-        "score_count": "削除したスコア数です。", "participant_count": "削除した卓参加者数です。",
+    "ParticipantDeleteResponseSchema": {
+        "deleted": "削除された大会参加者と同期結果です。"
     },
-    "TableDeleteResponseSchema": {"deleted": "カスケード削除された卓と配下データの件数です。"},
-    "GroupLookupErrorSchema": {"code": "検索結果単位のエラーコードです。", "message": "検索失敗の説明です。"},
+    "TableDeletedResourceSchema": {
+        "table_id": "削除した卓IDです。",
+        "game_count": "削除したゲーム数です。",
+        "score_count": "削除したスコア数です。",
+        "participant_count": "削除した卓参加者数です。",
+    },
+    "TableDeleteResponseSchema": {
+        "deleted": "カスケード削除された卓と配下データの件数です。"
+    },
+    "GroupLookupErrorSchema": {
+        "code": "検索結果単位のエラーコードです。",
+        "message": "検索失敗の説明です。",
+    },
     "GroupBatchResultSchema": {
-        "client_id": "リクエストで指定された対応付け用IDです。", "status": "グループごとの検索状態です。",
+        "client_id": "リクエストで指定された対応付け用IDです。",
+        "status": "グループごとの検索状態です。",
         "group": "取得できたグループです。statusがokの場合に返します。",
         "error": "検索中のエラー情報です。statusがerrorの場合に返します。",
     },
-    "GroupBatchGetResponseSchema": {"results": "指定されたグループごとの検索結果です。"},
+    "GroupBatchGetResponseSchema": {
+        "results": "指定されたグループごとの検索結果です。"
+    },
     "GroupDashboardResponseSchema": {
-        "group": "画面表示対象のグループです。", "tournaments": "グループ配下の大会一覧です。",
+        "group": "画面表示対象のグループです。",
+        "tournaments": "グループ配下の大会一覧です。",
         "players": "グループに所属するプレイヤー一覧です。",
     },
     "PlayerScoreMapV2Schema": {
-        "id": "プレイヤーIDです。", "name": "プレイヤーの表示名です。", "scores": "卓IDごとの合計スコアです。",
-        "total": "全卓の合計スコアです。", "converted_total": "レートを適用した換算後の合計です。",
+        "id": "プレイヤーIDです。",
+        "name": "プレイヤーの表示名です。",
+        "scores": "卓IDごとの合計スコアです。",
+        "total": "全卓の合計スコアです。",
+        "converted_total": "レートを適用した換算後の合計です。",
     },
     "TournamentScoreMapV2Schema": {
-        "tournament_id": "集計対象の大会IDです。", "tables": "集計対象の卓一覧です。",
-        "players": "プレイヤーごとのスコア集計です。", "rate": "換算に使用した大会レートです。",
+        "tournament_id": "集計対象の大会IDです。",
+        "tables": "集計対象の卓一覧です。",
+        "players": "プレイヤーごとのスコア集計です。",
+        "rate": "換算に使用した大会レートです。",
     },
     "ParentResourceV2Schema": {
-        "id": "親リソースのIDです。", "name": "親リソースの表示名です。",
+        "id": "親リソースのIDです。",
+        "name": "親リソースの表示名です。",
     },
     "TournamentDashboardParentSchema": {
         "group": "大会が所属するグループです。",
     },
     "TournamentDashboardResponseSchema": {
-        "parent": "大会の親リソースです。", "tournament": "画面表示対象の大会です。", "participants": "大会参加者一覧です。",
+        "parent": "大会の親リソースです。",
+        "tournament": "画面表示対象の大会です。",
+        "participants": "大会参加者一覧です。",
         "available_group_players": "グループ所属者のうち大会へ未参加のプレイヤーです。",
-        "tables": "大会配下の卓一覧です。", "score_map": "大会全体のスコア集計です。",
+        "tables": "大会配下の卓一覧です。",
+        "score_map": "大会全体のスコア集計です。",
     },
-    "GameScoreV2Schema": {"player_id": "得点対象のプレイヤーIDです。", "score": "このゲームでの得点です。"},
+    "GameScoreV2Schema": {
+        "player_id": "得点対象のプレイヤーIDです。",
+        "score": "このゲームでの得点です。",
+    },
     "GameV2Schema": {
-        "id": "ゲームIDです。", "table_id": "ゲームが属する卓IDです。", "game_index": "卓内でのゲーム順です。",
-        "memo": "ゲームに記録された任意メモです。", "played_at": "対局日時です。", "scores": "ゲームに登録されたプレイヤー別得点です。",
+        "id": "ゲームIDです。",
+        "table_id": "ゲームが属する卓IDです。",
+        "game_index": "卓内でのゲーム順です。",
+        "memo": "ゲームに記録された任意メモです。",
+        "played_at": "対局日時です。",
+        "scores": "ゲームに登録されたプレイヤー別得点です。",
     },
     "TableDashboardParentSchema": {
-        "tournament": "卓が所属する大会です。", "group": "大会が所属するグループです。",
+        "tournament": "卓が所属する大会です。",
+        "group": "大会が所属するグループです。",
     },
     "TableDashboardResponseSchema": {
-        "parent": "卓の親リソースです。", "table": "画面表示対象の卓です。", "table_players": "現在卓へ登録されているプレイヤーです。",
+        "parent": "卓の親リソースです。",
+        "table": "画面表示対象の卓です。",
+        "table_players": "現在卓へ登録されているプレイヤーです。",
         "available_tournament_players": "大会参加者のうち卓へ未登録のプレイヤーです。",
         "games": "卓で記録されたゲームとスコア一覧です。",
     },
@@ -381,6 +461,8 @@ for _schema_name, _descriptions in _FIELD_DESCRIPTIONS.items():
     _schema = globals()[_schema_name]
     _missing = set(_schema._declared_fields) - set(_descriptions)
     if _missing:
-        raise RuntimeError(f"Missing field descriptions for {_schema_name}: {sorted(_missing)}")
+        raise RuntimeError(
+            f"Missing field descriptions for {_schema_name}: {sorted(_missing)}"
+        )
     for _field_name, _description in _descriptions.items():
         _schema._declared_fields[_field_name].metadata["description"] = _description

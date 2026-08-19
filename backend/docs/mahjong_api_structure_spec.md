@@ -187,7 +187,9 @@ backend/
 ```python
 class ShareLinkSchema(Schema):
     short_key = fields.Str(required=True, description="共有アクセス用キー")
-    access_level = fields.Str(required=True, description="アクセスレベル (VIEW/EDIT/OWNER)")
+    access_level = fields.Str(
+        required=True, description="アクセスレベル (VIEW/EDIT/OWNER)"
+    )
     created_by = fields.Str(dump_only=True, description="作成者")
     created_at = fields.DateTime(dump_only=True, description="作成日時")
 ```
@@ -227,6 +229,7 @@ from app.resources.table_resource import table_bp
 from app.resources.table_player_resource import table_player_bp
 from app.resources.game_resource import game_bp
 from app.resources.export_resource import export_bp
+
 
 def register_blueprints(app):
     api.register_blueprint(group_bp)

@@ -1,7 +1,7 @@
 # app/schemas/common_schemas.py
 from datetime import timezone
 
-from marshmallow import Schema, fields, INCLUDE
+from marshmallow import INCLUDE, Schema, fields
 
 RFC3339_UTC_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
@@ -13,9 +13,7 @@ class UTCDateTime(fields.DateTime):
         super().__init__(*args, format=RFC3339_UTC_FORMAT, **kwargs)
 
     def _deserialize(self, value, attr, data, **kwargs):
-        parsed = fields.DateTime(format="iso")._deserialize(
-            value, attr, data, **kwargs
-        )
+        parsed = fields.DateTime(format="iso")._deserialize(value, attr, data, **kwargs)
         if parsed.tzinfo is None:
             return parsed.replace(tzinfo=timezone.utc)
         return parsed.astimezone(timezone.utc)
@@ -31,8 +29,11 @@ class UTCDateTime(fields.DateTime):
 
 class ShareLinkSchema(Schema):
     """共有リンク情報を表す共通スキーマ"""
+
     short_key = fields.Str(required=True, description="共有アクセス用キー")
-    access_level = fields.Str(required=True, description="アクセスレベル（VIEW/EDIT/OWNER）")
+    access_level = fields.Str(
+        required=True, description="アクセスレベル（VIEW/EDIT/OWNER）"
+    )
     created_by = fields.Str(dump_only=True, description="作成者")
     created_at = UTCDateTime(dump_only=True, description="作成日時")
 
@@ -43,6 +44,7 @@ class MessageSchema(Schema):
 
 class ValidationErrorField(Schema):
     """errors[json] に相当する部分"""
+
     class Meta:
         unknown = INCLUDE
 

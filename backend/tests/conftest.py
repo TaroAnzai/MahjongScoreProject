@@ -1,12 +1,15 @@
 import os
 import tempfile
-import pytest
-from app import create_app, db
-from app.models import Group, Tournament, Table, Game, Player, ShareLink, AccessLevel
-from sqlalchemy.orm import scoped_session, sessionmaker
 from unittest.mock import patch
 
+import pytest
+
+from app import create_app, db
+from app.models import AccessLevel, Group, ShareLink, Tournament
+
 pytest_plugins = ["tests.utils.test_data_factory"]
+
+
 @pytest.fixture(scope="session")
 def test_app():
     """
@@ -60,35 +63,46 @@ def db_session(app_context):
     db.session.rollback()
     db.session.close()
 
+
 @pytest.fixture(autouse=True)
 def mock_celery_delay():
     """
     全テストで Celery の delay() をモック化し、実行を抑止。
     autouse=True により自動的に全テストに適用される。
     """
-    with patch("app.api.services.group_service.send_group_creation_email_task.delay") as mock_delay:
+    with patch(
+        "app.api.services.group_service.send_group_creation_email_task.delay"
+    ) as mock_delay:
         yield mock_delay
+
+
 # ------------------------------------------------------------
 # reCAPTCHA をモックして成功扱いにする（RateLimitテスト用）
 # ------------------------------------------------------------
+
 
 @pytest.fixture(autouse=True)
 def mock_recaptcha_ok_group(monkeypatch):
     """reCAPTCHA 確認関数を常に True を返すようにモック"""
     monkeypatch.setattr(
         "app.api.services.group_service.verify_recaptcha",
-        lambda token, action="create_group": True
+        lambda token, action="create_group": True,
     )
+
+
 @pytest.fixture(autouse=True)
 def mock_recaptcha_ok_contact(monkeypatch):
     """reCAPTCHA 確認関数を常に True を返すようにモック"""
     monkeypatch.setattr(
         "app.api.services.contact_service.verify_recaptcha",
-        lambda token, action="create_group": True
+        lambda token, action="create_group": True,
     )
+
+
 # =========================================================
 # テストデータ生成用ユーティリティ
 # =========================================================
+
 
 @pytest.fixture()
 def sample_group(db_session):
@@ -125,6 +139,7 @@ def sample_sharelink(db_session, sample_group):
     db_session.add(link)
     db_session.commit()
     return link
+
 
 @pytest.fixture(autouse=True)
 def clean_db(db_session):

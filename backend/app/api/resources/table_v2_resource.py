@@ -1,14 +1,16 @@
 """V2 table endpoints."""
+
 from flask import jsonify
 from flask_smorest import Blueprint
 
 from app import db
-from app.decorators import with_v2_error_responses
 from app.api.schemas.v2_schema import (
-    IdempotencyHeaderSchema, TableDashboardResponseSchema, TableDeleteResponseSchema,
+    IdempotencyHeaderSchema,
+    TableDashboardResponseSchema,
+    TableDeleteResponseSchema,
 )
 from app.api.services.v2_service import V2Error, cascade_delete_table, table_dashboard
-
+from app.decorators import with_v2_error_responses
 
 table_v2_bp = Blueprint(
     "tables_v2", __name__, url_prefix="/api/v2/tables", description="V2 table API"

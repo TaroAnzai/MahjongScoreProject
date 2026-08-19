@@ -1,19 +1,20 @@
 # app/api/__init__.py
 
-from app.api.resources.tournament_resource import tournament_bp
-from app.api.resources.group_resource import group_bp
-from app.api.resources.player_resource import player_bp
-from app.api.resources.table_resource import table_bp
-from app.api.resources.game_resource import game_bp
-from app.api.resources.tournament_participant_resource import tournament_participant_bp
-from app.api.resources.table_player_resource import table_player_bp
-from app.api.resources.export_resource import export_bp
-from app.api.resources.admin_resource import admin_group_bp
 from app.api.resources.admin_auth_route import admin_auth_bp
+from app.api.resources.admin_resource import admin_group_bp
 from app.api.resources.contact_resource import contact_bp
+from app.api.resources.export_resource import export_bp
+from app.api.resources.game_resource import game_bp
+from app.api.resources.group_resource import group_bp
 from app.api.resources.group_v2_resource import group_v2_bp
-from app.api.resources.tournament_v2_resource import tournament_v2_bp
+from app.api.resources.player_resource import player_bp
+from app.api.resources.table_player_resource import table_player_bp
+from app.api.resources.table_resource import table_bp
 from app.api.resources.table_v2_resource import table_v2_bp
+from app.api.resources.tournament_participant_resource import tournament_participant_bp
+from app.api.resources.tournament_resource import tournament_bp
+from app.api.resources.tournament_v2_resource import tournament_v2_bp
+
 
 def register_blueprints(api):
     api.register_blueprint(tournament_bp)

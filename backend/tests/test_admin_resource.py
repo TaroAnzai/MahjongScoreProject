@@ -1,5 +1,5 @@
 import pytest
-from werkzeug.security import generate_password_hash
+
 from app.models import Group
 
 # ==== 管理者ログイン情報（グローバル変数） ====
@@ -22,7 +22,7 @@ def admin_logged_in(client, monkeypatch):
     )
 
     assert res.status_code == 200
-    return client   # ← ログイン済み client を返す
+    return client  # ← ログイン済み client を返す
 
 
 # -------------------------------------------------
@@ -32,7 +32,7 @@ def test_get_all_groups(admin_logged_in, create_group):
     client = admin_logged_in
 
     # --- テストデータ準備 ---
-    group_data, _ = create_group(name="管理者テストグループ")
+    _group_data, _ = create_group(name="管理者テストグループ")
 
     # --- API呼び出し ---
     res = client.get("/api/admin/groups")
@@ -70,7 +70,7 @@ def test_delete_group(admin_logged_in, setup_full_tournament, db_session):
     assert res.status_code == 200
     assert "削除しました" in res.get_json()["message"]
 
-    #--- DBから確認 ---
+    # --- DBから確認 ---
     deleted = Group.query.filter_by(id=group_id).first()
     assert deleted is None
 

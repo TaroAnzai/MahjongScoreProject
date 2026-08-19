@@ -1,8 +1,9 @@
 # app/services/contact_service.py
 
+from sqlalchemy.exc import SQLAlchemyError
+
 from app import db
 from app.models import Contact, ContactStatus
-from sqlalchemy.exc import SQLAlchemyError
 from app.service_errors import ServiceNotFoundError, ServicePermissionError
 from app.utils.recaptcha import verify_recaptcha
 
@@ -15,10 +16,12 @@ class ContactService:
         """
         問い合わせ作成（POST）
         """
-            # 🟩 reCAPTCHA（最初にチェック）
+        # 🟩 reCAPTCHA（最初にチェック）
         recaptcha = data.get("recaptcha_token")
         if not recaptcha or not verify_recaptcha(recaptcha, "create_contact"):
-          raise ServicePermissionError("不正なアクセスが検出されました。（reCAPTCHA）")
+            raise ServicePermissionError(
+                "不正なアクセスが検出されました。（reCAPTCHA）"
+            )
         data.pop("recaptcha_token", None)
         try:
             contact = Contact(
@@ -33,9 +36,9 @@ class ContactService:
             db.session.add(contact)
             db.session.commit()
             return contact
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             db.session.rollback()
-            raise e
+            raise
 
     @staticmethod
     def get_contact(contact_id):
@@ -77,9 +80,9 @@ class ContactService:
             db.session.commit()
             return contact
 
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             db.session.rollback()
-            raise e
+            raise
 
     @staticmethod
     def delete_contact(contact_id):

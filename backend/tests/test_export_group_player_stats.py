@@ -1,6 +1,9 @@
+from datetime import datetime
+
 import pytest
-from datetime import datetime, timedelta
+
 from app.models import Tournament
+
 
 @pytest.mark.usefixtures("client")
 class TestGroupPlayerStatsAPI:
@@ -38,7 +41,7 @@ class TestGroupPlayerStatsAPI:
         tournaments = db_session.query(Tournament).all()
         assert len(tournaments) >= 1
         t = tournaments[0]
-        t.started_at = datetime(2025, 5, 1)
+        t.started_at = datetime(2025, 5, 1)  # noqa: DTZ001
         db_session.commit()
 
         # --- フィルタ範囲内（ヒットする） ---

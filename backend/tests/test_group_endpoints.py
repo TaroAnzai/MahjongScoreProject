@@ -1,8 +1,8 @@
 import pytest
 
-from app.models import AccessLevel, Group
-from app.models import ShareLink
-from app.models import GroupCreationToken
+from app.models import AccessLevel, Group, GroupCreationToken
+
+
 @pytest.mark.api
 class TestGroupEndpoints:
     def test_group_creation_request_rejects_invalid_email(self, client, db_session):
@@ -27,7 +27,10 @@ class TestGroupEndpoints:
         # ------------------------------------------------------------
         # 1️⃣ メール送信リクエスト
         # ------------------------------------------------------------
-        res1 = client.post("/api/groups/request-link", json={"name": group_name, "email": email, "recaptcha_token":"xxx"})
+        res1 = client.post(
+            "/api/groups/request-link",
+            json={"name": group_name, "email": email, "recaptcha_token": "xxx"},
+        )
         print(res1.get_json())
         assert res1.status_code == 200
         res1_json = res1.get_json()
@@ -37,14 +40,20 @@ class TestGroupEndpoints:
         # ------------------------------------------------------------
         # 2️⃣ トークンをDBから取得（実際にはメールで届く想定）
         # ------------------------------------------------------------
-        token_record = GroupCreationToken.query.filter_by(email=email).order_by(GroupCreationToken.id.desc()).first()
+        token_record = (
+            GroupCreationToken.query.filter_by(email=email)
+            .order_by(GroupCreationToken.id.desc())
+            .first()
+        )
         assert token_record is not None
         token = token_record.token
         # ------------------------------------------------------------
         # 3️⃣ トークンを使ってstatusを確認(Pending)
         # ------------------------------------------------------------
         res2 = client.post("/api/groups/request-link/status", json={"token": token})
-        assert res2.status_code == 200, f"Unexpected status code: {res2.status_code}, response: {res2.get_data(as_text=True)}"
+        assert res2.status_code == 200, (
+            f"Unexpected status code: {res2.status_code}, response: {res2.get_data(as_text=True)}"
+        )
         res2_json = res2.get_json()
         assert res2_json["status"] == "pending"
         # ------------------------------------------------------------
@@ -58,17 +67,24 @@ class TestGroupEndpoints:
         levels = {l["access_level"] for l in data["group_links"]}
 
         assert data["name"] == group_name
-        assert levels == {AccessLevel.OWNER.value, AccessLevel.EDIT.value, AccessLevel.VIEW.value}
+        assert levels == {
+            AccessLevel.OWNER.value,
+            AccessLevel.EDIT.value,
+            AccessLevel.VIEW.value,
+        }
         for link in data["group_links"]:
             assert link["short_key"]
         # ------------------------------------------------------------
         # 3️⃣ トークンを使ってstatusを確認(ready)
         # ------------------------------------------------------------
         res2 = client.post("/api/groups/request-link/status", json={"token": token})
-        assert res2.status_code == 200, f"Unexpected status code: {res2.status_code}, response: {res2.get_data(as_text=True)}"
+        assert res2.status_code == 200, (
+            f"Unexpected status code: {res2.status_code}, response: {res2.get_data(as_text=True)}"
+        )
         res2_json = res2.get_json()
         assert res2_json["status"] == "ready"
         assert res2_json["owner_link"] == links[AccessLevel.OWNER.value]
+
     def test_get_group_by_short_key_ok(self, client, db_session, create_group):
         group_data, links = create_group("View Group")
         # ✅ group_links に変更
@@ -95,7 +111,7 @@ class TestGroupEndpoints:
         assert "EDIT" not in levels, f"Unexpected EDIT links: {links}"
 
     def test_update_group_requires_owner(self, client, db_session, create_group):
-        group_data, links = create_group("Initial Group")
+        group_data, _links = create_group("Initial Group")
         group_id = group_data["id"]
 
         edit_key = next(
@@ -115,7 +131,7 @@ class TestGroupEndpoints:
         assert stored.name == "Initial Group"
 
     def test_delete_group_requires_owner(self, client, db_session, create_group):
-        group_data, links = create_group("Delete Group")
+        group_data, _links = create_group("Delete Group")
         group_id = group_data["id"]
 
         edit_key = next(
@@ -131,5 +147,7 @@ class TestGroupEndpoints:
 
     def test_group_creation_status_invalid_token(self, client, db_session):
         # 無効なトークンでステータスを確認
-        res = client.post("/api/groups/request-link/status", json={"token": "invalid_token"})
+        res = client.post(
+            "/api/groups/request-link/status", json={"token": "invalid_token"}
+        )
         assert res.status_code == 404

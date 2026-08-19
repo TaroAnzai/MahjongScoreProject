@@ -1,5 +1,6 @@
 from werkzeug.security import generate_password_hash
 
+
 def main():
     password = input("管理者パスワードを入力してください: ").strip()
     if not password:
@@ -10,6 +11,7 @@ def main():
     print("\n=== パスワードハッシュ値 ===")
     print(hashed)
     print("\n※ この値を .env の ADMIN_PASSWORD_HASH に保存してください。")
+
 
 if __name__ == "__main__":
     main()

@@ -1,18 +1,21 @@
 # app/resources/table_player_resource.py
 
-from flask.views import MethodView
-from flask_smorest import Blueprint, abort
-from app.decorators import with_common_error_responses
-from app.api.schemas.common_schemas import MessageSchema
-from app.api.schemas.table_player_schema import TablePlayerCreateSchema, TablePlayersSchema
-from app.service_errors import ServiceError
 from flask import jsonify
-from app.service_errors import format_error_response
+from flask.views import MethodView
+from flask_smorest import Blueprint
+
+from app.api.schemas.common_schemas import MessageSchema
+from app.api.schemas.table_player_schema import (
+    TablePlayerCreateSchema,
+    TablePlayersSchema,
+)
 from app.api.services.table_player_service import (
-    list_table_players_by_key,
     create_table_player,
     delete_table_player,
+    list_table_players_by_key,
 )
+from app.decorators import with_common_error_responses
+from app.service_errors import ServiceError, format_error_response
 
 table_player_bp = Blueprint(
     "table_players",
@@ -21,9 +24,11 @@ table_player_bp = Blueprint(
     description="卓参加者管理API",
 )
 
+
 @table_player_bp.errorhandler(ServiceError)
 def handle_service_error(e: ServiceError):
     return jsonify(format_error_response(e.code, e.name, e.description)), e.code
+
 
 # =========================================================
 # 卓参加者一覧・作成
@@ -37,7 +42,6 @@ class TablePlayerListResource(MethodView):
     def get(self, table_key):
         """卓共有キーから参加者一覧を取得"""
         return list_table_players_by_key(table_key)
-
 
     @table_player_bp.arguments(TablePlayerCreateSchema)
     @table_player_bp.response(201, TablePlayersSchema)

@@ -1,7 +1,16 @@
 # app/services/table_player_service.py
 
 from app import db
-from app.models import AccessLevel, Table, TablePlayer, TournamentPlayer, Tournament, Player, Game, Score
+from app.models import (
+    AccessLevel,
+    Game,
+    Player,
+    Score,
+    Table,
+    TablePlayer,
+    Tournament,
+    TournamentPlayer,
+)
 from app.service_errors import (
     ServiceNotFoundError,
     ServicePermissionError,
@@ -48,8 +57,8 @@ def list_table_players_by_key(table_key: str):
     table_player = TablePlayer.query.filter_by(table_id=table.id).all()
     player_ids = [t.player_id for t in table_player]
     result = {
-        'table_key' : table_key,
-        'table_players' :  Player.query.filter(Player.id.in_(player_ids)).all()
+        "table_key": table_key,
+        "table_players": Player.query.filter(Player.id.in_(player_ids)).all(),
     }
     return result
 
@@ -74,20 +83,20 @@ def create_table_player(table_key: str, data: dict):
     created_players = []
     errors = []
 
-    for i,player_data in enumerate(players_data):
+    for i, player_data in enumerate(players_data):
         player_id = player_data.get("player_id")
         if not player_id:
             errors.append(f"Data{i + 1}:player_id は必須です。")
             continue
 
         # 大会内の参加者として存在するかを確認
-        participant = (
-            TournamentPlayer.query
-            .filter_by(tournament_id=tournament.id, player_id=player_id)
-            .first()
-        )
+        participant = TournamentPlayer.query.filter_by(
+            tournament_id=tournament.id, player_id=player_id
+        ).first()
         if not participant:
-            errors.append(f"Data{i + 1}:プレイヤーID {player_id} はこの大会の参加者ではありません。")
+            errors.append(
+                f"Data{i + 1}:プレイヤーID {player_id} はこの大会の参加者ではありません。"
+            )
             continue
 
         # すでに同じプレイヤーが卓に登録されていないか確認
@@ -95,7 +104,9 @@ def create_table_player(table_key: str, data: dict):
             table_id=table.id, player_id=player_id
         ).first()
         if existing:
-            errors.append(f"Data{i + 1}:プレイヤーID {player_id} はすでに登録されています。")
+            errors.append(
+                f"Data{i + 1}:プレイヤーID {player_id} はすでに登録されています。"
+            )
             continue
 
         # 登録処理
@@ -109,13 +120,12 @@ def create_table_player(table_key: str, data: dict):
         created_players.append(player)
 
     db.session.commit()
-    result ={
+    result = {
         "table_key": table_key,
         "created_players": created_players,
         "errors": errors,
-        }
+    }
     return result
-
 
 
 # =========================================================
@@ -127,7 +137,9 @@ def delete_table_player(table_key: str, player_id: int):
     if not link or link.resource_type != "table":
         raise ServicePermissionError("不正な共有リンクです。")
 
-    table_player = TablePlayer.query.filter_by(player_id=player_id, table_id=link.resource_id).first()
+    table_player = TablePlayer.query.filter_by(
+        player_id=player_id, table_id=link.resource_id
+    ).first()
     if not table_player:
         raise ServiceNotFoundError("卓参加者が見つかりません。")
 
@@ -141,8 +153,9 @@ def delete_table_player(table_key: str, player_id: int):
             game_id=game.id, player_id=table_player.player_id
         ).first()
         if existing_score:
-            raise ServiceValidationError("スコアが登録されているプレイヤーは削除できません。")
-
+            raise ServiceValidationError(
+                "スコアが登録されているプレイヤーは削除できません。"
+            )
 
     db.session.delete(table_player)
     db.session.commit()

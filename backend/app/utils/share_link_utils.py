@@ -1,8 +1,9 @@
 # app/utils/share_link_utils.py
-from datetime import datetime, timezone
 import secrets
+from datetime import datetime, timezone
+
 from app import db
-from app.models import ShareLink, AccessLevel
+from app.models import AccessLevel, ShareLink
 from app.service_errors import ServiceValidationError
 
 
@@ -11,15 +12,15 @@ def generate_short_key(length: int = 12) -> str:
     return secrets.token_urlsafe(length)[:length]
 
 
-def create_unique_share_link(resource_type: str, resource_id: int, created_by: str, access_level: AccessLevel):
+def create_unique_share_link(
+    resource_type: str, resource_id: int, created_by: str, access_level: AccessLevel
+):
     """
     指定されたリソースに対してユニークな共有リンクを作成する。
     同じresource_type / resource_id / access_level の組み合わせが存在すれば再利用する。
     """
     existing = ShareLink.query.filter_by(
-        resource_type=resource_type,
-        resource_id=resource_id,
-        access_level=access_level
+        resource_type=resource_type, resource_id=resource_id, access_level=access_level
     ).first()
     if existing:
         return existing
@@ -33,7 +34,7 @@ def create_unique_share_link(resource_type: str, resource_id: int, created_by: s
                 resource_id=resource_id,
                 created_by=created_by,
                 access_level=access_level,
-                created_at=datetime.now(timezone.utc)
+                created_at=datetime.now(timezone.utc),
             )
             db.session.add(link)
             db.session.flush()
@@ -47,7 +48,9 @@ def get_share_link_by_key(short_key: str) -> ShareLink | None:
     return ShareLink.query.filter_by(short_key=short_key).first()
 
 
-def create_default_share_links(resource_type: str, resource_id: int, created_by: str) -> dict[str, str]:
+def create_default_share_links(
+    resource_type: str, resource_id: int, created_by: str
+) -> dict[str, str]:
     """
     各リソース作成時に共通的に呼び出す関数。
     Groupの場合は OWNER, EDIT, VIEW の3種類、
@@ -71,10 +74,9 @@ def create_default_share_links(resource_type: str, resource_id: int, created_by:
             resource_type=resource_type,
             resource_id=resource_id,
             created_by=created_by,
-            access_level=level
+            access_level=level,
         )
         links[level.value] = link.short_key
 
     db.session.commit()
     return links
-
