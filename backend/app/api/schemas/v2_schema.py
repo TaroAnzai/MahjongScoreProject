@@ -198,7 +198,17 @@ class TournamentScoreMapV2Schema(Schema):
     rate = fields.Float(required=True)
 
 
+class ParentResourceV2Schema(Schema):
+    id = fields.Int(required=True, validate=validate.Range(min=1))
+    name = fields.Str(required=True)
+
+
+class TournamentDashboardParentSchema(Schema):
+    group = fields.Nested(ParentResourceV2Schema, required=True)
+
+
 class TournamentDashboardResponseSchema(Schema):
+    parent = fields.Nested(TournamentDashboardParentSchema, required=True)
     tournament = fields.Nested(TournamentV2Schema, required=True)
     participants = fields.List(fields.Nested(PlayerV2Schema), required=True)
     available_group_players = fields.List(fields.Nested(PlayerV2Schema), required=True)
@@ -220,7 +230,13 @@ class GameV2Schema(Schema):
     scores = fields.List(fields.Nested(GameScoreV2Schema), required=True)
 
 
+class TableDashboardParentSchema(Schema):
+    tournament = fields.Nested(ParentResourceV2Schema, required=True)
+    group = fields.Nested(ParentResourceV2Schema, required=True)
+
+
 class TableDashboardResponseSchema(Schema):
+    parent = fields.Nested(TableDashboardParentSchema, required=True)
     table = fields.Nested(TableV2Schema, required=True)
     table_players = fields.List(fields.Nested(PlayerV2Schema), required=True)
     available_tournament_players = fields.List(fields.Nested(PlayerV2Schema), required=True)
@@ -335,8 +351,14 @@ _FIELD_DESCRIPTIONS = {
         "tournament_id": "集計対象の大会IDです。", "tables": "集計対象の卓一覧です。",
         "players": "プレイヤーごとのスコア集計です。", "rate": "換算に使用した大会レートです。",
     },
+    "ParentResourceV2Schema": {
+        "id": "親リソースのIDです。", "name": "親リソースの表示名です。",
+    },
+    "TournamentDashboardParentSchema": {
+        "group": "大会が所属するグループです。",
+    },
     "TournamentDashboardResponseSchema": {
-        "tournament": "画面表示対象の大会です。", "participants": "大会参加者一覧です。",
+        "parent": "大会の親リソースです。", "tournament": "画面表示対象の大会です。", "participants": "大会参加者一覧です。",
         "available_group_players": "グループ所属者のうち大会へ未参加のプレイヤーです。",
         "tables": "大会配下の卓一覧です。", "score_map": "大会全体のスコア集計です。",
     },
@@ -345,8 +367,11 @@ _FIELD_DESCRIPTIONS = {
         "id": "ゲームIDです。", "table_id": "ゲームが属する卓IDです。", "game_index": "卓内でのゲーム順です。",
         "memo": "ゲームに記録された任意メモです。", "played_at": "対局日時です。", "scores": "ゲームに登録されたプレイヤー別得点です。",
     },
+    "TableDashboardParentSchema": {
+        "tournament": "卓が所属する大会です。", "group": "大会が所属するグループです。",
+    },
     "TableDashboardResponseSchema": {
-        "table": "画面表示対象の卓です。", "table_players": "現在卓へ登録されているプレイヤーです。",
+        "parent": "卓の親リソースです。", "table": "画面表示対象の卓です。", "table_players": "現在卓へ登録されているプレイヤーです。",
         "available_tournament_players": "大会参加者のうち卓へ未登録のプレイヤーです。",
         "games": "卓で記録されたゲームとスコア一覧です。",
     },

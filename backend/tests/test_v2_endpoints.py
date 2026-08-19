@@ -242,6 +242,9 @@ def test_dashboards_return_available_players_and_games(client, db_session, v2_to
         f"/api/v2/tournaments/{tournament_links['EDIT']}/dashboard"
     ).get_json()
     assert [p["id"] for p in tournament_body["available_group_players"]] == [players[2].id]
+    assert tournament_body["parent"] == {
+        "group": {"id": tournament.group.id, "name": tournament.group.name}
+    }
     assert tournament_body["score_map"]["players"][0]["total"] == 100
     table_edit_body = client.get(
         f"/api/v2/tables/{normal_links['EDIT']}/dashboard"
@@ -266,6 +269,10 @@ def test_dashboards_return_available_players_and_games(client, db_session, v2_to
     assert not deprecated_fields.intersection(tournament_body["tournament"])
     assert not deprecated_fields.intersection(tournament_edit_body["tournament"])
     assert [p["id"] for p in table_body["available_tournament_players"]] == [players[1].id]
+    assert table_body["parent"] == {
+        "tournament": {"id": tournament.id, "name": tournament.name},
+        "group": {"id": tournament.group.id, "name": tournament.group.name},
+    }
     assert table_body["games"][0]["scores"][0]["score"] == 100
     assert datetime.fromisoformat(group_body["group"]["created_at"])
     assert datetime.fromisoformat(tournament_body["tournament"]["started_at"])
