@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: '/mahjong/',
+    envPrefix: ['VITE_', 'FRONTEND_'],
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

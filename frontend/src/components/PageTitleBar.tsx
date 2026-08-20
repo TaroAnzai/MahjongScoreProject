@@ -56,7 +56,10 @@ function PageTitleBar({
     const shortKey = shareLinks.find((l) => l.access_level === accessType)?.short_key;
     if (!shortKey) return alert(t('titleBar.noLink', { accessType: accessType }));
     const basePath = import.meta.env.BASE_URL;
-    const shareUrl = `${window.location.origin}${basePath}/${type}/${shortKey}`.replace(
+    const shareOrigin = import.meta.env.DEV
+      ? import.meta.env.FRONTEND_URL
+      : window.location.origin;
+    const shareUrl = `${shareOrigin.replace(/\/+$/, '')}${basePath}/${type}/${shortKey}`.replace(
       /([^:]\/)\/+/g,
       '$1'
     );
