@@ -14,6 +14,7 @@ import {
 import type { ShareLink } from '@/api/generated/mahjongApi.schemas';
 import { getAccessLevelstring } from '@/utils/accessLevel_utils';
 import { useAlertDialog } from './common/AlertDialogProvider';
+import ShareUrlDialog from './ShareUrlDialog';
 interface PageTitleBarProps {
   title: string;
   shareLinks?: readonly ShareLink[];
@@ -38,6 +39,7 @@ function PageTitleBar({
   const { alertDialog } = useAlertDialog();
 
   const [accessLevel, setAccessLevel] = useState('');
+  const [shareDialogUrl, setShareDialogUrl] = useState<string | null>(null);
   useEffect(() => {
     setAccessLevel(getAccessLevelstring(shareLinks));
   }, [shareLinks]);
@@ -73,20 +75,7 @@ function PageTitleBar({
         });
       }
     } else {
-      try {
-        navigator.clipboard.writeText(shareUrl);
-        alertDialog({
-          title: t('titleBar.shareSuccessTitle'),
-          description: t('titleBar.shareSuccessDescription', { typeName: typeName, url: shareUrl }),
-          showCancelButton: false,
-        });
-      } catch (err: any) {
-        alertDialog({
-          title: t('titleBar.shareErrorTitle'),
-          description: t('titleBar.shareErrorDescription', { error: err.message }),
-          showCancelButton: false,
-        });
-      }
+      setShareDialogUrl(shareUrl);
     }
   };
 
@@ -125,6 +114,12 @@ function PageTitleBar({
           </DropdownMenu>
         </div>
       )}
+      <ShareUrlDialog
+        open={shareDialogUrl !== null}
+        onOpenChange={(open) => !open && setShareDialogUrl(null)}
+        shareUrl={shareDialogUrl ?? ''}
+        typeName={typeName}
+      />
     </div>
   );
 }

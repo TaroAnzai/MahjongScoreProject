@@ -123,6 +123,12 @@
     "shareSuccessDescription": "{{typeName}}のURLをクリップボードにコピーしました:\n{{url}}",
     "shareErrorTitle": "コピーに失敗しました",
     "shareErrorDescription": "URLをクリップボードにコピーに失敗しました。\n{{error}}",
+    "shareDialogTitle": "{{typeName}}のリンクを共有",
+    "shareDialogDescription": "URLをコピーするか、QRコードを読み取って共有できます。",
+    "shareQrCodeTitle": "{{typeName}}共有用QRコード",
+    "shareUrlLabel": "共有URL",
+    "copyUrl": "URLをコピー",
+    "shareCopyError": "URLのコピーに失敗しました。",
     "shareViewLink": "閲覧リンクを共有",
     "shareEditLink": "編集リンクを共有"
   },

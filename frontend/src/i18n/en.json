@@ -124,6 +124,12 @@
     "shareSuccessDescription": "Copied the URL for {{typeName}} to your clipboard:\n{{url}}",
     "shareErrorTitle": "Copy Failed",
     "shareErrorDescription": "Failed to copy the URL to clipboard.\n{{error}}",
+    "shareDialogTitle": "Share {{typeName}} link",
+    "shareDialogDescription": "Copy the URL or scan the QR code to share it.",
+    "shareQrCodeTitle": "{{typeName}} share QR code",
+    "shareUrlLabel": "Share URL",
+    "copyUrl": "Copy URL",
+    "shareCopyError": "Failed to copy the URL.",
     "shareViewLink": "Share View Link",
     "shareEditLink": "Share Edit Link"
   },
