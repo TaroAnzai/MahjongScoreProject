@@ -10,21 +10,32 @@ class UTCDateTime(fields.DateTime):
     """RFC 3339で受け取り、UTCへ正規化してUTCのRFC 3339で返す日時フィールド。"""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, format=RFC3339_UTC_FORMAT, **kwargs)
+        # 独自formatを指定しない。
+        # OpenAPIでは type: string / format: date-time として生成される。
+        super().__init__(*args, **kwargs)
 
     def _deserialize(self, value, attr, data, **kwargs):
-        parsed = fields.DateTime(format="iso")._deserialize(value, attr, data, **kwargs)
+        # DateTimeのデフォルトISO 8601解析を利用する。
+        parsed = super()._deserialize(value, attr, data, **kwargs)
+
+        if parsed is None:
+            return None
+
         if parsed.tzinfo is None:
             return parsed.replace(tzinfo=timezone.utc)
+
         return parsed.astimezone(timezone.utc)
 
     def _serialize(self, value, attr, obj, **kwargs):
-        if value is not None:
-            if value.tzinfo is None:
-                value = value.replace(tzinfo=timezone.utc)
-            else:
-                value = value.astimezone(timezone.utc)
-        return super()._serialize(value, attr, obj, **kwargs)
+        if value is None:
+            return None
+
+        if value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        else:
+            value = value.astimezone(timezone.utc)
+
+        return value.strftime(RFC3339_UTC_FORMAT)
 
 
 class ShareLinkSchema(Schema):
