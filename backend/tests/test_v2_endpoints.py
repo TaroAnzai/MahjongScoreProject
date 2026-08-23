@@ -271,8 +271,10 @@ def test_cascade_delete_table_reports_and_removes_children(
     assert Game.query.count() == Score.query.count() == TablePlayer.query.count() == 0
 
 
-def test_batch_get_groups_is_partial_and_does_not_echo_keys(client, v2_group):
-    _, links = v2_group
+def test_batch_get_groups_is_partial_and_does_not_echo_keys(client, db_session, v2_group):
+    group, links = v2_group
+    group.created_at = datetime(2026, 8, 23, 9, 30)
+    db_session.commit()
     response = client.post(
         "/api/v2/groups:batch-get",
         json={
@@ -289,6 +291,7 @@ def test_batch_get_groups_is_partial_and_does_not_echo_keys(client, v2_group):
     assert {
         link["access_level"] for link in body["results"][0]["group"]["group_links"]
     } == {"VIEW"}
+    assert body["results"][0]["group"]["created_at"] == "2026-08-23T09:30:00Z"
 
 
 def test_dashboards_return_available_players_and_games(

@@ -77,6 +77,16 @@ def _player(player):
     return {"id": player.id, "group_id": player.group_id, "name": player.name}
 
 
+def _rfc3339(value):
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    else:
+        value = value.astimezone(timezone.utc)
+    return value.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def _table(table, access_level):
     return {
         "id": table.id,
@@ -110,7 +120,7 @@ def _group(group, access_level):
         "id": group.id,
         "name": group.name,
         "description": group.description,
-        "created_at": group.created_at.isoformat() if group.created_at else None,
+        "created_at": _rfc3339(group.created_at),
         "group_links": _resource_links("group", group.id, access_level),
     }
 
