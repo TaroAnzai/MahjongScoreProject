@@ -22,8 +22,13 @@ services:
     image: mitmproxy/mitmproxy:latest
     container_name: mahjongscore-mitmproxy
     ports:
-      - '6080:6080' # これまでと同じAPI入口
+      - '6080:6080' # API入口
       - '127.0.0.1:8090:8090' # mitmweb GUI
+      - '127.0.0.1:9099:9099' # Maestro用制御API
+
+    volumes:
+      - ./scripts/mitmproxy:/addons:ro
+
     command:
       - mitmweb
       - --mode
@@ -38,9 +43,11 @@ services:
       - '8090'
       - --set
       - web_password=mahjong
+      - -s
+      - /addons/network_fault.py
+
     depends_on:
       - api
-
   db:
     image: mysql:8.0
     container_name: mahjongscore-db
