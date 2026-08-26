@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import './i18n';
 import './index.css';
-import './styles/mahjong.css';
 import App from './App.jsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AlertDialogProvider } from '@/components/common/AlertDialogProvider';

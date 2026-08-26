@@ -1,6 +1,5 @@
 // src/components/TableScoreBoard.jsx
 import type { Game, Player, ScoreInput, Table } from '@/api/generated/mahjongApi.schemas';
-import styles from './TableScoreBoard.module.css';
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +12,8 @@ interface TableScoreBoardProps {
   onUpdateGame: (gameId: number | null, scres: ScoreInput[]) => void;
   disabled?: boolean;
 }
+const cellClass = 'max-w-game-cell overflow-hidden text-ellipsis whitespace-nowrap border border-table-border p-2 text-center';
+const tableClass = "mt-4 w-full min-w-full border-separate border-spacing-0 [&_th]:rounded-small [&_th]:border [&_th]:border-[var(--color-border-subtle)] [&_th]:bg-[linear-gradient(135deg,rgba(34,139,34,0.3),rgba(0,100,0,0.2))] [&_th]:px-2 [&_th]:py-3 [&_th]:font-semibold [&_th]:text-[#90ee90] [&_th]:[text-shadow:0_1px_2px_rgba(0,0,0,0.5)] [&_td]:border [&_td]:border-[rgba(144,238,144,0.1)] [&_td]:bg-[linear-gradient(145deg,rgba(34,139,34,0.1),rgba(0,100,0,0.05))] [&_td]:px-2 [&_td]:py-3.5 [&_td]:font-medium [&_td]:text-[#e0ffe0] [&_tbody_tr]:transition-all [&_tbody_tr]:duration-300 [&_tbody_tr:hover]:scale-[1.02]";
 function TableScoreBoard({
   table,
   players,
@@ -130,13 +131,13 @@ function TableScoreBoard({
     });
   };
   return (
-    <div className={styles.scoreWrapper}>
-      <table className={`${styles.scoreTable} table`}>
+    <div className="mt-4 overflow-x-auto">
+      <table className={tableClass}>
         <thead>
           <tr>
-            <th className={styles.header}>{t('scoreBoard.gameTitle')}</th>
+            <th className={cellClass}>{t('scoreBoard.gameTitle')}</th>
             {displayPlayers.map((player) => (
-              <th key={player.id} className={styles.header}>
+              <th key={player.id} className={cellClass}>
                 {player.name}
               </th>
             ))}
@@ -146,16 +147,16 @@ function TableScoreBoard({
           {displayGames.map((game, index) => (
             <React.Fragment key={game?.id ?? `row-${index}`}>
               <tr onClick={() => handleRowClick(index)}>
-                <td className={styles.cell}>
+                <td className={cellClass}>
                   {isChipTable ? t('Common.chip') : t('scoreBoard.gameLabel', { index: index + 1 })}
                 </td>
                 {displayPlayers.map((player) => (
-                  <td key={`${index}-${player.id}`} className={styles.cell}>
+                  <td key={`${index}-${player.id}`} className={cellClass}>
                     {editingGameIndex === index && player.id > 0 ? (
                       <input
                         type="text"
                         inputMode="numeric"
-                        className={styles.input}
+                        className="score-input box-border m-0 h-full w-full overflow-hidden text-ellipsis border-0 bg-score-input-background p-0.5 text-center text-inherit text-score-input focus:border focus:border-[#4caf50] focus:shadow-[0_0_3px_rgba(76,175,80,0.5)] disabled:cursor-default disabled:border-0 disabled:bg-transparent disabled:text-white"
                         value={editingScores[player.id] ?? ''}
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) => {
@@ -170,29 +171,27 @@ function TableScoreBoard({
               </tr>
               {editingGameIndex === index && (
                 <>
-                  <tr className={styles.sumRow}>
+                  <tr className="bg-none hover:transform-none">
                     <td
-                      className={styles.totalCell}
+                      className="text-right font-bold"
                       colSpan={displayPlayers.length + 1}
-                      style={{ textAlign: 'right', fontWeight: 'bold' }}
                     >
                       {t('scoreBoard.totalLabel')}: {rowTotal}
                     </td>
                   </tr>
-                  <tr className={styles.confirmRow}>
-                    <td colSpan={displayPlayers.length + 1} className={styles.confirmCell}>
-                      <div className={styles.confirmBtnRow}>
+                  <tr className="border border-table-border bg-none hover:transform-none">
+                    <td colSpan={displayPlayers.length + 1} className="p-2 text-center">
+                      <div className="flex items-center justify-center gap-4">
                         <Button
                           onClick={handleConfirm}
-                          className={`${styles.addButton} mahjong-button`}
+                          variant="mahjong"
                           disabled={rowTotal !== 0 && table.type === 'NORMAL'}
                         >
                           {t('Common.Confirmed')}
                         </Button>
                         <Button
                           onClick={handleCancel}
-                          className={`${styles.addButton} mahjong-button`}
-                          style={{ marginLeft: '1rem' }}
+                          variant="mahjong"
                         >
                           {t('Common.Cancel')}
                         </Button>
@@ -204,10 +203,10 @@ function TableScoreBoard({
             </React.Fragment>
           ))}
           {!isChipTable && (
-            <tr className={styles.totalRow}>
-              <td className={styles.header}>{t('scoreBoard.totalLabel')}</td>
+            <tr className="font-bold">
+              <td className={cellClass}>{t('scoreBoard.totalLabel')}</td>
               {displayPlayers.map((player) => (
-                <td key={`total-${player.id}`} className={styles.cell}>
+                <td key={`total-${player.id}`} className={cellClass}>
                   {totalScores[player.id] ?? 0}
                 </td>
               ))}

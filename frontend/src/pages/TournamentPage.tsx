@@ -1,3 +1,4 @@
+import { appButtonVariants, containerVariants, sectionVariants } from '@/components/ui/mahjong';
 // src/pages/TournamentPage.jsx
 // React 関連
 import React, { useEffect, useState } from 'react';
@@ -76,7 +77,7 @@ function TournamentPage() {
   const { tournamentKey } = useParams();
 
   if (!tournamentKey) {
-    return <div className="mahjong-container">{t('tournamentPage.tournamentKeyMissing')}</div>;
+    return <div className={$containerVariants()}>{t('tournamentPage.tournamentKeyMissing')}</div>;
   }
   //Query系フック設定
   const { tournament, isLoadingTournament, loadTournament } = useGetTournament(tournamentKey);
@@ -271,7 +272,7 @@ function TournamentPage() {
   };
 
   return (
-    <div className="mahjong-container">
+    <div className={$containerVariants()}>
       <PageTitleBar
         title={tournament ? tournament.name : 'Loading...'}
         shareLinks={tournament?.tournament_links}
@@ -282,7 +283,7 @@ function TournamentPage() {
       />
       <div
         id="rate-display"
-        className="mahjong-rate-display"
+        className="mb-6 flex justify-center gap-2 rounded-[20px] border bg-surface-strong px-4 py-2 text-sm font-medium text-white shadow-[0_4px_12px_rgba(34,139,34,0.4)]"
         onClick={() => setIsEditingRate(true)}
       >
         {t('tournamentPage.rate')}:{' '}
@@ -295,7 +296,7 @@ function TournamentPage() {
             onChange={handleRateChange}
             onBlur={handleRateBlur}
             onKeyDown={handleRateKeyDown}
-            style={{ width: '60px' }}
+            className="w-game-cell"
             autoFocus
           />
         ) : (
@@ -305,28 +306,28 @@ function TournamentPage() {
 
       <ButtonGridSection>
         <button
-          className="mahjong-button"
+          className={$appButtonVariants()}
           disabled={accessLevel == 'VIEW'}
           onClick={handleOpenAddPlayerModal}
         >
           {t('tournamentPage.buttonAddPlayer')}
         </button>
         <button
-          className="mahjong-button"
+          className={$appButtonVariants()}
           disabled={accessLevel == 'VIEW'}
           onClick={handleOpenDeletePlayerModal}
         >
           {t('tournamentPage.buttonDeletePlayer')}
         </button>
         <button
-          className="mahjong-button"
+          className={$appButtonVariants()}
           disabled={accessLevel == 'VIEW'}
           onClick={handleCreateTable}
         >
           {t('tournamentPage.buttonCreateTable')}
         </button>
         <button
-          className="mahjong-button"
+          className={$appButtonVariants()}
           disabled={accessLevel == 'VIEW'}
           onClick={handleDeleteTournament}
         >
@@ -334,7 +335,7 @@ function TournamentPage() {
         </button>
       </ButtonGridSection>
 
-      <div className="mahjong-section">
+      <div className={$sectionVariants()}>
         <h3>{t('tournamentPage.sectionTournamentScore')}</h3>
         {isChipTableNonZero(scoreMap) && (
           <p className="text-sm text-red-500">{t('tournamentPage.chipNotZeroWarning')}</p>
