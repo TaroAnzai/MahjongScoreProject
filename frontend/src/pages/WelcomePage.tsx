@@ -1,3 +1,4 @@
+import { appButtonVariants, appListItemVariants, appListVariants, containerVariants, sectionVariants } from '@/components/ui/mahjong';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom'; // ← 追加
@@ -43,22 +44,22 @@ function WelcomePage() {
   };
 
   return (
-    <div className="mahjong-container">
+    <div className={$containerVariants()}>
       {/* ← 追加：処理中オーバーレイ */}
       {isCreateGroupPending && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
           <Spinner className="w-12 h-12" />
         </div>
       )}
-      <p className="mahjong-title">{t('welcomPage.pageTitle')}</p>
+      <p className="mb-6 text-title">{t('welcomPage.pageTitle')}</p>
 
       <ButtonGridSection>
-        <button className="mahjong-button" onClick={() => setIsModalOpen(true)}>
+        <button className={$appButtonVariants()} onClick={() => setIsModalOpen(true)}>
           {t('welcomPage.CreateGroup')}
         </button>
       </ButtonGridSection>
 
-      <div className="mahjong-section">
+      <div className={$sectionVariants()}>
         <h2>{t('welcomPage.RegisteredGroups')}</h2>
         {isLoading ? (
           <div className="flex items-center justify-center gap-2">
@@ -66,17 +67,14 @@ function WelcomePage() {
             <span>Loading...</span>
           </div>
         ) : (
-          <ul className="mahjong-list">
+          <ul className={$appListVariants()}>
             {groups.map(
               (group) =>
                 group && (
                   <li
-                    className="mahjong-list-item"
+                    className={$appListItemVariants()}
                     key={group.id + getAccessLevelstring(group.group_links)}
                     onClick={() => handleEnterGroup(group)}
-                    style={{
-                      cursor: 'pointer',
-                    }}
                   >
                     {group?.name}（{getAccessLevelstring(group.group_links)}）
                   </li>

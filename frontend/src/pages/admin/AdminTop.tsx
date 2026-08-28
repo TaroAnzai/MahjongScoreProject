@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 export function AdminTop() {
   const navigate = useNavigate();
   return (
-    <div className="mahjong-container max-w-1000! ">
+    <div className="relative mx-auto box-border w-full max-w-[1000px]! overflow-hidden rounded-container border-2 bg-surface p-2.5 text-center shadow-panel backdrop-blur-[var(--blur-surface)]">
       <h1 className="text-2xl font-bold mt-5">Admin Dashboard</h1>
       <p className="mt-3">
         Welcome to the admin dashboard. Use the navigation to manage groups and settings.

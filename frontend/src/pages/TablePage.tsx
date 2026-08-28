@@ -1,3 +1,4 @@
+import { appButtonVariants, containerVariants } from '@/components/ui/mahjong';
 // React 関連
 import React, { useEffect, useState, useRef, use } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
@@ -126,7 +127,7 @@ export default function TablePage() {
   };
 
   return (
-    <div className="mahjong-container">
+    <div className={$containerVariants()}>
       <PageTitleBar
         title={table ? table.name : t('Common.loading')}
         onTitleChange={handleTableNameChange}
@@ -137,7 +138,7 @@ export default function TablePage() {
       {!isChipTable && (
         <ButtonGridSection>
           <button
-            className="mahjong-button"
+            className={$appButtonVariants()}
             disabled={accessLevel == 'VIEW'}
             onClick={() => {
               setShowAddPlayerModal(true);
@@ -146,21 +147,21 @@ export default function TablePage() {
             {t('tablePage.buttonAddPlayer')}
           </button>
           <button
-            className="mahjong-button"
+            className={$appButtonVariants()}
             disabled={accessLevel == 'VIEW'}
             onClick={() => setShowDeletePlayerModal(true)}
           >
             {t('tablePage.buttonDeletePlayer')}
           </button>
           <button
-            className="mahjong-button"
+            className={$appButtonVariants()}
             disabled={accessLevel == 'VIEW'}
             onClick={handleDeleteGameClick}
           >
             {t('tablePage.buttonDeleteGame')}
           </button>
           <button
-            className="mahjong-button"
+            className={$appButtonVariants()}
             disabled={accessLevel == 'VIEW'}
             onClick={handleDeleteTable}
           >

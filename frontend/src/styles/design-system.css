@@ -1,0 +1,78 @@
+/* Single source of truth for the values used by the application and shadcn/ui. */
+:root {
+  --color-background: oklch(0 0 0 / 0);
+  --color-on-background: oklch(100% 0.00011 271.152);
+  --color-surface: oklch(90.458% 0.20337 139.622);
+  --color-on-surface: oklch(0.22 0.03 140);
+  --color-on-surface-muted: oklch(100% 0.00011 271.152);
+  --color-primary: oklch(0.58 0.15 140);
+  --color-on-primary: oklch(0.99 0 0);
+  --color-secondary: oklch(0.9 0.04 140);
+  --color-on-secondary: oklch(0.25 0.03 140);
+  --color-accent: oklch(0.92 0.05 140);
+  --color-on-accent: oklch(0.22 0.03 140);
+  --color-destructive: oklch(0.6 0.25 20);
+  --color-border: rgba(144, 238, 144, 0.3);
+  --color-border-subtle: rgba(144, 238, 144, 0.2);
+  --color-table-border: #ccc;
+  --color-input: oklch(0.85 0.04 140);
+  --color-focus-ring: oklch(0.6 0.1 140);
+  --color-link: oklch(0.85 0.03 140);
+  --color-link-hover: oklch(0.78 0.04 140);
+  --color-score-input: #000;
+  --color-score-input-background: #fff;
+  --color-disabled-text: #ccc;
+  --gradient-page: linear-gradient(135deg, #2f5938 0%, #0d2818 100%);
+  --gradient-surface: linear-gradient(145deg, rgba(34, 139, 34, 0.15), rgba(0, 100, 0, 0.1));
+  --gradient-surface-strong: linear-gradient(145deg, rgba(34, 139, 34, 0.2), rgba(0, 100, 0, 0.15));
+  --gradient-action: linear-gradient(135deg, #32cd32, #228b22);
+  --gradient-action-disabled: linear-gradient(135deg, #6b8e23, #556b2f);
+  --font-sans: 'Noto Sans JP', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-modal: 'Yu Gothic', sans-serif;
+  --text-xs-app: 0.8em; --text-sm-app: 14px; --text-base-app: 1rem;
+  --text-list: 1.2em; --text-list-large: 1.5em; --text-title: 24px; --text-nav: 18px;
+  --font-weight-normal-app: 400; --font-weight-medium-app: 500; --font-weight-semibold-app: 600; --font-weight-bold-app: 700;
+  --leading-body: 1.5; --leading-heading: 1.1; --leading-titlebar: 2.5em;
+  --space-0: 0; --space-px2: 2px; --space-1-app: 4px; --space-2-app: 8px; --space-3-app: 10px;
+  --space-4-app: 12px; --space-5-app: 16px; --space-6-app: 20px; --space-7-app: 24px;
+  --gap-control: 0.5rem; --gap-actions: 1rem;
+  --height-titlebar: 2.5em; --height-share: 1.3em;
+  --radius-control: 6px; --radius-small: 8px; --radius-modal: 10px; --radius-panel: 16px; --radius-container: 24px;
+  --shadow-control: 0 8px 24px rgba(50, 205, 50, 0.3);
+  --shadow-panel: 0 32px 64px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --shadow-modal: 0 16px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --blur-surface: 20px; --blur-popover: 10px;
+  --duration-fast: 200ms; --duration-default: 300ms;
+  --z-sticky: 2; --z-overlay: 1000;
+  --content-width-default: 500px; --modal-width-default: 400px;
+  --cell-width-score: 6em; --cell-width-game: 60px;
+  --background: var(--color-background); --foreground: var(--color-on-background);
+  --card: var(--color-surface); --card-foreground: var(--color-on-surface);
+  --popover: var(--color-background); --popover-foreground: var(--color-on-background);
+  --primary: var(--color-primary); --primary-foreground: var(--color-on-primary);
+  --secondary: var(--color-secondary); --secondary-foreground: var(--color-on-secondary);
+  --muted: var(--color-secondary); --muted-foreground: var(--color-on-surface-muted);
+  --accent: var(--color-accent); --accent-foreground: var(--color-on-accent);
+  --destructive: var(--color-destructive); --border: var(--color-border);
+  --input: var(--color-input); --ring: var(--color-focus-ring); --radius: var(--radius-container);
+}
+
+@theme inline {
+  --color-background: var(--background); --color-foreground: var(--foreground);
+  --color-card: var(--card); --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive); --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring);
+  --color-link: var(--color-link); --color-link-hover: var(--color-link-hover);
+  --color-table-border: var(--color-table-border); --color-score-input: var(--color-score-input); --color-score-input-background: var(--color-score-input-background);
+  --font-sans: var(--font-sans); --font-modal: var(--font-modal);
+  --text-title: var(--text-title); --text-nav: var(--text-nav); --text-list: var(--text-list); --text-list-large: var(--text-list-large);
+  --radius-control: var(--radius-control); --radius-small: var(--radius-small); --radius-modal: var(--radius-modal); --radius-panel: var(--radius-panel); --radius-container: var(--radius-container);
+  --shadow-control: var(--shadow-control); --shadow-panel: var(--shadow-panel); --shadow-modal: var(--shadow-modal); --shadow-inset: var(--shadow-inset);
+  --spacing-content: var(--content-width-default); --spacing-modal: var(--modal-width-default); --spacing-score-cell: var(--cell-width-score); --spacing-game-cell: var(--cell-width-game);
+  --background-image-page: var(--gradient-page); --background-image-surface: var(--gradient-surface); --background-image-surface-strong: var(--gradient-surface-strong); --background-image-action: var(--gradient-action); --background-image-action-disabled: var(--gradient-action-disabled);
+}

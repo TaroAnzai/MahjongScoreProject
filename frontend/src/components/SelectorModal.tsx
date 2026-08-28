@@ -1,5 +1,4 @@
 // src/components/SelectorModal.jsx
-import styles from './SelectorModal.module.css';
 import {
   Dialog,
   DialogContent,
@@ -39,11 +38,11 @@ function SelectorModal({
           <DialogDescription>{t('Common.Select')}</DialogDescription>
         </DialogHeader>
         {items === undefined || items.length === 0 ? (
-          <div className={styles.emptyMessage}>{msg}</div>
+          <div>{msg}</div>
         ) : (
-          <ul className={styles.list}>
+          <ul className="m-0 inline-block w-full flex-1 list-none overflow-y-auto p-0">
             {items?.map((item) => (
-              <li key={item.id} className={styles.listItem} onClick={() => onSelect(item)}>
+              <li key={item.id} className="mb-2 cursor-pointer rounded-panel border bg-action p-2 text-base text-white transition-colors duration-200 hover:bg-[#94a994]" onClick={() => onSelect(item)}>
                 <div>{item.name}</div>
                 {plusDisplayItem && <div>{item[plusDisplayItem]}</div>}
               </li>

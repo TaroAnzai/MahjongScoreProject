@@ -5,7 +5,6 @@ import WelcomePage from './pages/WelcomePage';
 import GroupPage from './pages/GroupPage';
 import TablePage from './pages/TablePage';
 import TournamentPage from './pages/TournamentPage';
-import './App.css';
 import { Toaster } from 'sonner';
 import GroupCreatePage from './pages/GroupCreatePage';
 import GroupPlayerStatsPage from './pages/GroupPlayerStats';
@@ -22,7 +21,7 @@ function NotFoundPage() {
   const { t } = useTranslation();
 
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
+    <div className="p-5 text-center">
       <h2>{t('notFound.title')}</h2>
       <p>
         {t('notFound.path')}: {location.pathname}
