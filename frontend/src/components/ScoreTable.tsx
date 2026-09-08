@@ -1,18 +1,17 @@
 // src/components/ScoreTable.jsx
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './ScoreTable.module.css';
-import type {
-  Table,
-  TournamentExport,
-  TournamentParticipant,
-  TournamentScoreMap,
-} from '@/api/generated/mahjongApi.schemas';
+import type React from 'react';
+import type { TournamentScoreMap } from '@/api/generated/mahjongApi.schemas';
 import { useTranslation } from 'react-i18next';
 interface ScoreTableProps {
   scoreMap: TournamentScoreMap | undefined;
   onClick: (table_id: number) => void;
 }
+const ScoreCell = ({ children, sticky = false }: { children: React.ReactNode; sticky?: boolean }) => (
+  <td className={`max-w-score-cell overflow-hidden text-ellipsis whitespace-nowrap border border-table-border p-2 text-center ${sticky ? 'sticky left-0 z-[var(--z-sticky)] bg-[darkgreen]' : ''}`}>{children}</td>
+);
+const ScoreHeaderCell = ({ children, sticky = false, onClick }: { children: React.ReactNode; sticky?: boolean; onClick?: () => void }) => (
+  <th className={`max-w-score-cell overflow-hidden text-ellipsis whitespace-nowrap border border-table-border p-2 text-center ${sticky ? 'sticky left-0 z-[var(--z-sticky)] bg-[darkgreen]' : ''} ${onClick ? 'cursor-pointer underline' : ''}`} onClick={onClick}>{children}</th>
+);
 const ScoreTable = ({ scoreMap, onClick }: ScoreTableProps) => {
   const { t } = useTranslation();
   if (!scoreMap) {
@@ -23,25 +22,23 @@ const ScoreTable = ({ scoreMap, onClick }: ScoreTableProps) => {
   const sortedTables = [...normalTables, ...chipTables];
 
   return (
-    <div className={styles.mahjongScoreWrapper}>
-      <table className={`${styles.mahjongScoreTable} table`}>
+    <div className="relative mt-4 overflow-x-auto">
+      <table className="mt-4 min-w-max border-separate border-spacing-0">
         <thead>
           <tr>
-            <th className={`${styles.header} ${styles.stickyHeader}`}>
+            <ScoreHeaderCell sticky>
               {t('scoreTable.columnParticipant')}
-            </th>
+            </ScoreHeaderCell>
             {sortedTables.map((table) => (
-              <th
+              <ScoreHeaderCell
                 key={table.id}
-                className={styles.header}
                 onClick={() => onClick(table.id!)}
-                style={{ cursor: 'pointer', textDecoration: 'underline' }}
               >
                 {table.name}
-              </th>
+              </ScoreHeaderCell>
             ))}
-            <th className={styles.header}>{t('scoreTable.columnTotal')}</th>
-            <th className={styles.header}>{t('scoreTable.columnConvertedTotal')}</th>
+            <ScoreHeaderCell>{t('scoreTable.columnTotal')}</ScoreHeaderCell>
+            <ScoreHeaderCell>{t('scoreTable.columnConvertedTotal')}</ScoreHeaderCell>
           </tr>
         </thead>
 
@@ -49,23 +46,23 @@ const ScoreTable = ({ scoreMap, onClick }: ScoreTableProps) => {
           {scoreMap.players.map((player) => (
             <tr key={player.id}>
               {/* プレイヤー名 */}
-              <td className={`${styles.cell} ${styles.stickyHeader}`}>{player.name}</td>
+              <ScoreCell sticky>{player.name}</ScoreCell>
 
               {/* 卓ごとのスコア */}
               {sortedTables.map((table) => {
                 const score = (player.scores ?? {})[String(table.id)] ?? '';
                 return (
-                  <td key={table.id} className={styles.cell}>
+                  <ScoreCell key={table.id}>
                     {score !== 0 ? score : ''}
-                  </td>
+                  </ScoreCell>
                 );
               })}
 
               {/* 合計 */}
-              <td className={styles.cell}>{player.total}</td>
+              <ScoreCell>{player.total}</ScoreCell>
 
               {/* 換算点（小数第1位まで） */}
-              <td className={styles.cell}>{Number(player.converted_total).toFixed(1)}</td>
+              <ScoreCell>{Number(player.converted_total).toFixed(1)}</ScoreCell>
             </tr>
           ))}
         </tbody>

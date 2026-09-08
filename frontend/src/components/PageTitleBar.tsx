@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import styles from './PageTitleBar.module.css';
 import EditableTitle from './EditableTitle';
 import { ChevronsLeft, ChevronsRight, ChevronsUp, Share2 } from 'lucide-react';
 import {
@@ -81,7 +80,7 @@ function PageTitleBar({
   };
 
   return (
-    <div className={styles.title}>
+    <div className="relative mb-6 flex h-[var(--height-titlebar)] items-center justify-between rounded-panel border bg-surface-strong px-5 py-4 text-nav shadow-inset">
       <div className="flex">
         {parentUrl !== null && parentUrl !== undefined && (
           <ChevronsUp className="cursor-pointer" onClick={() => navigate(parentUrl)} />
@@ -89,11 +88,11 @@ function PageTitleBar({
         {showBackButton && <ChevronsLeft className="cursor-pointer" onClick={() => navigate(-1)} />}
       </div>
 
-      <div className={styles.center}>
+      <div className="pointer-events-none absolute left-1/2 w-[calc(100%-8em)] -translate-x-1/2 whitespace-nowrap text-center leading-[var(--leading-titlebar)]">
         {TitleComponent ? (
           <TitleComponent onClick={onTitleClick} />
         ) : (
-          <EditableTitle value={title} onChange={onTitleChange} className={styles.editable} />
+          <EditableTitle value={title} onChange={onTitleChange} className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-nav font-semibold text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.3)]" />
         )}
       </div>
       {shareLinks.length > 0 && (

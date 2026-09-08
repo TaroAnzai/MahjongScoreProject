@@ -1,3 +1,4 @@
+import { appButtonVariants, appListItemVariants, appListVariants, containerVariants, sectionVariants } from '@/components/ui/mahjong';
 // src/pages/GroupPage.jsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
@@ -25,7 +26,7 @@ function GroupPage() {
   const { alertDialog } = useAlertDialog();
   const location = useLocation();
   const { groupKey } = useParams();
-  if (!groupKey) return <div className="mahjong-container">{t('groupPage.groupKeyNotFound')}</div>;
+  if (!groupKey) return <div className={$containerVariants()}>{t('groupPage.groupKeyNotFound')}</div>;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showTournamentModal, setShowTournamentModal] = useState(false);
   const [isCreateTournamentModalOpen, setIsCreateTournamentModalOpen] = useState(false);
@@ -102,7 +103,7 @@ function GroupPage() {
   };
 
   return (
-    <div className="mahjong-container">
+    <div className={$containerVariants()}>
       <PageTitleBar
         title={group ? group.name : 'Loading...'}
         shareLinks={group ? group.group_links : []}
@@ -112,51 +113,51 @@ function GroupPage() {
 
       <ButtonGridSection>
         <button
-          className="mahjong-button"
+          className={$appButtonVariants()}
           disabled={accessLevel === 'VIEW'}
           onClick={() => setIsCreatePlayerModalOpen(true)}
         >
           {t('groupPage.buttonAddPlayer')}
         </button>
         <button
-          className="mahjong-button"
+          className={$appButtonVariants()}
           disabled={accessLevel === 'VIEW'}
           onClick={() => setShowDeleteModal(true)}
         >
           {t('groupPage.buttonDeletePlayer')}
         </button>
         <button
-          className="mahjong-button"
+          className={$appButtonVariants()}
           disabled={accessLevel === 'VIEW'}
           onClick={() => setIsCreateTournamentModalOpen(true)}
         >
           {t('groupPage.buttonCreateTournament')}
         </button>
-        <button className="mahjong-button" onClick={() => setShowTournamentModal(true)}>
+        <button className={$appButtonVariants()} onClick={() => setShowTournamentModal(true)}>
           {t('groupPage.buttonSelectTournament')}
         </button>
-        <button className="mahjong-button" onClick={handleAddGroup}>
+        <button className={$appButtonVariants()} onClick={handleAddGroup}>
           {t('groupPage.buttonSaveToBrowser')}
         </button>
-        <button className="mahjong-button" onClick={handleRemoveGroup}>
+        <button className={$appButtonVariants()} onClick={handleRemoveGroup}>
           {t('groupPage.buttonRemoveFromBrowser')}
         </button>
-        <button className="mahjong-button" onClick={() => navigate(`/group/stats/${groupKey}`)}>
+        <button className={$appButtonVariants()} onClick={() => navigate(`/group/stats/${groupKey}`)}>
           {t('groupPage.buttonStats')}
         </button>
       </ButtonGridSection>
 
-      <div className="mahjong-section">
-        <h3 className="mahjong-subtitle">{t('groupPage.sectionMemberList')}</h3>
+      <div className={$sectionVariants()}>
+        <h3 className="mb-3 pl-2.5 text-list text-[#f0f0f0]">{t('groupPage.sectionMemberList')}</h3>
         {isLoadingPlayers ? (
           <div className="flex items-center justify-center gap-2">
             <Spinner />
             <span>Loading...</span>
           </div>
         ) : (
-          <ul className="mahjong-list">
+          <ul className={$appListVariants()}>
             {players?.map((player) => (
-              <li key={player.id} className="mahjong-list-item">
+              <li key={player.id} className={$appListItemVariants()}>
                 {player.name}
               </li>
             ))}

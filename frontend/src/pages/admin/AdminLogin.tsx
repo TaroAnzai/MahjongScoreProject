@@ -1,3 +1,4 @@
+import { appButtonVariants, containerVariants } from '@/components/ui/mahjong';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAdminLogin, useCheckAdmin } from '@/hooks/useAdmin';
@@ -23,7 +24,7 @@ export function AdminLogin() {
     login({ username: username, password: password });
   };
   return (
-    <div className="mahjong-container">
+    <div className={$containerVariants()}>
       <h2 className="mb-5">AdminLogin</h2>
       <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
         <Input
@@ -53,7 +54,7 @@ export function AdminLogin() {
             {show ? <EyeOff size={18} /> : <Eye size={18} />}
           </Button>
         </div>
-        <button className="mahjong-button" type="submit">
+        <button className={$appButtonVariants()} type="submit">
           ログイン
         </button>
       </form>

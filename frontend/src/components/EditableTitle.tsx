@@ -1,6 +1,6 @@
 // src/components/EditableTitle.jsx
 import React, { useState } from 'react';
-import styles from './EditableTitle.module.css';
+import { cn } from '@/lib/utils';
 
 interface EditableTitleProps {
   value: string;
@@ -29,11 +29,11 @@ function EditableTitle({ value, onChange, className = '' }: EditableTitleProps) 
   };
 
   return (
-    <div className={`${styles.wrapper} ${className}`} onClick={handleStartEdit}>
+    <div className={cn('pointer-events-auto cursor-pointer', className)} onClick={handleStartEdit}>
       {editing ? (
         <input
           type="text"
-          className={styles.input}
+          className="box-border w-full px-1.5 py-0.5 text-[1em]"
           value={tempValue}
           onChange={(e) => setTempValue(e.target.value)}
           onBlur={handleFinishEdit}

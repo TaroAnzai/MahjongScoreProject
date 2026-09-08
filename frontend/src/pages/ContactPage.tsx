@@ -1,3 +1,4 @@
+import { containerVariants } from '@/components/ui/mahjong';
 import PageTitleBar from '@/components/PageTitleBar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -78,7 +79,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="mahjong-container">
+    <div className={$containerVariants()}>
       <PageTitleBar title={t('contactPage.title')} showBackButton />
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

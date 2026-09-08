@@ -154,7 +154,7 @@ export function AdminGroups() {
     deleteGroup({ groupKey: GroupKey });
   };
   return (
-    <div className="mahjong-container max-w-1000! ">
+    <div className="relative mx-auto box-border w-full max-w-[1000px]! overflow-hidden rounded-container border-2 bg-surface p-2.5 text-center shadow-panel backdrop-blur-[var(--blur-surface)]">
       <Table className="mt-5">
         <TableHeader>
           <TableRow>

@@ -1,7 +1,7 @@
+import { appButtonVariants } from '@/components/ui/mahjong';
 // src/components/MultiSelectorModal.jsx
 import React, { useState } from 'react';
 import Modal from './Modal';
-import styles from './MultiSelectorModal.module.css';
 import { useTranslation } from 'react-i18next';
 
 interface multiSelectorModalProps<T extends { id: number | string }> {
@@ -36,25 +36,25 @@ function MultiSelectorModal<T extends { id: number; name: string }>({
       footer={
         <>
           <button
-            className="mahjong-button"
+            className={$appButtonVariants()}
             onClick={handleConfirm}
             disabled={selectedIds.length === 0}
           >
             OK
           </button>
-          <button className="mahjong-button" onClick={onClose}>
+          <button className={$appButtonVariants()} onClick={onClose}>
             {' '}
             {t('Common.Cancel')}
           </button>
         </>
       }
     >
-      <div className={styles.listContainer}>
+      <div className="flex-1 overflow-y-auto">
         {items.length === 0 && <p>{t('Common.emptyMessage')}</p>}
-        <ul className={styles.list}>
+        <ul className="m-0 inline-block w-full flex-1 list-none overflow-y-auto p-0">
           {items.map((item) => (
-            <li key={item.id} className={styles.listItem}>
-              <label style={{ cursor: 'pointer' }}>
+            <li key={item.id} className="mb-4 text-list-large text-white">
+              <label className="cursor-pointer">
                 <input
                   type="checkbox"
                   checked={selectedIds.includes(item.id)}
