@@ -44,7 +44,7 @@ function WelcomePage() {
   };
 
   return (
-    <div className={$containerVariants()}>
+    <div className={containerVariants()}>
       {/* ← 追加：処理中オーバーレイ */}
       {isCreateGroupPending && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -54,12 +54,12 @@ function WelcomePage() {
       <p className="mb-6 text-title">{t('welcomPage.pageTitle')}</p>
 
       <ButtonGridSection>
-        <button className={$appButtonVariants()} onClick={() => setIsModalOpen(true)}>
+        <button className={appButtonVariants()} onClick={() => setIsModalOpen(true)}>
           {t('welcomPage.CreateGroup')}
         </button>
       </ButtonGridSection>
 
-      <div className={$sectionVariants()}>
+      <div className={sectionVariants()}>
         <h2>{t('welcomPage.RegisteredGroups')}</h2>
         {isLoading ? (
           <div className="flex items-center justify-center gap-2">
@@ -67,12 +67,12 @@ function WelcomePage() {
             <span>Loading...</span>
           </div>
         ) : (
-          <ul className={$appListVariants()}>
+          <ul className={appListVariants()}>
             {groups.map(
               (group) =>
                 group && (
                   <li
-                    className={$appListItemVariants()}
+                    className={appListItemVariants()}
                     key={group.id + getAccessLevelstring(group.group_links)}
                     onClick={() => handleEnterGroup(group)}
                   >

@@ -79,7 +79,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className={$containerVariants()}>
+    <div className={containerVariants()}>
       <PageTitleBar title={t('contactPage.title')} showBackButton />
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

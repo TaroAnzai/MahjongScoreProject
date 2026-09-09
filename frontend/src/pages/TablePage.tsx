@@ -127,7 +127,7 @@ export default function TablePage() {
   };
 
   return (
-    <div className={$containerVariants()}>
+    <div className={containerVariants()}>
       <PageTitleBar
         title={table ? table.name : t('Common.loading')}
         onTitleChange={handleTableNameChange}
@@ -138,7 +138,7 @@ export default function TablePage() {
       {!isChipTable && (
         <ButtonGridSection>
           <button
-            className={$appButtonVariants()}
+            className={appButtonVariants()}
             disabled={accessLevel == 'VIEW'}
             onClick={() => {
               setShowAddPlayerModal(true);
@@ -147,21 +147,21 @@ export default function TablePage() {
             {t('tablePage.buttonAddPlayer')}
           </button>
           <button
-            className={$appButtonVariants()}
+            className={appButtonVariants()}
             disabled={accessLevel == 'VIEW'}
             onClick={() => setShowDeletePlayerModal(true)}
           >
             {t('tablePage.buttonDeletePlayer')}
           </button>
           <button
-            className={$appButtonVariants()}
+            className={appButtonVariants()}
             disabled={accessLevel == 'VIEW'}
             onClick={handleDeleteGameClick}
           >
             {t('tablePage.buttonDeleteGame')}
           </button>
           <button
-            className={$appButtonVariants()}
+            className={appButtonVariants()}
             disabled={accessLevel == 'VIEW'}
             onClick={handleDeleteTable}
           >

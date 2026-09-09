@@ -216,7 +216,7 @@ class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     game_id = db.Column(db.Integer, db.ForeignKey("tbl_games.id"), nullable=False)
     player_id = db.Column(db.Integer, db.ForeignKey("tbl_players.id"), nullable=False)
-    score = db.Column(db.Integer, nullable=False)
+    score = db.Column(db.Numeric(15, 5), nullable=False)
     rank = db.Column(db.Integer)
     uma = db.Column(db.Float)
     total_score = db.Column(db.Float)

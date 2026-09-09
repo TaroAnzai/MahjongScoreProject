@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 """Transactional and aggregate services for the V2 mobile API."""
 
 import hashlib
@@ -472,7 +474,7 @@ def _score_map(tournament, access_level):
     rate = tournament.rate if tournament.rate is not None else 0.001
     for value in values.values():
         value["total"] = sum(value["scores"].values())
-        value["converted_total"] = round(value["total"] * rate, 2)
+        value["converted_total"] = round(value["total"] * Decimal(str(rate)), 2)
     return {
         "tournament_id": tournament.id,
         "tables": [_table(t, access_level) for t in tables],

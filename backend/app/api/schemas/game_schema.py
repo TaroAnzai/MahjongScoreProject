@@ -1,12 +1,23 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, ValidationError, fields
 
 from app.api.schemas.common_schemas import ShareLinkSchema, UTCDateTime
 from app.api.schemas.mixins.share_link_mixin import ShareLinkMixin
+from app.utils.score_utils import normalize_score
+
+
+class ScoreNumber(fields.Float):
+    """Expose JSON/OpenAPI number while deserializing to exact Decimal."""
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        try:
+            return normalize_score(value)
+        except ValueError as exc:
+            raise ValidationError(str(exc)) from exc
 
 
 class ScoreInputSchema(Schema):
     player_id = fields.Int(required=True, description="プレイヤーID")
-    score = fields.Float(required=True, description="得点（合計0である必要あり）")
+    score = ScoreNumber(required=True, description="符号付き得点（小数第5位まで、絶対値9999999999.99999以下。通常卓は合計0）")
 
 
 class GameUpdateSchema(Schema):

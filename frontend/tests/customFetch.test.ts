@@ -19,9 +19,23 @@ describe.each([
       headers: { 'X-Request-ID': 'test' } })).resolves.toEqual({ id: 7 });
     const [url, options] = fetchMock.mock.calls[0];
     expect(url).toBe('https://api.example.test/games');
-    expect(options).toMatchObject({ method: 'POST', body: JSON.stringify(data), signal,
-      headers: { 'Content-Type': 'application/json', 'X-Request-ID': 'test' } });
+    expect(options).toMatchObject({ method: 'POST', body: JSON.stringify(data), signal });
+    const headers = new Headers(options?.headers);
+    expect(headers.get('Content-Type')).toBe('application/json');
+    expect(headers.get('X-Request-ID')).toBe('test');
     expect(options?.credentials).toBe(credentials);
+  });
+
+  it('HeadersInitの統合と他のoptionsの優先順位を保持する', async () => {
+    fetchMock.mockResolvedValue(Response.json({}));
+    const signal = new AbortController().signal;
+    await request({ url: '/games', method: 'POST', data: {},
+      headers: new Headers({ 'Content-Type': 'config/type', 'X-Keep': 'yes' }) },
+      { headers: [['content-type', 'options/type']], method: 'PUT', body: 'override', signal, credentials: 'omit' });
+    const options = fetchMock.mock.calls[0][1];
+    expect(options).toMatchObject({ method: 'PUT', body: 'override', signal, credentials: 'omit' });
+    expect(new Headers(options?.headers).get('Content-Type')).toBe('options/type');
+    expect(new Headers(options?.headers).get('X-Keep')).toBe('yes');
   });
 
   it('検索条件をURLエンコードし、GETでは本文を送らない', async () => {
@@ -69,6 +83,7 @@ describe.each([
     expect(headers.get('Content-Type')).toBe('application/json');
     expect(headers.get('X-Request-ID')).toBe('test');
     expect(headers.get('Authorization')).toBe('Bearer test-token');
+    expect(fetchMock.mock.calls[0][1]?.credentials).toBe(credentials);
   });
 });
 

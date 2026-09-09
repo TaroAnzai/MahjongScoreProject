@@ -36,13 +36,13 @@ function MultiSelectorModal<T extends { id: number; name: string }>({
       footer={
         <>
           <button
-            className={$appButtonVariants()}
+            className={appButtonVariants()}
             onClick={handleConfirm}
             disabled={selectedIds.length === 0}
           >
             OK
           </button>
-          <button className={$appButtonVariants()} onClick={onClose}>
+          <button className={appButtonVariants()} onClick={onClose}>
             {' '}
             {t('Common.Cancel')}
           </button>

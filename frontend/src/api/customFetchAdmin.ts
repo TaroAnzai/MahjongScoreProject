@@ -6,7 +6,7 @@ interface CustomFetchAdminConfig {
   method: string;
   data?: any;
   params?: Record<string, string | number | null>;
-  headers?: Record<string, string>;
+  headers?: HeadersInit;
   signal?: AbortSignal;
 }
 export const customFetchAdmin = async <T>(
@@ -25,17 +25,18 @@ export const customFetchAdmin = async <T>(
     urlWithParams += `?${query}`;
   }
 
+  const headers = new Headers({ 'Content-Type': 'application/json' });
+  for (const source of [config.headers, options?.headers]) {
+    new Headers(source).forEach((value, key) => headers.set(key, value));
+  }
+
   const response = await fetch(urlWithParams, {
     method: config.method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(config.headers || {}),
-      ...(options?.headers || {}),
-    },
     body: config.data && config.method !== 'GET' ? JSON.stringify(config.data) : undefined,
     signal: config.signal,
     credentials: 'include',
     ...options,
+    headers,
   });
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));

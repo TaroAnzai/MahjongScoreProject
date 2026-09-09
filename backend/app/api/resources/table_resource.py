@@ -2,6 +2,7 @@ from flask import jsonify
 from flask.views import MethodView
 from flask_smorest import Blueprint
 
+from app.api.score_parser import ScoreJSONParser
 from app.api.schemas.common_schemas import MessageSchema
 from app.api.schemas.game_schema import GameCreateSchema, GameSchema
 from app.api.schemas.table_schema import (
@@ -24,6 +25,7 @@ table_bp = Blueprint(
     url_prefix="/api/tables",
     description="卓管理API",
 )
+table_bp.ARGUMENTS_PARSER = ScoreJSONParser()
 
 
 @table_bp.errorhandler(ServiceError)
