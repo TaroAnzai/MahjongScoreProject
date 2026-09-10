@@ -1,21 +1,11 @@
 # util/send_test_mail.py
 import argparse
-import os
 
-from dotenv import load_dotenv
+from environment import load_environment
 
 from .send_mail import MailMessage, MailSendError, send_email
 
-load_dotenv()  # FLASK_ENV の値に応じて .env を読み込む
-env_name = os.getenv("FLASK_ENV", "development")
-print("FLASK_ENV:", env_name)
-if env_name == "production":
-    load_dotenv(".env.production")
-elif env_name == "test":
-    load_dotenv(".env.test")
-else:
-    load_dotenv(".env")  # 開発用
-
+load_environment()
 
 def main():
     p = argparse.ArgumentParser()

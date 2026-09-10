@@ -1,7 +1,13 @@
+import { loadEnv } from 'vite';
+import { fileURLToPath } from 'node:url';
+
+const rootEnv = loadEnv('development', fileURLToPath(new URL('..', import.meta.url)), 'ORVAL_');
+const schemaUrl = process.env.ORVAL_API_URL || rootEnv.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json';
+
 export default {
   mahjongApi: {
     input: {
-      target: process.env.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json',
+      target: schemaUrl,
       filters: {
         // 管理 API (/api/admin/*) を除外する
         mode: 'exclude',
@@ -15,6 +21,8 @@ export default {
       clean: true, // generated フォルダをクリーンアップしてから生成
       prettier: true,
       override: {
+        // Mutators return the response body directly.
+        fetch: { includeHttpResponseReturnType: false },
         mutator: {
           path: 'src/api/customFetch.ts', // これは消えない（generated 外だから）
           name: 'customFetch',
@@ -28,7 +36,7 @@ export default {
   // -------------------------------------------------
   adminApi: {
     input: {
-      target: process.env.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json',
+      target: schemaUrl,
       filters: {
         // /api/admin/* のみ抽出する
 
@@ -42,6 +50,8 @@ export default {
       clean: false,
       prettier: true,
       override: {
+        // Mutators return the response body directly.
+        fetch: { includeHttpResponseReturnType: false },
         mutator: {
           path: 'src/api/customFetchAdmin.ts',
           name: 'customFetchAdmin',

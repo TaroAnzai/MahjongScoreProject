@@ -1,4 +1,7 @@
 {
+  "navigation": {
+    "admin": "Administration"
+  },
   "Common": {
     "Confirm": "Confirm",
     "Confirmed": "Confirmed",

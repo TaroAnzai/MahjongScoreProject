@@ -10,16 +10,16 @@ function GroupPlayerStatsPage() {
   const { groupKey } = useParams();
   const { t } = useTranslation();
   if (!groupKey)
-    return <div className={$containerVariants()}>{t('statsPage.errorInvalidGroupKey')}</div>;
+    return <div className={containerVariants()}>{t('statsPage.errorInvalidGroupKey')}</div>;
   const { playerStats, isLoadingPlayerStats } = useGetPlayerStats(groupKey);
 
   return (
-    <div className={$containerVariants()}>
+    <div className={containerVariants()}>
       <PageTitleBar
         title={t('statsPage.pageTitle')}
         parentUrl={`/group/${groupKey}`}
       ></PageTitleBar>
-      <div className={$sectionVariants()}>
+      <div className={sectionVariants()}>
         {isLoadingPlayerStats || !playerStats?.players ? (
           <div>Loading...</div>
         ) : (

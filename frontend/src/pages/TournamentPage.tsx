@@ -77,7 +77,7 @@ function TournamentPage() {
   const { tournamentKey } = useParams();
 
   if (!tournamentKey) {
-    return <div className={$containerVariants()}>{t('tournamentPage.tournamentKeyMissing')}</div>;
+    return <div className={containerVariants()}>{t('tournamentPage.tournamentKeyMissing')}</div>;
   }
   //Query系フック設定
   const { tournament, isLoadingTournament, loadTournament } = useGetTournament(tournamentKey);
@@ -272,7 +272,7 @@ function TournamentPage() {
   };
 
   return (
-    <div className={$containerVariants()}>
+    <div className={containerVariants()}>
       <PageTitleBar
         title={tournament ? tournament.name : 'Loading...'}
         shareLinks={tournament?.tournament_links}
@@ -283,7 +283,7 @@ function TournamentPage() {
       />
       <div
         id="rate-display"
-        className="mb-6 flex justify-center gap-2 rounded-[20px] border bg-surface-strong px-4 py-2 text-sm font-medium text-white shadow-[0_4px_12px_rgba(34,139,34,0.4)]"
+        className="mb-6 flex justify-center gap-2 rounded-[20px] border bg-surface-strong px-4 py-2 text-sm font-medium text-foreground shadow-none"
         onClick={() => setIsEditingRate(true)}
       >
         {t('tournamentPage.rate')}:{' '}
@@ -306,28 +306,28 @@ function TournamentPage() {
 
       <ButtonGridSection>
         <button
-          className={$appButtonVariants()}
+          className={appButtonVariants()}
           disabled={accessLevel == 'VIEW'}
           onClick={handleOpenAddPlayerModal}
         >
           {t('tournamentPage.buttonAddPlayer')}
         </button>
         <button
-          className={$appButtonVariants()}
+          className={appButtonVariants()}
           disabled={accessLevel == 'VIEW'}
           onClick={handleOpenDeletePlayerModal}
         >
           {t('tournamentPage.buttonDeletePlayer')}
         </button>
         <button
-          className={$appButtonVariants()}
+          className={appButtonVariants()}
           disabled={accessLevel == 'VIEW'}
           onClick={handleCreateTable}
         >
           {t('tournamentPage.buttonCreateTable')}
         </button>
         <button
-          className={$appButtonVariants()}
+          className={appButtonVariants()}
           disabled={accessLevel == 'VIEW'}
           onClick={handleDeleteTournament}
         >
@@ -335,7 +335,7 @@ function TournamentPage() {
         </button>
       </ButtonGridSection>
 
-      <div className={$sectionVariants()}>
+      <div className={sectionVariants()}>
         <h3>{t('tournamentPage.sectionTournamentScore')}</h3>
         {isChipTableNonZero(scoreMap) && (
           <p className="text-sm text-red-500">{t('tournamentPage.chipNotZeroWarning')}</p>

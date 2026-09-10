@@ -3,6 +3,7 @@ import tempfile
 from unittest.mock import patch
 
 import pytest
+from werkzeug.security import generate_password_hash
 
 from app import create_app, db
 from app.models import AccessLevel, Group, ShareLink, Tournament
@@ -24,7 +25,13 @@ def test_app():
     os.environ["DATABASE_URL"] = f"sqlite:///{db_path}"
 
     # Flaskアプリ作成
-    app = create_app("testing")
+    # Tests must not depend on local .env credentials or contact real services.
+    config = {
+        "SECRET_KEY": "test-only-secret",
+        "SESSION_COOKIE_NAME": "mahjong_session",
+        "SESSION_COOKIE_SECURE": False,
+    }
+    app = create_app("testing", config_override=config)
 
     # DB初期化
     with app.app_context():
@@ -148,3 +155,9 @@ def clean_db(db_session):
     for tbl in reversed(db.metadata.sorted_tables):
         db_session.execute(tbl.delete())
     db_session.commit()
+
+
+@pytest.fixture(autouse=True)
+def test_admin_credentials(monkeypatch):
+    monkeypatch.setenv("ADMIN_USER", "admin")
+    monkeypatch.setenv("ADMIN_PASSWORD_HASH", generate_password_hash("testpassword"))

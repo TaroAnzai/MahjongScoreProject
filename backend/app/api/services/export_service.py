@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from datetime import date, datetime
 
 from sqlalchemy import and_, case, func
@@ -153,7 +155,7 @@ def get_tournament_score_map(tournament_key: str):
     for p in player_map.values():
         total = sum(p["scores"].values())
         p["total"] = total
-        p["converted_total"] = round(total * rate, 2)
+        p["converted_total"] = round(total * Decimal(str(rate)), 2)
 
     return {
         "tournament_id": tournament.id,

@@ -19,7 +19,7 @@ mitmproxy アドオンです。次の状態を、実行中に制御 API から�
 docker compose up -d api mitmproxy
 ```
 
-既存の `docker-compose.yml` では、次のポートを使用します。
+既存の `compose.override.yaml` では、次のポートを使用します。
 
 | URL | 用途 |
 | --- | --- |

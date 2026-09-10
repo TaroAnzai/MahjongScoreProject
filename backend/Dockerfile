@@ -11,5 +11,7 @@ COPY . .
 
 
 ENV PYTHONUNBUFFERED=1
+# Celery forked tasks also need the top-level Flask config module.
+ENV PYTHONPATH=/app
 
 

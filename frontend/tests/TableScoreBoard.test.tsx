@@ -96,7 +96,9 @@ describe('スコアの入力と更新', () => {
 
   it('[BUG-01] 既存の0点も編集・保存時に保持する', async () => {
     const { user, onUpdateGame } = setup('NORMAL', [game([20, -20, 0, 0])]);
-    await editFirstRow(user);
+    const inputs = await editFirstRow(user);
+    expect(inputs[2]).toHaveValue('0');
+    expect(inputs[3]).toHaveValue('0');
     await user.click(screen.getByRole('button', { name: 'Common.Confirmed' }));
     expect(onUpdateGame).toHaveBeenCalledExactlyOnceWith(10, scores([20, -20, 0, 0]));
   });
@@ -118,4 +120,23 @@ describe('スコアの入力と更新', () => {
     await user.click(screen.getByRole('button', { name: 'Common.Confirmed' }));
     expect(onUpdateGame).toHaveBeenCalledExactlyOnceWith(null, scores([0.1, 0.2, -0.3, 0]));
   });
+});
+
+it.each([
+  ['NORMAL', ['0.1', '0.2', '-0.29999', '0'], false],
+  ['NORMAL', ['12.34567', '-12.34567', '0', '0'], true],
+  ['NORMAL', ['1.123456', '-1.123456', '0', '0'], false],
+  ['CHIP', ['1.123456', '', '', ''], false],
+  ['CHIP', ['-', '', '', ''], false],
+  ['CHIP', ['.', '', '', ''], false],
+  ['CHIP', ['-.', '', '', ''], false],
+  ['CHIP', ['NaN', '', '', ''], false],
+  ['CHIP', ['Infinity', '', '', ''], false],
+])('[BUG-03] %sの精度・有限数値検証 %j', async (type, values, valid) => {
+  const { user, onUpdateGame } = setup(type);
+  const inputs = await editFirstRow(user);
+  values.forEach((value, index) => fireEvent.change(inputs[index], { target: { value } }));
+  await user.click(screen.getByRole('button', { name: 'Common.Confirmed' }));
+  if (valid) expect(onUpdateGame).toHaveBeenCalledExactlyOnceWith(null, scores(values.map(Number)));
+  else expect(onUpdateGame).not.toHaveBeenCalled();
 });

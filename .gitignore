@@ -58,3 +58,8 @@ backend/celerybeat-schedule
 frontend/ssl/*
 frontend/.htaccess
 
+
+# Single local configuration; never track credentials
+.env
+.env.*
+!.env.example

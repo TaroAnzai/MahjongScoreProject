@@ -5,6 +5,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_limiter.errors import RateLimitExceeded
 from flask_smorest import Api
+from sqlalchemy import text
 
 from app.extensions import db, limiter, migrate
 from app.api import register_blueprints
@@ -55,5 +56,15 @@ def create_app(config_name=None, config_override=None):
     api = Api(app)
 
     register_blueprints(api)
+
+    @app.get("/healthz")
+    @limiter.exempt
+    def healthz():
+        try:
+            db.session.execute(text("SELECT 1"))
+        except Exception:
+            db.session.rollback()
+            return jsonify(status="unavailable"), 503
+        return jsonify(status="ok")
 
     return app

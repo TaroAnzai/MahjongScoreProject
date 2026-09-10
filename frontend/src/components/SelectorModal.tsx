@@ -42,7 +42,7 @@ function SelectorModal({
         ) : (
           <ul className="m-0 inline-block w-full flex-1 list-none overflow-y-auto p-0">
             {items?.map((item) => (
-              <li key={item.id} className="mb-2 cursor-pointer rounded-panel border bg-action p-2 text-base text-white transition-colors duration-200 hover:bg-[#94a994]" onClick={() => onSelect(item)}>
+              <li key={item.id} className="mb-2 cursor-pointer min-h-14 rounded-control border bg-surface px-4 py-3 text-left text-base font-semibold text-foreground transition-colors duration-200 hover:bg-accent" onClick={() => onSelect(item)}>
                 <div>{item.name}</div>
                 {plusDisplayItem && <div>{item[plusDisplayItem]}</div>}
               </li>

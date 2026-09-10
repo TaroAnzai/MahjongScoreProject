@@ -31,10 +31,10 @@ function EditTournamentModal({ tournament, onConfirm, onClose }: EditTournamentM
       onClose={onClose}
       footer={
         <>
-          <button className={$appButtonVariants()} onClick={handleSubmit}>
+          <button className={appButtonVariants()} onClick={handleSubmit}>
             保存
           </button>
-          <button className={$appButtonVariants()} onClick={onClose}>
+          <button className={appButtonVariants()} onClick={onClose}>
             {' '}
             閉じる
           </button>

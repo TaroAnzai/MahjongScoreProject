@@ -1,6 +1,6 @@
-from dotenv import load_dotenv
+from environment import load_environment
 
-load_dotenv()  # ← 起動前に環境変数を読み込む
+load_environment()
 
 from app import create_app
 

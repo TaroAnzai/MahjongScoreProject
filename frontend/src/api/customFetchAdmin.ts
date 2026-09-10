@@ -1,56 +1,35 @@
-// src/api/customFetchAdmin.ts
 import { API_BASE_URL } from '@/api/loadEnv';
 
-interface CustomFetchAdminConfig {
-  url: string;
-  method: string;
-  data?: any;
-  params?: Record<string, string | number | null>;
-  headers?: Record<string, string>;
-  signal?: AbortSignal;
-}
+/** Orval 8 supplies a URL (including query parameters) and a serialized RequestInit. */
 export const customFetchAdmin = async <T>(
-  config: CustomFetchAdminConfig,
+  url: string,
   options?: RequestInit
 ): Promise<T> => {
-  // ✅ ベースURLを組み込む
-  const fullUrl = `${API_BASE_URL}${config.url}`;
+  const fullUrl = /^[a-z][a-z\d+.-]*:/i.test(url)
+    ? url
+    : `${API_BASE_URL.replace(/\/+$/, '')}/${url.replace(/^\/+/, '')}`;
+  const headers = new Headers({ 'Content-Type': 'application/json' });
+  new Headers(options?.headers).forEach((value, key) => headers.set(key, value));
 
-  // クエリパラメータ処理
-  let urlWithParams = fullUrl;
-  if (config.params) {
-    const query = new URLSearchParams(
-      Object.entries(config.params).map(([k, v]) => [k, String(v)])
-    );
-    urlWithParams += `?${query}`;
-  }
-
-  const response = await fetch(urlWithParams, {
-    method: config.method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(config.headers || {}),
-      ...(options?.headers || {}),
-    },
-    body: config.data && config.method !== 'GET' ? JSON.stringify(config.data) : undefined,
-    signal: config.signal,
-    credentials: 'include',
+  const response = await fetch(fullUrl, {
     ...options,
+    credentials: 'include',
+    headers,
   });
+
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
     throw {
       status: response.status,
       statusText: response.statusText,
       body: errorBody,
-      url: urlWithParams,
+      url: fullUrl,
     };
   }
 
   if (response.status === 204) {
     return null as T;
   }
-  // JSON以外のレスポンスにも対応
   const contentType = response.headers.get('content-type');
   if (contentType?.includes('application/json')) {
     return (await response.json()) as T;

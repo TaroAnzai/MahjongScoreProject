@@ -24,7 +24,7 @@ export function AdminLogin() {
     login({ username: username, password: password });
   };
   return (
-    <div className={$containerVariants()}>
+    <div className={containerVariants()}>
       <h2 className="mb-5">AdminLogin</h2>
       <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
         <Input
@@ -54,7 +54,7 @@ export function AdminLogin() {
             {show ? <EyeOff size={18} /> : <Eye size={18} />}
           </Button>
         </div>
-        <button className={$appButtonVariants()} type="submit">
+        <button className={appButtonVariants()} type="submit">
           ログイン
         </button>
       </form>

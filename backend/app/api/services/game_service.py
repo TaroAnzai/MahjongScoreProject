@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from sqlalchemy import func
 
 from app import db
@@ -7,6 +9,7 @@ from app.service_errors import (
     ServicePermissionError,
     ServiceValidationError,
 )
+from app.utils.score_utils import normalize_score
 from app.utils.share_link_utils import get_share_link_by_key
 
 _ACCESS_PRIORITY = {
@@ -56,6 +59,13 @@ def _ensure_access(link, required: AccessLevel, message: str):
 # =========================================================
 # サービス関数群
 # =========================================================
+def _normalize_scores(scores):
+    try:
+        return [{**score, "score": normalize_score(score.get("score"))} for score in scores]
+    except ValueError as exc:
+        raise ServiceValidationError(str(exc)) from exc
+
+
 def create_game(table_key: str, data: dict) -> Game:
     """卓に対局（スコア付き）を追加"""
 
@@ -77,8 +87,9 @@ def create_game(table_key: str, data: dict) -> Game:
 
     if not isinstance(scores, list) or not scores:
         raise ServiceValidationError("scores はリスト形式で必須です。")
+    scores = _normalize_scores(scores)
     table_type = table.type
-    total = sum(s.get("score", 0) for s in scores)
+    total = sum((s["score"] for s in scores), Decimal(0))
     if total != 0 and table_type == TableTypeEnum.NORMAL:
         raise ServiceValidationError("スコアの合計は0である必要があります。")
     # ✅ 卓に登録されているプレイヤーID一覧を取得
@@ -197,7 +208,8 @@ def update_game(table_key: str, game_id: int, data: dict) -> Game:
         if not isinstance(scores, list):
             raise ServiceValidationError("scores はリスト形式である必要があります。")
 
-        total = sum(s.get("score", 0) for s in scores)
+        scores = _normalize_scores(scores)
+        total = sum((s["score"] for s in scores), Decimal(0))
         if total != 0 and table.type == TableTypeEnum.NORMAL:
             raise ServiceValidationError("スコアの合計は0でなければなりません。")
 

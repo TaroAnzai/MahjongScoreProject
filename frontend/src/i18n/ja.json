@@ -1,4 +1,7 @@
 {
+  "navigation": {
+    "admin": "管理画面"
+  },
   "Common": {
     "Confirm": "確認",
     "Confirmed": "確定",
