@@ -27,9 +27,6 @@ export const useAdminLogin = () => {
       console.log('Admin logged in');
       navigate('/admin/groups');
     },
-    onError: (error) => {
-      console.log('Admin login failed', error);
-    },
   });
 };
 
