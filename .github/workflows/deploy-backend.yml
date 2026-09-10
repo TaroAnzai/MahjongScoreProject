@@ -1,4 +1,4 @@
-name: Backend CI
+name: Backend CI/CD
 
 on:
   push:
@@ -6,25 +6,60 @@ on:
       - main
     paths:
       - 'backend/**'
-      - 'compose*.yaml'
+      - 'frontend/**'
+      - 'compose.yaml'
+      - 'compose.production.yaml'
       - '.github/workflows/deploy-backend.yml'
+      - '.github/workflows/frontend.yml'
   workflow_dispatch:
 
 jobs:
-  # --- ✅ テストジョブ ---
+  detect_backend_changes:
+    name: Detect Backend Changes
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.backend_changes.outputs.changed }}
+    steps:
+      - name: Checkout repository
+        if: github.event_name == 'push'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect backend-related changes
+        id: backend_changes
+        if: github.event_name == 'push'
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+        run: |
+          if git diff --quiet "$BEFORE_SHA" "$AFTER_SHA" -- \
+            backend \
+            compose.yaml \
+            compose.production.yaml \
+            .github/workflows/deploy-backend.yml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
   test:
     name: Run Pytest
+    needs: detect_backend_changes
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        needs.detect_backend_changes.outputs.changed == 'true'
+      }}
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
       - name: Install dependencies
         working-directory: backend
         run: |
@@ -32,17 +67,55 @@ jobs:
           source venv/bin/activate
           pip install -U pip wheel
           pip install -r requirements.txt
-          pip install pytest pytest-cov
-
-      - name: Set environment variables for testing
-        working-directory: backend
-        run: |
-          echo "FLASK_ENV=test" >> $GITHUB_ENV
-          echo "FLASK_APP=app" >> $GITHUB_ENV
-          echo "DATABASE_URL=sqlite:///test_database.db" >> $GITHUB_ENV
-
       - name: Run pytest
         working-directory: backend
+        env:
+          FLASK_ENV: test
+          FLASK_APP: app
+          DATABASE_URL: sqlite:///test_database.db
         run: |
           source venv/bin/activate
           pytest -v --maxfail=3 --disable-warnings --cov=app --cov-report=term-missing
+
+  deploy:
+    name: Deploy Backend to VPS
+    needs:
+      - detect_backend_changes
+      - test
+    if: >-
+      ${{
+        always() &&
+        github.ref == 'refs/heads/main' &&
+        needs.test.result == 'success' &&
+        (github.event_name == 'workflow_dispatch' ||
+         needs.detect_backend_changes.outputs.changed == 'true')
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy backend
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          DEPLOY_SHA: ${{ github.sha }}
+        with:
+          host: ${{ secrets.DEPLOY_API_HOST }}
+          username: ${{ secrets.DEPLOY_API_USER }}
+          port: ${{ vars.DEPLOY_API_PORT || 10022 }}
+          key: ${{ secrets.DEPLOY_API_KEY }}
+          envs: DEPLOY_SHA
+          script: |
+            set -euo pipefail
+            cd ~/mahjongscore-api
+            git pull --ff-only origin main
+
+            if [ "$(git rev-parse HEAD)" != "$DEPLOY_SHA" ]; then
+              echo "VPS checkout does not match the tested commit: $DEPLOY_SHA" >&2
+              exit 1
+            fi
+
+            compose=(
+              docker compose
+              -f compose.yaml
+              -f compose.production.yaml
+            )
+            "${compose[@]}" config --quiet
+            "${compose[@]}" up -d --build api celery_worker celery_beat
