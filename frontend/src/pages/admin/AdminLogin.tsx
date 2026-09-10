@@ -1,6 +1,8 @@
 import { appButtonVariants, containerVariants } from '@/components/ui/mahjong';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { useAlertDialog } from '@/components/common/AlertDialogProvider';
 import { useAdminLogin, useCheckAdmin } from '@/hooks/useAdmin';
 import { Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -11,7 +13,8 @@ export function AdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
-  const { mutate: login, isPending, isSuccess } = useAdminLogin();
+  const { alertDialog } = useAlertDialog();
+  const { mutate: login, isPending } = useAdminLogin();
   const { isAdmin } = useCheckAdmin();
 
   useEffect(() => {
@@ -21,7 +24,28 @@ export function AdminLogin() {
   }, [isAdmin]);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    login({ username: username, password: password });
+    if (isPending) return;
+
+    login(
+      { username, password },
+      {
+        onError: (error) => {
+          const isAuthenticationError =
+            typeof error === 'object' &&
+            error !== null &&
+            'status' in error &&
+            error.status === 401;
+
+          void alertDialog({
+            title: 'ログインに失敗しました',
+            description: isAuthenticationError
+              ? 'ユーザー名またはパスワードを確認してください。'
+              : 'サーバーとの通信に失敗しました。しばらくしてから再度お試しください。',
+            showCancelButton: false,
+          });
+        },
+      }
+    );
   };
   return (
     <div className={containerVariants()}>
@@ -54,8 +78,15 @@ export function AdminLogin() {
             {show ? <EyeOff size={18} /> : <Eye size={18} />}
           </Button>
         </div>
-        <button className={appButtonVariants()} type="submit">
-          ログイン
+        <button className={appButtonVariants()} type="submit" disabled={isPending}>
+          {isPending ? (
+            <span className="flex items-center justify-center gap-2">
+              <Spinner />
+              ログイン中...
+            </span>
+          ) : (
+            'ログイン'
+          )}
         </button>
       </form>
     </div>
