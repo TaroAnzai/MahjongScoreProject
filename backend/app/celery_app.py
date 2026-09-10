@@ -3,18 +3,9 @@ import os
 from datetime import timedelta
 
 from celery import Celery
-from dotenv import load_dotenv
+from environment import load_environment
 
-env_name = os.getenv("FLASK_ENV", "development")
-print("env_name:", env_name)
-
-if env_name == "production":
-    load_dotenv(".env.production")
-elif env_name == "test":
-    load_dotenv(".env.test")
-else:
-    load_dotenv(".env.development")  # 開発用
-
+load_environment()
 
 def make_celery():
     """Flaskに依存しないCeleryインスタンスを作成"""

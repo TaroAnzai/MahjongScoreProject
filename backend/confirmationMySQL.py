@@ -1,13 +1,9 @@
-import pymysql
+"""Read-only connection check using the same DATABASE_URL as the application."""
+from sqlalchemy import create_engine, text
 
-conn = pymysql.connect(
-    host="localhost",
-    user="mahjong_user",
-    password="Taro58009@",
-    database="mahjongscore",
-    charset="utf8mb4",
-)
+from config import Config
 
-with conn.cursor() as cursor:
-    cursor.execute("SELECT DATABASE();")
-    print("接続成功：", cursor.fetchone()[0])
+if __name__ == "__main__":
+    engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
+    with engine.connect() as connection:
+        print("接続成功：", connection.execute(text("SELECT DATABASE()")).scalar())

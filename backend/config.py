@@ -3,20 +3,9 @@
 import os
 from typing import ClassVar
 
-from dotenv import load_dotenv
+from environment import load_environment
 
-load_dotenv(".env.secrets")
-# FLASK_ENV の値に応じて .env を読み込む
-env_name = os.getenv("FLASK_ENV", "development")
-print("env_name:", env_name)
-
-if env_name == "production":
-    load_dotenv(".env.production")
-elif env_name == "testing":
-    load_dotenv(".env.test")
-else:
-    load_dotenv(".env.development")  # 開発用
-
+load_environment()
 
 class Config:
     # Database

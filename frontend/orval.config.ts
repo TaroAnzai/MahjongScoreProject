@@ -1,7 +1,13 @@
+import { loadEnv } from 'vite';
+import { fileURLToPath } from 'node:url';
+
+const rootEnv = loadEnv('development', fileURLToPath(new URL('..', import.meta.url)), 'ORVAL_');
+const schemaUrl = process.env.ORVAL_API_URL || rootEnv.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json';
+
 export default {
   mahjongApi: {
     input: {
-      target: process.env.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json',
+      target: schemaUrl,
       filters: {
         // 管理 API (/api/admin/*) を除外する
         mode: 'exclude',
@@ -30,7 +36,7 @@ export default {
   // -------------------------------------------------
   adminApi: {
     input: {
-      target: process.env.ORVAL_API_URL || 'http://localhost:6080/doc/openapi.json',
+      target: schemaUrl,
       filters: {
         // /api/admin/* のみ抽出する
 

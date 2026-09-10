@@ -1,0 +1,15 @@
+.git
+**/.env*
+.env*
+**/node_modules
+**/dist
+**/venv
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/.coverage
+backend/instance*
+backend/celerybeat-schedule*
+frontend/ssl
+frontend/src/api/generated

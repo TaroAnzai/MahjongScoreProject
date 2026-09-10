@@ -1,4 +1,4 @@
-name: Backend CI/CD
+name: Backend CI
 
 on:
   push:
@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'backend/**'
+      - 'compose*.yaml'
+      - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
 
 jobs:
@@ -44,47 +46,3 @@ jobs:
         run: |
           source venv/bin/activate
           pytest -v --maxfail=3 --disable-warnings --cov=app --cov-report=term-missing
-
-  # --- 🚀 デプロイジョブ（テスト成功時のみ） ---
-  deploy:
-    name: Deploy Backend to VPS
-    runs-on: ubuntu-latest
-    needs: test # ← これがポイント（test成功時のみ実行）
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_API_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -p 10022 -H ${{ secrets.DEPLOY_API_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Deploy via SSH
-        run: |
-          ssh -i ~/.ssh/id_ed25519 -p 10022 ${{ secrets.DEPLOY_API_USER }}@${{ secrets.DEPLOY_API_HOST }} << 'EOF'
-          set -e
-          cd ~/mahjongscore-api/backend
-
-          echo ">>> Pulling latest code"
-          git fetch origin main
-          git reset --hard origin/main
-
-          echo ">>> Activating virtual environment"
-          source venv/bin/activate
-
-          echo ">>> Installing dependencies"
-          pip install -r requirements.txt
-
-          echo ">>> Running migrations"
-          FLASK_APP=app FLASK_ENV=production flask db upgrade
-
-          echo ">>> Restarting services"
-          sudo systemctl restart mahjong_backend.service
-          sudo systemctl restart celery-worker-mahjong.service
-          sudo systemctl restart celery-beat-mahjong.service
-
-          echo ">>> Deployment completed successfully."
-          EOF
