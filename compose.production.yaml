@@ -27,17 +27,3 @@ services:
   celery_beat:
     restart: unless-stopped
     environment: *production-environment
-  frontend:
-    restart: unless-stopped
-    build:
-      target: production
-      args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:?Set the public API URL}
-        VITE_RECAPTCHA_SITE_KEY: ${VITE_RECAPTCHA_SITE_KEY:-}
-        VITE_SHARE_ORIGIN: ${VITE_SHARE_ORIGIN:-}
-    ports: ["127.0.0.1:${FRONTEND_PORT:-5180}:80"]
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/mahjong/"]
-      interval: 10s
-      timeout: 3s
-      retries: 5

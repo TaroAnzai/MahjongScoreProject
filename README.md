@@ -41,8 +41,7 @@ MahjongScoreProject/
 │   ├── public/
 │   ├── orval.config.ts     # OpenAPI からの API クライアント生成設定
 │   ├── vite.config.js
-│   ├── package.json
-│   └── Dockerfile
+│   └── package.json
 ├── scripts/mitmproxy/      # 通信障害を再現するアドオン・テスト・操作手順
 ├── .github/workflows/     # バックエンド・フロントエンドの CI/CD
 ├── compose.yaml           # 共通サービス
@@ -95,20 +94,19 @@ docker compose exec api flask --app app db upgrade
 
 | サービス | 接続先 |
 | --- | --- |
-| Frontend（hot reload） | http://localhost:5173/mahjong/ |
+| Frontend（ホストのVite） | http://localhost:5173/mahjong/ |
 | API（mitmproxy） | http://localhost:6080 |
 | Swagger / OpenAPI | http://localhost:6080/doc/swagger-ui / http://localhost:6080/doc/openapi.json |
 | mitmweb / 障害制御API | http://localhost:8090 / http://localhost:9099 |
 | MySQL（開発のみ） | 127.0.0.1:3307 |
 | MailHog UI / SMTP | localhost:8025 / localhost:1025 |
 
-APIはGunicornのreload、frontendはViteのhot reloadを使用します。Celeryは従来通りコードをマウントし、変更時はworker/beatを再起動します。
+APIはGunicornのreloadを使用します。フロントエンドはホスト上のViteで起動します。Celeryは従来通りコードをマウントし、変更時はworker/beatを再起動します。
 コンテナからのSMTPは`mailhog:1025`です。通信障害機能は[scripts/mitmproxy/README.md](scripts/mitmproxy/README.md)を参照してください。
 
-### 4. フロントエンドをホストで開発する場合
+### 4. フロントエンドの起動
 
 ```bash
-docker compose stop frontend
 cd frontend
 npm ci
 npm run orval
@@ -121,7 +119,7 @@ Viteはルート`.env`の`VITE_*`のみを公開します。旧`FRONTEND_URL`の
 `VITE_USE_HTTPS=true`を設定し、従来通り`frontend/ssl/localhost.key`と`.crt`を用意してください。
 Orvalの取得先を変更する場合は`ORVAL_API_URL=... npm run orval`で明示できます。
 
-本番構成・環境変数・移行・切替・ロールバックは[Docker本番移行手順](docs/docker-production.md)を参照してください。
+バックエンドの本番構成・環境変数・移行・切替・ロールバックは[Docker本番移行手順](docs/docker-production.md)を参照してください。
 
 ## テスト・ビルド
 
@@ -155,9 +153,8 @@ npm run build
 
 ビルド成果物は `frontend/dist/` に出力されます。`npm run preview` でビルド結果を確認できます。`npm test`でVitestを実行します。
 
-## CI
+## CI/CD
 
-GitHub ActionsはbackendのpytestとfrontendのOrval生成・test・lint・buildを行います。
-旧systemd再起動・ホストDB自動migration・静的ファイル転送の自動デプロイは削除しました。
-本番反映は移行手順に従って明示的に行います。frontend CIの公開reCAPTCHAキーは
+GitHub ActionsはbackendのpytestとfrontendのOrval生成・test・lint・buildを行います。mainブランチのfrontendビルド成功後、distを既存の静的配信先へSCP転送します。
+frontend CIの公開reCAPTCHAキーは
 Repository variable `VITE_RECAPTCHA_SITE_KEY`、スキーマ取得先は既存Secret `ORVAL_API_URL`を使用します。

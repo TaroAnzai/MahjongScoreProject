@@ -56,12 +56,6 @@ services:
     <<: *backend
     command: celery -A app.celery_app.celery beat --loglevel=info --schedule=/var/lib/celery/celerybeat-schedule
     volumes: [celery_beat_data:/var/lib/celery]
-  frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-    networks: [default]
-
 volumes:
   # Keep the existing development volume key/project name to preserve its data.
   db_data:
