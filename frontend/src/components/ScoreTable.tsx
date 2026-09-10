@@ -7,10 +7,10 @@ interface ScoreTableProps {
   onClick: (table_id: number) => void;
 }
 const ScoreCell = ({ children, sticky = false }: { children: React.ReactNode; sticky?: boolean }) => (
-  <td className={`max-w-score-cell overflow-hidden text-ellipsis whitespace-nowrap border border-table-border p-2 text-center ${sticky ? 'sticky left-0 z-[var(--z-sticky)] bg-[darkgreen]' : ''}`}>{children}</td>
+  <td className={`max-w-score-cell overflow-hidden text-ellipsis whitespace-nowrap border border-table-border p-2 text-center ${sticky ? 'sticky left-0 z-[var(--z-sticky)] bg-accent' : ''}`}>{children}</td>
 );
 const ScoreHeaderCell = ({ children, sticky = false, onClick }: { children: React.ReactNode; sticky?: boolean; onClick?: () => void }) => (
-  <th className={`max-w-score-cell overflow-hidden text-ellipsis whitespace-nowrap border border-table-border p-2 text-center ${sticky ? 'sticky left-0 z-[var(--z-sticky)] bg-[darkgreen]' : ''} ${onClick ? 'cursor-pointer underline' : ''}`} onClick={onClick}>{children}</th>
+  <th className={`max-w-score-cell overflow-hidden text-ellipsis whitespace-nowrap border border-table-border p-2 text-center ${sticky ? 'sticky left-0 z-[var(--z-sticky)] bg-accent' : ''} ${onClick ? 'cursor-pointer underline' : ''}`} onClick={onClick}>{children}</th>
 );
 const ScoreTable = ({ scoreMap, onClick }: ScoreTableProps) => {
   const { t } = useTranslation();

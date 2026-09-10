@@ -148,7 +148,7 @@ function GroupPage() {
       </ButtonGridSection>
 
       <div className={sectionVariants()}>
-        <h3 className="mb-3 pl-2.5 text-list text-[#f0f0f0]">{t('groupPage.sectionMemberList')}</h3>
+        <h3 className="mb-3 pl-2.5 text-list text-foreground">{t('groupPage.sectionMemberList')}</h3>
         {isLoadingPlayers ? (
           <div className="flex items-center justify-center gap-2">
             <Spinner />

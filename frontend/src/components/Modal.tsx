@@ -21,7 +21,7 @@ function Modal({ title, children, onClose, footer = null }: ModalProps) {
 
   return ReactDOM.createPortal(
     <div className="fixed inset-0 z-[var(--z-overlay)] flex h-screen w-screen items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="box-border flex max-h-[80vh] w-[90%] max-w-modal flex-col overflow-hidden rounded-modal border bg-surface-strong p-6 text-center font-modal text-white shadow-modal backdrop-blur-[var(--blur-surface)]" onClick={(e) => e.stopPropagation()}>
+      <div className="box-border flex max-h-[80vh] w-[90%] max-w-modal flex-col overflow-hidden rounded-modal border bg-surface p-6 text-center font-modal text-foreground shadow-modal backdrop-blur-[var(--blur-surface)]" onClick={(e) => e.stopPropagation()}>
         <h3>{title}</h3>
         <div className="mb-4 flex-1 overflow-y-auto">{children}</div>
         {footer && <div className="flex justify-center gap-4">{footer}</div>}

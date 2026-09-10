@@ -51,7 +51,7 @@ function WelcomePage() {
           <Spinner className="w-12 h-12" />
         </div>
       )}
-      <p className="mb-6 text-title">{t('welcomPage.pageTitle')}</p>
+      <p className="mb-5 text-title font-bold">{t('welcomPage.pageTitle')}</p>
 
       <ButtonGridSection>
         <button className={appButtonVariants()} onClick={() => setIsModalOpen(true)}>

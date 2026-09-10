@@ -80,7 +80,7 @@ function PageTitleBar({
   };
 
   return (
-    <div className="relative mb-6 flex h-[var(--height-titlebar)] items-center justify-between rounded-panel border bg-surface-strong px-5 py-4 text-nav shadow-inset">
+    <div className="relative mb-6 flex min-h-16 items-center justify-between rounded-panel border bg-surface-strong px-5 py-4 text-nav shadow-inset">
       <div className="flex">
         {parentUrl !== null && parentUrl !== undefined && (
           <ChevronsUp className="cursor-pointer" onClick={() => navigate(parentUrl)} />
@@ -92,7 +92,7 @@ function PageTitleBar({
         {TitleComponent ? (
           <TitleComponent onClick={onTitleClick} />
         ) : (
-          <EditableTitle value={title} onChange={onTitleChange} className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-nav font-semibold text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.3)]" />
+          <EditableTitle value={title} onChange={onTitleChange} className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-nav font-bold text-foreground" />
         )}
       </div>
       {shareLinks.length > 0 && (

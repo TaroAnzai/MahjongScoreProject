@@ -283,7 +283,7 @@ function TournamentPage() {
       />
       <div
         id="rate-display"
-        className="mb-6 flex justify-center gap-2 rounded-[20px] border bg-surface-strong px-4 py-2 text-sm font-medium text-white shadow-[0_4px_12px_rgba(34,139,34,0.4)]"
+        className="mb-6 flex justify-center gap-2 rounded-[20px] border bg-surface-strong px-4 py-2 text-sm font-medium text-foreground shadow-none"
         onClick={() => setIsEditingRate(true)}
       >
         {t('tournamentPage.rate')}:{' '}

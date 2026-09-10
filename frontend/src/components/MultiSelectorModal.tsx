@@ -53,7 +53,7 @@ function MultiSelectorModal<T extends { id: number; name: string }>({
         {items.length === 0 && <p>{t('Common.emptyMessage')}</p>}
         <ul className="m-0 inline-block w-full flex-1 list-none overflow-y-auto p-0">
           {items.map((item) => (
-            <li key={item.id} className="mb-4 text-list-large text-white">
+            <li key={item.id} className="mb-4 text-list-large text-foreground">
               <label className="cursor-pointer">
                 <input
                   type="checkbox"
