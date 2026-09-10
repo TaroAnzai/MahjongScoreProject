@@ -15,6 +15,8 @@ export default {
       clean: true, // generated フォルダをクリーンアップしてから生成
       prettier: true,
       override: {
+        // Mutators return the response body directly.
+        fetch: { includeHttpResponseReturnType: false },
         mutator: {
           path: 'src/api/customFetch.ts', // これは消えない（generated 外だから）
           name: 'customFetch',
@@ -42,6 +44,8 @@ export default {
       clean: false,
       prettier: true,
       override: {
+        // Mutators return the response body directly.
+        fetch: { includeHttpResponseReturnType: false },
         mutator: {
           path: 'src/api/customFetchAdmin.ts',
           name: 'customFetchAdmin',

@@ -1,45 +1,17 @@
-/**
- * customFetch.ts
- * Orvalのmutator用fetchラッパー
- */
 import { API_BASE_URL } from '@/api/loadEnv';
-interface CustomFetchConfig {
-  url: string;
-  method: string;
-  data?: any;
-  params?: Record<string, string | number | null>;
-  headers?: HeadersInit;
-  signal?: AbortSignal;
-}
 
-/**
- * Orvalが自動生成したfetch呼び出しを共通化
- */
+/** Orval 8 supplies a URL (including query parameters) and a serialized RequestInit. */
 export const customFetch = async <T>(
-  config: CustomFetchConfig,
+  url: string,
   options?: RequestInit
 ): Promise<T> => {
-  // ✅ ベースURLを組み込む
-  const fullUrl = `${API_BASE_URL}${config.url}`;
-
-  // クエリパラメータ処理
-  let urlWithParams = fullUrl;
-  if (config.params) {
-    const query = new URLSearchParams(
-      Object.entries(config.params).map(([k, v]) => [k, String(v)])
-    );
-    urlWithParams += `?${query}`;
-  }
-
+  const fullUrl = /^[a-z][a-z\d+.-]*:/i.test(url)
+    ? url
+    : `${API_BASE_URL.replace(/\/+$/, '')}/${url.replace(/^\/+/, '')}`;
   const headers = new Headers({ 'Content-Type': 'application/json' });
-  for (const source of [config.headers, options?.headers]) {
-    new Headers(source).forEach((value, key) => headers.set(key, value));
-  }
+  new Headers(options?.headers).forEach((value, key) => headers.set(key, value));
 
-  const response = await fetch(urlWithParams, {
-    method: config.method,
-    body: config.data && config.method !== 'GET' ? JSON.stringify(config.data) : undefined,
-    signal: config.signal,
+  const response = await fetch(fullUrl, {
     ...options,
     headers,
   });
@@ -50,11 +22,13 @@ export const customFetch = async <T>(
       status: response.status,
       statusText: response.statusText,
       body: errorBody,
-      url: urlWithParams,
+      url: fullUrl,
     };
   }
 
-  // JSON以外のレスポンスにも対応
+  if (response.status === 204) {
+    return null as T;
+  }
   const contentType = response.headers.get('content-type');
   if (contentType?.includes('application/json')) {
     return (await response.json()) as T;
