@@ -8,22 +8,27 @@ services:
   api:
     restart: unless-stopped
     environment: *production-environment
+    networks: [default, common-db-network]
     ports: ["127.0.0.1:${BACKEND_PORT:?Set the existing Nginx upstream port}:5000"]
     # Defaults match the existing repository's Gunicorn command; verify VPS units.
     command: >-
       gunicorn --bind 0.0.0.0:5000
       --workers ${GUNICORN_WORKERS:-1} --timeout ${GUNICORN_TIMEOUT:-30}
       --access-logfile - --error-logfile - "app:create_app()"
-  db:
-    restart: unless-stopped
   redis:
     restart: unless-stopped
   celery_worker:
     restart: unless-stopped
     environment: *production-environment
+    networks: [default, common-db-network]
     command: >-
       celery -A app.celery_app.celery worker --loglevel=info
       --concurrency=${CELERY_WORKER_CONCURRENCY:-0} --queues=${CELERY_QUEUES:-celery}
   celery_beat:
     restart: unless-stopped
     environment: *production-environment
+    networks: [default, common-db-network]
+
+networks:
+  common-db-network:
+    external: true

@@ -118,4 +118,4 @@ jobs:
               -f compose.production.yaml
             )
             "${compose[@]}" config --quiet
-            "${compose[@]}" up -d --build api celery_worker celery_beat
+            "${compose[@]}" up -d --build
